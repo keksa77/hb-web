@@ -1,0 +1,15 @@
+{
+  "name": "hb-web",
+  "version": "0.1.0",
+  "description": "Hory Bory – nový web. Statické stránky generované z obsahu v Supabase.",
+  "type": "module",
+  "scripts": {
+    "start": "eleventy --serve",
+    "build": "eleventy"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "3.1.6"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}
