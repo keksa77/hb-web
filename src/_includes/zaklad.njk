@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="{{ web.jazyk }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if titulek and titulek != web.nazev %}{{ titulek }} – {{ web.nazev }}{% else %}{{ web.nazev }}{% endif %}</title>
+<meta name="description" content="{{ metaPopis or web.popis }}">
+<meta property="og:title" content="{% if titulek and titulek != web.nazev %}{{ titulek }} – {{ web.nazev }}{% else %}{{ web.nazev }}{% endif %}">
+<meta property="og:description" content="{{ metaPopis or web.popis }}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="cs_CZ">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="{{ web.zaklad }}/assets/styl.css">
+</head>
+<body>
+
+<a class="preskocit" href="#obsah">Přeskočit na obsah</a>
+
+<header class="hlavicka">
+  <div class="obal hlavicka-obal">
+    <a class="znacka" href="{{ web.zaklad }}/">Hory&nbsp;Bory</a>
+    <button class="menu-tlacitko" aria-expanded="false" aria-controls="menu">Menu</button>
+    <nav id="menu" class="menu" aria-label="Hlavní nabídka">
+      <ul>
+        {% for s in obsah.stranky %}
+          {% if s.kod != "uvod" and s.kod != "gdpr" %}
+          <li><a href="{{ web.zaklad }}{{ s.adresa }}"{% if s.adresa == adresa %} aria-current="page"{% endif %}>{{ s.titulek }}</a></li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+      {% if obsah.jazyky.length > 1 %}
+      <div class="jazyky" aria-label="Jazyk">
+        {% for j in obsah.jazyky %}
+          <span class="jazyk{% if j.kod == web.jazyk %} jazyk-aktivni{% endif %}">{{ j.kod | upper }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+<main id="obsah" class="obal">
+  {% if stav == "rozpracovana" %}
+  <p class="upozorneni">{{ upozorneni or "Na této stránce se pracuje. Obsah zatím nemusí být úplný ani aktuální." }}</p>
+  {% endif %}
+  {{ content | safe }}
+</main>
+
+<footer class="paticka">
+  <div class="obal">
+    <p><strong>Hory Bory</strong> — štafetový běh z Dolní Lomné do Mikulova.</p>
+    <p>
+      <a href="mailto:info@horybory.cz">info@horybory.cz</a> ·
+      {% for s in obsah.stranky %}{% if s.kod == "gdpr" %}<a href="{{ web.zaklad }}{{ s.adresa }}">{{ s.titulek }}</a>{% endif %}{% endfor %}
+    </p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var t = document.querySelector('.menu-tlacitko');
+    var m = document.getElementById('menu');
+    if (!t || !m) return;
+    t.addEventListener('click', function () {
+      var otevreno = m.classList.toggle('menu-otevrene');
+      t.setAttribute('aria-expanded', otevreno ? 'true' : 'false');
+    });
+  })();
+</script>
+</body>
+</html>
