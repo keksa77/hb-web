@@ -1,0 +1,46 @@
+---
+pagination:
+  data: obsah.stranky
+  size: 1
+  alias: stranka
+permalink: "{{ stranka.adresa }}index.html"
+layout: zaklad.njk
+eleventyComputed:
+  titulek: "{{ stranka.titulek }}"
+  metaPopis: "{{ stranka.metaPopis }}"
+  stav: "{{ stranka.stav }}"
+  upozorneni: "{{ stranka.upozorneni }}"
+  adresa: "{{ stranka.adresa }}"
+---
+<h1>{{ stranka.titulek }}</h1>
+
+{% if stranka.kod == "uvod" %}
+  <p class="perex">{{ web.popis }}</p>
+{% endif %}
+
+{% if stranka.text %}
+  <div class="text">{{ stranka.text | safe }}</div>
+{% endif %}
+
+{% for blok in stranka.bloky %}
+  <section class="blok">
+    {% if blok.titulek %}<h2>{{ blok.titulek }}</h2>{% endif %}
+    {% if blok.obsah %}<div class="text">{{ blok.obsah | safe }}</div>{% endif %}
+  </section>
+{% endfor %}
+
+{% if stranka.kod == "casto-se-ptate" %}
+  <div class="faq">
+  {% for o in obsah.otazky %}
+    <details class="otazka">
+      <summary>{{ o.otazka | striptags | trim }}</summary>
+      <div class="text">{{ o.odpoved | safe }}</div>
+    </details>
+  {% endfor %}
+  </div>
+  <p class="pocet">Otázek celkem: {{ obsah.otazky.length }}.</p>
+{% endif %}
+
+{% if not stranka.text and stranka.bloky.length == 0 and stranka.kod != "casto-se-ptate" %}
+  <p class="prazdno">Obsah téhle stránky se teprve připravuje.</p>
+{% endif %}
