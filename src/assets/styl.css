@@ -1,0 +1,107 @@
+/* Hory Bory – základní styl. Barva závodu je tmavě vínová #78212E.
+   Tohle je provizorium, než dorazí návrh grafika (fáze 1, konec září 2026). */
+
+:root {
+  --hb: #78212E;
+  --hb-tmava: #5c1923;
+  --hb-svetla: #f5eced;
+  --text: #23201f;
+  --seda: #6b6362;
+  --ram: #e2d9da;
+  --pozadi: #fdfcfc;
+  --sirka: 62rem;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: Nunito, "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  background: var(--pozadi);
+  line-height: 1.6;
+  font-size: 17px;
+}
+
+.obal { max-width: var(--sirka); margin: 0 auto; padding: 0 16px; }
+
+.preskocit {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--hb); color: #fff; padding: 10px 16px; z-index: 10;
+}
+.preskocit:focus { left: 0; }
+
+/* hlavička */
+.hlavicka { background: var(--hb); color: #fff; }
+.hlavicka-obal { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-top: 12px; padding-bottom: 12px; }
+.znacka { color: #fff; text-decoration: none; font-weight: 700; font-size: 1.35rem; letter-spacing: .02em; }
+.menu-tlacitko {
+  margin-left: auto; background: transparent; color: #fff;
+  border: 1px solid rgba(255,255,255,.5); border-radius: 6px;
+  padding: 7px 12px; font: inherit; font-size: .95rem; cursor: pointer;
+}
+.menu { width: 100%; display: none; }
+.menu-otevrene { display: block; }
+.menu ul { list-style: none; margin: 8px 0 0; padding: 0; }
+.menu li { border-top: 1px solid rgba(255,255,255,.18); }
+.menu a { display: block; color: #fff; text-decoration: none; padding: 10px 2px; }
+.menu a:hover, .menu a:focus { text-decoration: underline; }
+.menu a[aria-current="page"] { font-weight: 700; }
+.jazyky { display: flex; gap: 8px; padding: 10px 2px 2px; }
+.jazyk { font-size: .82rem; opacity: .65; letter-spacing: .04em; }
+.jazyk-aktivni { opacity: 1; font-weight: 700; }
+
+@media (min-width: 52rem) {
+  .menu-tlacitko { display: none; }
+  .menu { display: flex; width: auto; margin-left: auto; align-items: center; gap: 18px; }
+  .menu ul { display: flex; gap: 18px; margin: 0; }
+  .menu li { border: 0; }
+  .menu a { padding: 4px 0; }
+  .jazyky { padding: 0; }
+}
+
+/* obsah */
+main { padding-top: 28px; padding-bottom: 48px; }
+h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 16px; color: var(--hb); }
+h2 { font-size: 1.35rem; margin: 32px 0 10px; color: var(--hb); }
+h3 { font-size: 1.1rem; margin: 24px 0 8px; }
+a { color: var(--hb); }
+.perex { font-size: 1.1rem; color: var(--seda); margin: 0 0 24px; }
+.blok { margin: 0 0 8px; }
+.text img { max-width: 100%; height: auto; }
+.text ul, .text ol { padding-left: 1.3em; }
+.text table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+.text th { background: var(--hb); color: #fff; text-align: left; padding: 8px 10px; }
+.text td { border: 1px solid var(--ram); padding: 7px 10px; }
+.table-responsive { overflow-x: auto; }
+.c-btn, .c-formBtn {
+  display: inline-block; background: var(--hb); color: #fff !important;
+  text-decoration: none; padding: 9px 16px; border-radius: 6px; margin: 4px 6px 4px 0;
+}
+.c-btn:hover { background: var(--hb-tmava); }
+
+.upozorneni {
+  background: var(--hb-svetla); border-left: 4px solid var(--hb);
+  padding: 10px 14px; margin: 0 0 24px; font-size: .95rem;
+}
+.prazdno { color: var(--seda); font-style: italic; }
+
+/* FAQ */
+.faq { border-top: 1px solid var(--ram); margin-top: 8px; }
+.otazka { border-bottom: 1px solid var(--ram); }
+.otazka summary {
+  cursor: pointer; padding: 13px 4px; font-weight: 600; list-style: none;
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.otazka summary::-webkit-details-marker { display: none; }
+.otazka summary::before { content: "+"; color: var(--hb); font-weight: 700; flex: none; }
+.otazka[open] summary::before { content: "–"; }
+.otazka .text { padding: 0 4px 10px 24px; }
+.otazka .text p:first-child { margin-top: 0; }
+.pocet { color: var(--seda); font-size: .9rem; }
+
+/* patička */
+.paticka { background: var(--hb-svetla); border-top: 1px solid var(--ram); padding: 24px 0; font-size: .92rem; }
+.paticka p { margin: 4px 0; }
