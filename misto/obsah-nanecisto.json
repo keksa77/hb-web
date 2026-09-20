@@ -1,0 +1,24 @@
+{
+  "stranky": [
+    { "kod": "uvod", "stav": "rozpracovana", "upozorneni": null, "poradi": 10,
+      "titulek": "Hory Bory", "slug": "", "adresa": "/", "text": null, "metaPopis": null,
+      "bloky": [ { "titulek": "Základní fakta", "obsah": "<ul><li>Týmy šesti až deseti závodníků.</li><li>Trať má 30 etap.</li></ul>" } ] },
+    { "kod": "pravidla", "stav": "rozpracovana", "upozorneni": null, "poradi": 40,
+      "titulek": "Pravidla", "slug": "pravidla", "adresa": "/pravidla/", "text": null, "metaPopis": null,
+      "bloky": [ { "titulek": "Pravidla závodu", "obsah": "<ol><li>Trať se skládá ze třiceti etap.</li></ol>" },
+                 { "titulek": "Povinná výbava", "obsah": "<ol><li>čelovka</li><li>reflexní vesta</li></ol>" } ] },
+    { "kod": "casto-se-ptate", "stav": "rozpracovana", "upozorneni": null, "poradi": 60,
+      "titulek": "Často se ptáte", "slug": "casto-se-ptate", "adresa": "/casto-se-ptate/", "text": null, "metaPopis": null, "bloky": [] },
+    { "kod": "partneri", "stav": "rozpracovana", "upozorneni": null, "poradi": 100,
+      "titulek": "Partneři", "slug": "partneri", "adresa": "/partneri/", "text": null, "metaPopis": null, "bloky": [] },
+    { "kod": "gdpr", "stav": "rozpracovana", "upozorneni": "Zásady se právě píšou znovu.", "poradi": 120,
+      "titulek": "Zásady zpracování údajů", "slug": "gdpr", "adresa": "/gdpr/", "text": null, "metaPopis": null, "bloky": [] }
+  ],
+  "otazky": [
+    { "poradi": 1, "otazka": "<p>Co jsou Hory Bory?</p>", "odpoved": "<p>Štafetový běh z Beskyd na Pálavu.</p>" },
+    { "poradi": 2, "otazka": "Kolik nás musí být v týmu?", "odpoved": "Tým tvoří 6 až 10 závodníků." }
+  ],
+  "jazyky": [ { "kod": "cs", "nazev": "Čeština", "poradi": 1, "aktivni": true, "vychozi": true },
+              { "kod": "en", "nazev": "English", "poradi": 2, "aktivni": true, "vychozi": false } ],
+  "staženo": "zkušební data"
+}
