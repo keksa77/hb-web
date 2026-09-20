@@ -1,0 +1,68 @@
+# Sestavení webu Hory Bory a vystavení na testovací adresu.
+#
+# Co to dělá: stáhne obsah ze Supabase, vygeneruje hotové HTML a vystaví ho
+# na https://keksa77.github.io/hb-web/. Ostrý web na Wedosu tenhle soubor
+# ZATÍM NEOBSLUHUJE — nasazení přes FTP se doplní až před přepnutím domény,
+# aby se omylem nepřepsal živý horybory.cz.
+#
+# Spouští se při každé změně v repozitáři a taky ručně (Actions → Run workflow),
+# což je způsob, jak po úpravě textů v databázi přegenerovat web.
+
+name: Sestavit a vystavit
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  sestavit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Nainstalovat Eleventy
+        run: npm install --no-audit --no-fund
+
+      - name: Sestavit web
+        env:
+          ZAKLAD_URL: /hb-web
+        run: npm run build
+
+      - name: Zkontrolovat, že se obsah opravdu natáhl
+        run: |
+          test -f _site/index.html || { echo "Chybí index.html"; exit 1; }
+          pocet=$(find _site -name 'index.html' | wc -l)
+          echo "Vygenerováno stránek: $pocet"
+          if [ "$pocet" -lt 10 ]; then
+            echo "Stránek je míň, než má být — obsah se nejspíš nenatáhl z databáze."
+            exit 1
+          fi
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  vystavit:
+    needs: sestavit
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.nasazeni.outputs.page_url }}
+    steps:
+      - id: nasazeni
+        uses: actions/deploy-pages@v4
