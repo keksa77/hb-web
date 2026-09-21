@@ -55,6 +55,7 @@
       <a href="mailto:info@horybory.cz">info@horybory.cz</a> ·
       {% for s in obsah.stranky %}{% if s.kod == "gdpr" %}<a href="{{ web.zaklad }}{{ s.adresa }}">{{ s.titulek }}</a>{% endif %}{% endfor %}
     </p>
+    <p class="verze" title="{{ web.commit }}">verze {{ web.verze }} · {{ web.sestaveno }}</p>
   </div>
 </footer>
 

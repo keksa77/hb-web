@@ -12,6 +12,7 @@
 <body class="adm{% if tabulka %} adm-s-tabulkou{% endif %}">
 <header class="adm-hlavicka">
   <a class="adm-znacka" href="{{ web.zaklad }}/admin/">Hory Bory · administrace</a>
+  <span class="adm-verze" title="Nasazeno {{ web.sestaveno }}{% if web.commit %} · commit {{ web.commit }}{% endif %}">{{ web.verze }}</span>
   <div class="adm-kdo" id="adm-kdo" hidden>
     <span id="adm-jmeno"></span>
     <button type="button" class="adm-odkaz" id="adm-odhlasit">Odhlásit</button>
