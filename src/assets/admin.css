@@ -99,3 +99,6 @@
   .adm-menu-skupina, .adm-menu .adm-pripravuje { display: none !important; }
   .adm-panel { position: fixed; inset: 44px 0 0 auto; width: min(360px, 100vw); z-index: 30; }
 }
+/* Hláška „žádný řádek“ vlevo, ať je vidět i u široké tabulky */
+.tabulator .tabulator-tableholder .tabulator-placeholder { justify-content: flex-start; }
+.tabulator .tabulator-tableholder .tabulator-placeholder .tabulator-placeholder-contents { position: sticky; left: 0; padding: 24px 16px; text-align: left; }
