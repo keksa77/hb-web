@@ -1,59 +1,101 @@
-/* Administrace Hory Bory – doplněk k styl.css. Stejné barvy, hustší rozložení. */
-.adm { background: #f7f4f4; font-size: 16px; }
-.adm-obal { max-width: 72rem; margin: 0 auto; padding: 0 16px; }
-.adm-hlavicka { background: var(--hb-tmava); color: #fff; }
-.adm-hlavicka-obal { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; padding-top: 10px; padding-bottom: 10px; }
+/* Administrace Hory Bory – doplněk k styl.css. Menu vlevo, tabulka přes zbytek šířky, hustě jako v Excelu. */
+.adm { background: #f7f4f4; font-size: 15px; margin: 0; }
+.adm-hlavicka { background: var(--hb-tmava); color: #fff; display: flex; align-items: center; gap: 16px; padding: 8px 16px; height: 44px; box-sizing: border-box; }
 .adm-znacka { color: #fff; font-weight: 700; text-decoration: none; }
-.adm-menu { display: flex; gap: 16px; flex-wrap: wrap; }
-.adm-menu[hidden], .adm-kdo[hidden] { display: none; }
-.adm-menu a { color: #fff; text-decoration: none; opacity: .85; }
-.adm-menu a[aria-current="page"] { opacity: 1; font-weight: 700; text-decoration: underline; }
-.adm-kdo { margin-left: auto; display: flex; gap: 12px; align-items: center; font-size: .92rem; }
-.adm-odkaz { background: none; border: 1px solid rgba(255,255,255,.5); color: #fff; border-radius: 5px; padding: 4px 10px; font: inherit; cursor: pointer; }
-.adm-hlavni { padding-top: 22px; padding-bottom: 60px; }
-.adm h1 { font-size: 1.6rem; margin: 0 0 8px; }
-.adm h2 { font-size: 1.15rem; margin: 0; color: var(--text); }
-.adm h3 { font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--seda); margin: 0 0 4px; }
+.adm-kdo { margin-left: auto; display: flex; gap: 12px; align-items: center; font-size: .9rem; }
+.adm-kdo[hidden], .adm-menu[hidden] { display: none; }
+.adm-odkaz { background: none; border: 1px solid rgba(255,255,255,.5); color: #fff; border-radius: 5px; padding: 3px 10px; font: inherit; cursor: pointer; }
+.adm-telo { display: flex; min-height: calc(100vh - 44px); }
+.adm-menu { flex: 0 0 180px; background: #2d2626; color: #ddd; padding: 8px 0; font-size: .9rem; }
+.adm-menu a, .adm-menu span.adm-pripravuje { display: block; padding: 5px 16px; color: #eee; text-decoration: none; }
+.adm-menu a:hover { background: #3d3434; }
+.adm-menu a[aria-current="page"] { background: var(--hb); color: #fff; font-weight: 700; }
+.adm-menu .adm-pripravuje { color: #8d8484 !important; cursor: default; }
+.adm-menu-skupina { color: #a99; font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; padding: 12px 16px 3px; }
+.adm-pocet { font-weight: 400; opacity: .85; }
+.adm-hlavni { flex: 1; min-width: 0; padding: 16px 20px 40px; }
+.adm-s-tabulkou .adm-hlavni { padding: 10px 12px 0; display: flex; flex-direction: column; height: calc(100vh - 44px); box-sizing: border-box; }
+.adm h1 { font-size: 1.25rem; margin: 0; }
+.adm h3 { font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; color: var(--seda); margin: 14px 0 4px; }
 .adm-sub { color: var(--seda); font-size: .92rem; margin: 4px 0 14px; }
+.adm-sub-mini { color: var(--seda); font-size: .8rem; }
 .adm-karta { background: #fff; border: 1px solid var(--ram); border-radius: 8px; padding: 16px 18px; margin-bottom: 12px; }
 .adm-prihlaseni { max-width: 26rem; margin: 30px auto; }
 .adm-pole { display: block; font-weight: 700; font-size: .9rem; margin: 0 0 12px; }
-.adm-pole input, .adm-filtry select { display: block; width: 100%; margin-top: 4px; padding: 8px 10px; border: 1px solid #cfc4c5; border-radius: 5px; font: inherit; font-weight: 400; background: #fff; }
-.adm-tlacitko { background: var(--hb); color: #fff; border: 0; border-radius: 6px; padding: 9px 16px; font: inherit; font-weight: 700; cursor: pointer; }
-.adm-tlacitko:disabled, .adm-male:disabled { opacity: .5; cursor: default; }
-.adm-male { background: #fff; color: var(--hb); border: 1px solid #cfc4c5; border-radius: 6px; padding: 8px 12px; font: inherit; font-size: .92rem; cursor: pointer; }
-.adm-male-cervene { color: #8a2a2a; }
-.adm-chyba { background: #fbecec; border: 1px solid #e0a5a5; color: #7a1f1f; border-radius: 6px; padding: 10px 14px; }
-.adm-ok { background: #eef5f0; border: 1px solid #b7d6c0; color: #2c5c3a; border-radius: 6px; padding: 10px 14px; }
+.adm-pole input { display: block; width: 100%; margin-top: 4px; padding: 8px 10px; border: 1px solid #cfc4c5; border-radius: 5px; font: inherit; font-weight: 400; background: #fff; box-sizing: border-box; }
+.adm-tlacitko { background: var(--hb); color: #fff; border: 0; border-radius: 5px; padding: 7px 14px; font: inherit; font-weight: 700; cursor: pointer; }
+.adm-tlacitko:disabled, .adm-male:disabled, .adm-mini:disabled { opacity: .45; cursor: default; }
+.adm-male { background: #fff; color: var(--hb); border: 1px solid #cfc4c5; border-radius: 4px; padding: 3px 9px; font: inherit; font-size: .85rem; cursor: pointer; }
+.adm-male:hover:not(:disabled) { border-color: var(--hb); }
+.adm-odkaz-tmavy { background: none; border: 0; color: var(--seda); text-decoration: underline; font: inherit; font-size: .85rem; cursor: pointer; }
+.adm-chyba { background: #fbecec; border: 1px solid #e0a5a5; color: #7a1f1f; border-radius: 5px; padding: 6px 12px; margin: 4px 0; font-size: .9rem; }
+.adm-ok { background: #eef5f0; border: 1px solid #b7d6c0; color: #2c5c3a; border-radius: 5px; padding: 6px 12px; margin: 4px 0; font-size: .9rem; }
 .adm-chyba[hidden], .adm-ok[hidden] { display: none; }
-.adm-dlazdice { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 12px; }
-.adm-dlazdice-polozka { display: block; background: #fff; border: 1px solid var(--ram); border-radius: 8px; padding: 16px; text-decoration: none; color: var(--text); }
-.adm-dlazdice-polozka strong { display: block; color: var(--hb); font-size: 1.05rem; margin-bottom: 4px; }
-.adm-dlazdice-polozka span { color: var(--seda); font-size: .92rem; }
-a.adm-dlazdice-polozka:hover { border-color: var(--hb); }
-.adm-pripravuje { opacity: .55; }
-.adm-souhrn { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 16px; }
-.adm-souhrn div { background: #fff; border: 1px solid var(--ram); border-radius: 8px; padding: 10px 14px; min-width: 9rem; }
-.adm-souhrn b { display: block; font-size: 1.5rem; color: var(--hb); line-height: 1.1; }
-.adm-souhrn span { font-size: .82rem; color: var(--seda); }
-.adm-souhrn .adm-test { border-color: #e8c78a; background: #fff8ea; }
-.adm-filtry { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; margin: 0 0 16px; }
-.adm-filtry label { font-size: .85rem; font-weight: 700; }
-.adm-filtry select { width: auto; }
-.adm-zaskrt { display: flex; gap: 6px; align-items: center; font-weight: 400 !important; padding-bottom: 8px; }
-.adm-polozka { border-left: 4px solid var(--ram); }
-.adm-polozka.adm-faktura { border-left-color: #2c5c3a; }
-.adm-polozka header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; margin-bottom: 12px; }
-.adm-vs { font-family: Consolas, "SF Mono", monospace; font-size: .88rem; color: var(--seda); }
-.adm-stitek { margin-left: auto; font-size: .85rem; font-weight: 700; border-radius: 20px; padding: 3px 10px; }
-.adm-stitek-zakladni { background: #eef5f0; color: #2c5c3a; }
-.adm-stitek-zvlastni { background: #eaf1f8; color: #1f4f7a; }
-.adm-mrizka { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 12px 20px; }
-.adm-mrizka p { margin: 0 0 6px; }
-.adm-dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 10px; margin: 0; font-size: .92rem; }
-.adm-dl dt { color: var(--seda); }
-.adm-dl dd { margin: 0; }
-.adm-upozorneni { background: #fff8ea; border-radius: 4px; padding: 4px 8px; font-size: .88rem; color: #6b4a00; }
-.adm-poznamka { margin: 10px 0; font-weight: 400; font-size: .85rem; color: var(--seda); }
-.adm-akce { display: flex; flex-wrap: wrap; gap: 8px; }
-@media (max-width: 40rem) { .adm-stitek { margin-left: 0; } .adm-kdo { margin-left: 0; width: 100%; } }
+
+/* Lišta nad tabulkou */
+.adm-tabulka-obal { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.adm-lista { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin-bottom: 6px; font-size: .88rem; }
+.adm-lista h1 { margin-right: 10px; }
+.adm-lista input[type=search] { flex: 1 1 180px; max-width: 320px; padding: 4px 8px; border: 1px solid #cfc4c5; border-radius: 4px; font: inherit; }
+.adm-pocet-radku { color: var(--seda); margin-right: auto; }
+.adm-pohled select { padding: 3px 4px; border: 1px solid #cfc4c5; border-radius: 4px; font: inherit; max-width: 200px; }
+.adm-lista-2 { min-height: 22px; }
+.adm-stitky { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.adm-stitek-filtr { background: #f3e6e8; border: 1px solid #dcbcc2; border-radius: 12px; padding: 0 4px 0 9px; font-size: .8rem; }
+.adm-stitek-filtr button { border: 0; background: none; color: var(--hb); cursor: pointer; font-size: .95rem; padding: 0 4px; }
+.adm-hromadne { background: #fff8ea; border: 1px solid #ecd49a; border-radius: 5px; padding: 3px 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.adm-hromadne[hidden] { display: none; }
+.adm-info { color: var(--seda); font-size: .82rem; margin-left: auto; }
+.adm-rozbal { position: relative; }
+.adm-rozbal-obsah { position: absolute; z-index: 20; right: 0; top: 100%; background: #fff; border: 1px solid #cfc4c5; border-radius: 5px; padding: 6px 10px; max-height: 60vh; overflow: auto; box-shadow: 0 4px 14px rgba(0,0,0,.15); min-width: 200px; }
+.adm-rozbal-obsah[hidden] { display: none; }
+.adm-rozbal-obsah label { display: block; white-space: nowrap; font-size: .85rem; padding: 1px 0; }
+.adm-ulozit-pohled { background: #fff; border: 1px solid var(--ram); border-radius: 5px; padding: 6px 10px; margin-bottom: 6px; font-size: .88rem; }
+.adm-ulozit-pohled[hidden] { display: none; }
+.adm-ulozit-pohled input { padding: 3px 6px; border: 1px solid #cfc4c5; border-radius: 4px; font: inherit; }
+
+/* Tabulka + panel vpravo */
+.adm-prostor { display: flex; flex: 1; min-height: 0; gap: 8px; padding-bottom: 8px; }
+#t-tabulka { flex: 1; min-width: 0; border: 1px solid #d8cfd0; background: #fff; font-size: 12.5px; }
+.adm-panel { flex: 0 0 360px; background: #fff; border: 1px solid #d8cfd0; overflow: auto; padding: 8px 12px; font-size: .85rem; }
+.adm-panel[hidden] { display: none; }
+.adm-panel-hlava { display: flex; align-items: center; gap: 8px; position: sticky; top: -8px; background: #fff; padding: 4px 0; }
+.adm-panel-hlava b { flex: 1; color: var(--hb); font-size: 1rem; }
+.adm-panel-akce { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 8px; }
+.adm-panel-pole { display: grid; grid-template-columns: 38% 1fr; gap: 3px 8px; margin: 0; }
+.adm-panel-pole dt { color: var(--seda); padding-top: 3px; }
+.adm-panel-pole dd { margin: 0; word-break: break-word; }
+.adm-panel-pole input, .adm-panel-pole select, .adm-panel-pole textarea { width: 100%; box-sizing: border-box; padding: 2px 5px; border: 1px solid #d6cbcc; border-radius: 3px; font: inherit; background: #fffdf5; }
+.adm-panel-ulozit { position: sticky; bottom: -8px; background: #fff; padding: 8px 0; }
+.adm-historie ul { list-style: none; padding: 0; margin: 0; }
+.adm-historie li { border-top: 1px solid #eee; padding: 4px 0; font-size: .8rem; word-break: break-word; }
+
+/* Tabulator – hustě jako v Excelu, barvy Hory Bory */
+.tabulator { font-size: 12.5px; }
+.tabulator .tabulator-header { background: #78212E; color: #fff; border-bottom: 1px solid #5a1822; }
+.tabulator .tabulator-header .tabulator-col { background: #78212E; border-right: 1px solid #8f3a47; }
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content { padding: 3px 5px; }
+.tabulator .tabulator-header .tabulator-col .tabulator-header-filter { margin-top: 3px; }
+.tabulator .tabulator-header .tabulator-col input, .tabulator .tabulator-header .tabulator-col select { font-size: 11.5px; padding: 1px 3px !important; border: 1px solid #c9b3b7; border-radius: 2px; color: #222; background: #fff; box-sizing: border-box; width: 100%; }
+.tabulator .tabulator-header .tabulator-col.tabulator-sortable.tabulator-col-sorter-element:hover { background: #8f2a39; }
+.tabulator .tabulator-header .tabulator-col .tabulator-col-sorter .tabulator-arrow { border-bottom-color: #d9a9b1; }
+.tabulator-row { min-height: 22px; }
+.tabulator-row .tabulator-cell { padding: 2px 5px; border-right: 1px solid #eee4e5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tabulator-row.tabulator-row-even { background: #faf7f7; }
+.tabulator-row.tabulator-selectable:hover { background: #f3e6e8; cursor: pointer; }
+.tabulator-row.tabulator-selected { background: #f7e3b8 !important; }
+.tabulator-row.adm-radek-otevreny { box-shadow: inset 3px 0 0 #78212E; background: #f3e6e8; }
+.tabulator .tabulator-cell.adm-upravitelne { cursor: cell; }
+.tabulator .tabulator-cell.tabulator-editing { border: 1px solid #78212E; padding: 0; }
+.tabulator .tabulator-placeholder span { color: #888 !important; font-size: 14px !important; font-weight: 400 !important; }
+.adm-rozsah { display: flex; flex-direction: column; gap: 2px; }
+.adm-rozsah input { width: 100%; }
+.adm-mini { background: #fff; color: #333; border: 1px solid #cdbfc1; border-radius: 3px; padding: 0 6px; margin-right: 3px; font-size: 11.5px; line-height: 17px; cursor: pointer; }
+.adm-mini-hlavni { background: #2c5c3a; color: #fff; border-color: #2c5c3a; }
+.adm-mini-cervene { color: #8a2a2a; }
+@media (max-width: 800px) {
+  .adm-telo { flex-direction: column; }
+  .adm-menu { flex: none; display: flex; flex-wrap: wrap; padding: 4px; }
+  .adm-menu-skupina, .adm-menu .adm-pripravuje { display: none !important; }
+  .adm-panel { position: fixed; inset: 44px 0 0 auto; width: min(360px, 100vw); z-index: 30; }
+}
