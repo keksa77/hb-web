@@ -16,29 +16,8 @@ eleventyExcludeFromCollections: true
   <p class="adm-chyba" id="adm-chyba-prihlaseni" hidden></p>
 </section>
 
-<section id="adm-rozcestnik" hidden>
-  <h1>Administrace</h1>
-  <div class="adm-dlazdice">
-    <a class="adm-dlazdice-polozka" href="{{ web.zaklad }}/admin/fronta/">
-      <strong>Fronta ke schválení</strong>
-      <span id="adm-pocet-fronta">Registrační maily čekající na vaše rozhodnutí.</span>
-    </a>
-    <div class="adm-dlazdice-polozka adm-pripravuje">
-      <strong>Týmy</strong><span>Připravuje se.</span>
-    </div>
-    <div class="adm-dlazdice-polozka adm-pripravuje">
-      <strong>Nastavení ročníku</strong><span>Připravuje se.</span>
-    </div>
-    <div class="adm-dlazdice-polozka adm-pripravuje">
-      <strong>Texty mailů</strong><span>Připravuje se.</span>
-    </div>
-    <div class="adm-dlazdice-polozka adm-pripravuje">
-      <strong>Seznam pro variantu 2</strong><span>Připravuje se.</span>
-    </div>
-  </div>
-</section>
-
 <script>
+// Po přihlášení rovnou do první sekce (nástěnka se nedělá – rozhodnuto 22. 9. 2026).
 document.addEventListener("DOMContentLoaded", async function () {
   var j = await HBA.ja();
   if (j && j.osoba_id) {
@@ -48,15 +27,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
     var zpet = new URLSearchParams(location.search).get("zpet");
-    if (zpet && zpet.indexOf(HB.zaklad + "/admin/") === 0) { location.href = zpet; return; }
-    document.getElementById("adm-rozcestnik").hidden = false;
-    try {
-      var r = await HBA.db("web_maily_ke_schvaleni?select=id,web_tym!inner(testovaci)&stav=eq.ceka&web_tym.testovaci=is.false");
-      var z = await HBA.db("web_maily_ke_schvaleni?select=id,web_tym!inner(testovaci)&stav=eq.ceka&web_tym.testovaci=is.true");
-      document.getElementById("adm-pocet-fronta").textContent =
-        (r.length ? "Čeká na rozhodnutí: " + r.length + "." : "Ostrá fronta je prázdná, registrace ještě nezačala.") +
-        (z.length ? " Zkušebních přihlášek: " + z.length + "." : "");
-    } catch (e) { /* počet je jen pro orientaci */ }
+    location.replace(zpet && zpet.indexOf(HB.zaklad + "/admin/") === 0 ? zpet : HB.zaklad + "/admin/fronta/");
     return;
   }
   document.getElementById("adm-prihlaseni").hidden = false;
