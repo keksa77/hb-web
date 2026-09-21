@@ -1,0 +1,71 @@
+---
+permalink: "/admin/index.html"
+layout: admin.njk
+titulek: "Přihlášení"
+sekce: "uvod"
+eleventyExcludeFromCollections: true
+---
+<section id="adm-prihlaseni" class="adm-karta adm-prihlaseni" hidden>
+  <h1>Přihlášení</h1>
+  <p class="adm-sub">Stejný e-mail a heslo jako do plánovače.</p>
+  <form id="adm-form-prihlaseni">
+    <label class="adm-pole">E-mail<input name="email" type="email" autocomplete="username" required></label>
+    <label class="adm-pole">Heslo<input name="heslo" type="password" autocomplete="current-password" required></label>
+    <button class="adm-tlacitko" type="submit">Přihlásit</button>
+  </form>
+  <p class="adm-chyba" id="adm-chyba-prihlaseni" hidden></p>
+</section>
+
+<section id="adm-rozcestnik" hidden>
+  <h1>Administrace</h1>
+  <div class="adm-dlazdice">
+    <a class="adm-dlazdice-polozka" href="{{ web.zaklad }}/admin/fronta/">
+      <strong>Fronta ke schválení</strong>
+      <span id="adm-pocet-fronta">Registrační maily čekající na vaše rozhodnutí.</span>
+    </a>
+    <div class="adm-dlazdice-polozka adm-pripravuje">
+      <strong>Týmy</strong><span>Připravuje se.</span>
+    </div>
+    <div class="adm-dlazdice-polozka adm-pripravuje">
+      <strong>Nastavení ročníku</strong><span>Připravuje se.</span>
+    </div>
+    <div class="adm-dlazdice-polozka adm-pripravuje">
+      <strong>Texty mailů</strong><span>Připravuje se.</span>
+    </div>
+    <div class="adm-dlazdice-polozka adm-pripravuje">
+      <strong>Seznam pro variantu 2</strong><span>Připravuje se.</span>
+    </div>
+  </div>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", async function () {
+  var j = await HBA.ja();
+  if (j && j.osoba_id) {
+    HBA.zobrazKdo(j);
+    if ((j.uroven || 0) < 30) {
+      document.querySelector(".adm-hlavni").innerHTML = '<p class="adm-chyba">Váš účet nemá organizátorská práva. Požádejte správce o přidělení role.</p>';
+      return;
+    }
+    var zpet = new URLSearchParams(location.search).get("zpet");
+    if (zpet && zpet.indexOf(HB.zaklad + "/admin/") === 0) { location.href = zpet; return; }
+    document.getElementById("adm-rozcestnik").hidden = false;
+    try {
+      var r = await HBA.db("web_maily_ke_schvaleni?select=id,web_tym!inner(testovaci)&stav=eq.ceka&web_tym.testovaci=is.false");
+      document.getElementById("adm-pocet-fronta").textContent =
+        r.length ? "Čeká na rozhodnutí: " + r.length + "." : "Nic nečeká na rozhodnutí.";
+    } catch (e) { /* počet je jen pro orientaci */ }
+    return;
+  }
+  document.getElementById("adm-prihlaseni").hidden = false;
+  document.getElementById("adm-form-prihlaseni").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    var chyba = document.getElementById("adm-chyba-prihlaseni");
+    chyba.hidden = true;
+    try {
+      await HBA.prihlasit(this.email.value.trim(), this.heslo.value);
+      location.reload();
+    } catch (err) { chyba.textContent = err.message; chyba.hidden = false; }
+  });
+});
+</script>
