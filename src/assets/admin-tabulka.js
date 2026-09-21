@@ -17,17 +17,32 @@
   }
   function dvoj(n) { return String(n).padStart(2, "0"); }
   // Časové razítko z databáze → "RRRR-MM-DD HH:MM" v místním čase (řadí se i filtruje jako text).
-  function mistniCas(v) {
+  function mistniCas(v, sekundy) {
     if (!v) return "";
     var d = new Date(v);
     if (isNaN(d)) return v;
-    return d.getFullYear() + "-" + dvoj(d.getMonth() + 1) + "-" + dvoj(d.getDate()) + " " + dvoj(d.getHours()) + ":" + dvoj(d.getMinutes());
+    return d.getFullYear() + "-" + dvoj(d.getMonth() + 1) + "-" + dvoj(d.getDate()) + " " + dvoj(d.getHours()) + ":" + dvoj(d.getMinutes()) +
+      (sekundy ? ":" + dvoj(d.getSeconds()) : "");
+  }
+  // Interval z databáze ("01:05:00", "1 day 01:45:34") → sekundy a text "25:45:34".
+  function trvaniS(v) {
+    if (v == null || v === "") return null;
+    var m = String(v).match(/^(?:(-?\d+) days? )?(-?)(\d+):(\d{2}):(\d{2})/);
+    if (!m) return null;
+    var s = (+(m[1] || 0)) * 86400 + (+m[3]) * 3600 + (+m[4]) * 60 + (+m[5]);
+    return m[2] === "-" ? -s : s;
+  }
+  function trvaniText(v) {
+    var s = typeof v === "number" ? v : trvaniS(v);
+    if (s == null) return "";
+    var z = s < 0 ? "-" : ""; s = Math.abs(s);
+    return z + Math.floor(s / 3600) + ":" + dvoj(Math.floor(s % 3600 / 60)) + ":" + dvoj(s % 60);
   }
   function ceskeDatum(v) {
     if (!v) return "";
-    var m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
+    var m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/);
     if (!m) return e(v);
-    return (+m[3]) + ". " + (+m[2]) + ". " + m[1] + (m[4] ? " " + m[4] + ":" + m[5] : "");
+    return (+m[3]) + ". " + (+m[2]) + ". " + m[1] + (m[4] ? " " + m[4] + ":" + m[5] + (m[6] ? ":" + m[6] : "") : "");
   }
   function prazdne(v) { return v == null || v === "" || (Array.isArray(v) && !v.length); }
 
@@ -105,6 +120,7 @@
         '<input type="search" id="t-hledat" placeholder="Hledat ve všech sloupcích…">' +
         '<span id="t-pocet" class="adm-pocet-radku"></span>' +
         '<label class="adm-pohled">Pohled <select id="t-pohled"><option value="">—</option></select></label>' +
+        (N.pridat ? '<button type="button" class="adm-tlacitko adm-tlacitko-male" id="t-pridat">+ ' + e(N.pridat.nazev) + '</button>' : "") +
         '<button type="button" class="adm-male" id="t-ulozit-pohled">Uložit pohled</button>' +
         '<button type="button" class="adm-male" id="t-zrusit">Zrušit filtry</button>' +
         '<span class="adm-rozbal"><button type="button" class="adm-male" id="t-sloupce">Sloupce ▾</button><div class="adm-rozbal-obsah" id="t-sloupce-seznam" hidden></div></span>' +
@@ -146,7 +162,7 @@
         c.headerFilter = editorRozsahu(t); c.headerFilterFunc = filtrRozsahu(t);
         c.headerFilterLiveFilter = true;
         c.headerFilterEmptyCheck = function (v) { return !v || (!v.od && !v.do); };
-        if (typ === "cislo") { c.hozAlign = "right"; c.sorter = "number"; }
+        if (typ === "cislo") { c.hozAlign = "right"; c.sorter = "number"; c.sorterParams = { alignEmptyValues: "bottom" }; }
         if (typ === "datum" || typ === "cas") c.formatter = function (cell) { return ceskeDatum(cell.getValue()); };
       } else if (typ === "vycet" || typ === "bool") {
         c.headerFilter = "list";
@@ -158,6 +174,11 @@
         c.headerFilterEmptyCheck = function (v) { return !v || !v.length; };
       }
       if (s.formatter) c.formatter = s.formatter;
+      if (s.razeni) c.sorter = function (a, b, ar, br) {
+        var x = ar.getData()[s.razeni], y = br.getData()[s.razeni];
+        return (x == null ? -Infinity : x) - (y == null ? -Infinity : y);
+      };
+      if (s.zarovnat) c.hozAlign = s.zarovnat;
       if (s.uprava) {
         c.editable = true;
         var u = s.uprava;
@@ -369,6 +390,10 @@
     async function zapis(radek, zmeny) {
       // zmeny: [{ s: definice sloupce, v: nová hodnota }] – seskupí se podle tabulky a klíče
       var skupiny = {};
+      for (var i = 0; i < zmeny.length; i++) {
+        if (zmeny[i].s.uprava.ulozit) await zmeny[i].s.uprava.ulozit(radek, zmeny[i].v);
+      }
+      zmeny = zmeny.filter(function (z) { return !z.s.uprava.ulozit; });
       zmeny.forEach(function (z) {
         var u = z.s.uprava, klic = radek[u.klic || N.idPole || "id"];
         if (klic == null) throw new Error("Řádek nemá " + (u.klic || "id") + " – tuhle hodnotu tady upravit nejde.");
@@ -512,6 +537,15 @@
     });
     async function nactiHistorii(r) {
       var hist = el("t-historie");
+      if (N.historieRadku) {
+        try {
+          var zaznamy = await N.historieRadku(r);
+          hist.innerHTML = zaznamy.length ? "<ul>" + zaznamy.map(function (z) {
+            return '<li' + (z.neplati ? ' class="adm-neplati"' : "") + '><span class="adm-sub-mini">' + ceskeDatum(mistniCas(z.kdy)) + ' · ' + e(z.kdo || "?") + '</span><br>' + z.html + '</li>';
+          }).join("") + "</ul>" : '<span class="adm-sub-mini">Zatím nic zapsáno.</span>';
+        } catch (err) { hist.innerHTML = '<span class="adm-sub-mini">Historii se nepodařilo načíst: ' + e(err.message) + '</span>'; }
+        return;
+      }
       if (!N.historie) { hist.innerHTML = '<span class="adm-sub-mini">U této sekce se historie nevede.</span>'; return; }
       try {
         var dotazy = N.historie(r).map(function (h) {
@@ -533,9 +567,48 @@
       } catch (err) { hist.innerHTML = '<span class="adm-sub-mini">Historii se nepodařilo načíst: ' + e(err.message) + '</span>'; }
     }
 
+    // --- přidání řádku (formulář v panelu vpravo) ---
+    if (N.pridat) el("t-pridat").addEventListener("click", async function () {
+      otevreny = null;
+      tab.getRows().forEach(function (x) { x.getElement().classList.remove("adm-radek-otevreny"); });
+      var p = el("t-panel"), pole = [];
+      for (var i = 0; i < N.pridat.pole.length; i++) {
+        var f = N.pridat.pole[i], vstup;
+        if (f.hodnoty) {
+          var h = typeof f.hodnoty === "function" ? await f.hodnoty() : f.hodnoty;
+          vstup = '<select data-nove="' + e(f.pole) + '"><option value=""></option>' + h.map(function (x) {
+            return '<option value="' + e(x.value) + '">' + e(x.label) + '</option>'; }).join("") + '</select>';
+        } else {
+          vstup = '<input data-nove="' + e(f.pole) + '" type="' + (f.typ || "text") + '">';
+        }
+        pole.push('<dt>' + e(f.nazev) + (f.povinne ? " *" : "") + '</dt><dd>' + vstup + '</dd>');
+      }
+      p.innerHTML = '<div class="adm-panel-hlava"><b>' + e(N.pridat.nazev) + '</b>' +
+        '<button type="button" class="adm-male" id="t-panel-zavrit" title="Zavřít">×</button></div>' +
+        (N.pridat.napoveda ? '<p class="adm-sub-mini">' + e(N.pridat.napoveda) + '</p>' : "") +
+        '<dl class="adm-panel-pole">' + pole.join("") + '</dl>' +
+        '<div class="adm-panel-ulozit"><button type="button" class="adm-tlacitko" id="t-pridat-ulozit">Přidat</button></div>';
+      p.hidden = false;
+      el("t-pridat-ulozit").addEventListener("click", async function () {
+        var data = {}, chybi = [];
+        p.querySelectorAll("[data-nove]").forEach(function (i) { data[i.dataset.nove] = i.value.trim(); });
+        N.pridat.pole.forEach(function (f) { if (f.povinne && !data[f.pole]) chybi.push(f.nazev); });
+        if (chybi.length) { chyba(new Error("Vyplňte: " + chybi.join(", ") + ".")); return; }
+        this.disabled = true; hlaska();
+        try {
+          await N.pridat.ulozit(data);
+          hlaska("ok", "Přidáno.");
+          p.hidden = true;
+          await nacist(false);
+        } catch (err) { chyba(err); this.disabled = false; }
+      });
+    });
+
     return { tabulka: tab, nacist: nacist, hlaska: hlaska };
   };
 
   window.HBT.mistniCas = mistniCas;
   window.HBT.ceskeDatum = ceskeDatum;
+  window.HBT.trvaniS = trvaniS;
+  window.HBT.trvaniText = trvaniText;
 })();
