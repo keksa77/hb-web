@@ -52,8 +52,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     document.getElementById("adm-rozcestnik").hidden = false;
     try {
       var r = await HBA.db("web_maily_ke_schvaleni?select=id,web_tym!inner(testovaci)&stav=eq.ceka&web_tym.testovaci=is.false");
+      var z = await HBA.db("web_maily_ke_schvaleni?select=id,web_tym!inner(testovaci)&stav=eq.ceka&web_tym.testovaci=is.true");
       document.getElementById("adm-pocet-fronta").textContent =
-        r.length ? "Čeká na rozhodnutí: " + r.length + "." : "Nic nečeká na rozhodnutí.";
+        (r.length ? "Čeká na rozhodnutí: " + r.length + "." : "Ostrá fronta je prázdná, registrace ještě nezačala.") +
+        (z.length ? " Zkušebních přihlášek: " + z.length + "." : "");
     } catch (e) { /* počet je jen pro orientaci */ }
     return;
   }
