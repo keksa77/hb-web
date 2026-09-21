@@ -1,0 +1,191 @@
+---
+permalink: "/zkusebni-prihlaska/index.html"
+layout: zaklad.njk
+titulek: "Zkušební přihláška"
+metaPopis: "Zkušební přihláška HB27 – jen pro pořadatele, nic se neodesílá."
+eleventyExcludeFromCollections: true
+---
+<style>
+  .zk-pozor{background:#fff4e0;border:1px solid #e8c78a;border-radius:6px;padding:10px 14px;margin:0 0 22px;font-size:15px}
+  .zk-form fieldset{border:1px solid #e2d9da;border-radius:8px;padding:14px 16px;margin:0 0 16px;background:#fff}
+  .zk-form legend{font-weight:700;padding:0 6px}
+  .zk-radek{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 14px}
+  .zk-form label.pole{display:block;font-size:14px;font-weight:600}
+  .zk-form label.pole input{display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid #cfc4c5;border-radius:5px;font:inherit;font-weight:400}
+  .zk-volba{display:flex;gap:10px;align-items:flex-start;margin:8px 0;cursor:pointer}
+  .zk-volba input{margin-top:4px;width:17px;height:17px;accent-color:#78212E;flex:none}
+  .zk-pozn{font-size:13px;color:#2c5c3a;background:#eef5f0;border-radius:4px;padding:5px 10px;margin:0 0 6px 27px}
+  .zk-odsaz{margin-left:27px}
+  .zk-tlacitko{background:#78212E;color:#fff;border:0;border-radius:6px;padding:11px 22px;font:inherit;font-weight:700;cursor:pointer}
+  .zk-tlacitko:disabled{opacity:.5}
+  .zk-male{background:#fff;color:#78212E;border:1px solid #cfc4c5;border-radius:5px;padding:4px 9px;font:inherit;font-size:13px;cursor:pointer;margin:2px 2px 2px 0}
+  .zk-chyba{background:#fbecec;border:1px solid #e0a5a5;color:#7a1f1f;border-radius:6px;padding:10px 14px;margin:14px 0}
+  .zk-vysledek{background:#fff;border:2px solid #78212E;border-radius:8px;padding:14px 18px;margin:18px 0}
+  .zk-vysledek h2{margin:0 0 8px}
+  .zk-vysledek dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:0}
+  .zk-vysledek dt{color:#6b6362}
+  .zk-vysledek dd{margin:0;font-weight:600}
+  .zk-var1{color:#2c5c3a} .zk-var2{color:#1f4f7a}
+  .zk-tab{width:100%;border-collapse:collapse;font-size:14px;background:#fff}
+  .zk-tab th,.zk-tab td{border:1px solid #e2d9da;padding:6px 8px;text-align:left;vertical-align:top}
+  .zk-tab th{background:#f5eced}
+  .zk-sub{font-size:12px;color:#6b6362}
+  .zk-skryte{display:none}
+</style>
+
+<p class="zk-pozor">
+  <strong>Zkušební přihláška pro pořadatele.</strong> Nic se neodesílá a nečerpá se ostrá řada variabilních
+  symbolů ani limit pěti týmů. Tým dostane symbol <code>TEST-001</code> a dál. Když zadáte e-mail kapitána z minulých
+  ročníků, uvidíte i jeho historii.
+</p>
+
+<form id="zk-form" class="zk-form" novalidate>
+  <fieldset>
+    <legend>Tým a kapitán</legend>
+    <div class="zk-radek">
+      <label class="pole" style="grid-column:1/-1">Název týmu *<input name="nazev" required></label>
+      <label class="pole">Jméno kapitána *<input name="jmeno" required></label>
+      <label class="pole">Příjmení *<input name="prijmeni" required></label>
+      <label class="pole">E-mail *<input name="email" type="email" required></label>
+      <label class="pole">Telefon<input name="telefon" type="tel"></label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Faktura za startovné</legend>
+    <label class="zk-volba"><input type="radio" name="faktura" value="ne" checked><span>Ne, fakturu nepotřebujeme</span></label>
+    <label class="zk-volba"><input type="radio" name="faktura" value="ano"><span>Ano, startovné platí firma nebo organizace a potřebuje fakturu</span></label>
+
+    <div id="zk-faktura" class="zk-odsaz zk-skryte">
+      <div class="zk-radek" style="margin:8px 0 12px">
+        <label class="pole">Název odběratele *<input name="odberatel_nazev"></label>
+        <label class="pole">IČ *<input name="odberatel_ic"></label>
+        <label class="pole">DIČ<input name="odberatel_dic"></label>
+        <label class="pole">Adresa *<input name="odberatel_adresa"></label>
+      </div>
+      <p style="margin:6px 0;font-weight:600">Datum uskutečnění zdanitelného plnění *</p>
+      <label class="zk-volba"><input type="radio" name="duzp" value="2027" checked><span>v roce 2027</span></label>
+      <p class="zk-pozn">Preferujeme plnění v roce 2027.</p>
+      <label class="zk-volba"><input type="radio" name="duzp" value="2026"><span>v roce 2026</span></label>
+    </div>
+  </fieldset>
+
+  <button class="zk-tlacitko" type="submit" id="zk-odeslat">Odeslat zkušební přihlášku</button>
+</form>
+
+<div id="zk-chyba" class="zk-chyba zk-skryte"></div>
+<div id="zk-vysledek" class="zk-vysledek zk-skryte"></div>
+
+<h2 style="margin-top:36px">Fronta ke schválení (jen zkušební přihlášky)</h2>
+<p class="zk-sub">Takhle to uvidíte v administraci do 10. 1. 2027. Tlačítka simulují vaše rozhodnutí.
+  Zbývá míst na variantu 1 před 1. 1. 2027: <strong id="zk-zbyva">–</strong> z 5.</p>
+<div style="overflow-x:auto"><table class="zk-tab" id="zk-fronta">
+  <thead><tr><th>Tým</th><th>Skupina</th><th>Ročníky</th><th>Návrh</th><th>Stav</th><th>Rozhodnutí</th></tr></thead>
+  <tbody><tr><td colspan="6" class="zk-sub">Načítám…</td></tr></tbody>
+</table></div>
+<p style="margin-top:14px"><button class="zk-male" id="zk-smazat" type="button">Smazat všechna testovací data</button>
+  <span class="zk-sub" id="zk-smazano"></span></p>
+
+<script>
+(function () {
+  var URL_DB = "{{ web.supabaseUrl }}";
+  var KLIC = "{{ web.supabaseKlic }}";
+  var UCTY = { zakladni: "Varianta 1 – účet Endorphins", zvlastni: "Varianta 2 – druhý účet" };
+
+  function rpc(fce, data) {
+    return fetch(URL_DB + "/rest/v1/rpc/" + fce, {
+      method: "POST",
+      headers: { "apikey": KLIC, "Authorization": "Bearer " + KLIC, "Content-Type": "application/json" },
+      body: JSON.stringify(data || {})
+    }).then(function (r) {
+      return r.json().then(function (j) {
+        if (!r.ok) throw new Error((j && (j.message || j.hint)) || ("Chyba " + r.status));
+        return j;
+      });
+    });
+  }
+  function el(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+  function datum(d) { if (!d) return "–"; var x = d.split("-"); return (+x[2]) + ". " + (+x[1]) + ". " + x[0]; }
+  function varianta(v) { return '<span class="' + (v === "zakladni" ? "zk-var1" : "zk-var2") + '">' + esc(UCTY[v] || v) + "</span>"; }
+
+  var form = el("zk-form");
+  form.addEventListener("change", function () {
+    var ano = form.faktura.value === "ano";
+    el("zk-faktura").classList.toggle("zk-skryte", !ano);
+  });
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    el("zk-chyba").classList.add("zk-skryte");
+    var f = form, ano = f.faktura.value === "ano";
+    var data = {
+      p_nazev: f.nazev.value, p_jmeno: f.jmeno.value, p_prijmeni: f.prijmeni.value,
+      p_email: f.email.value, p_telefon: f.telefon.value, p_fakturovat: ano,
+      p_odberatel_nazev: ano ? f.odberatel_nazev.value : null, p_odberatel_ic: ano ? f.odberatel_ic.value : null,
+      p_odberatel_dic: ano ? f.odberatel_dic.value : null, p_odberatel_adresa: ano ? f.odberatel_adresa.value : null,
+      p_duzp_rok: ano ? parseInt(f.duzp.value, 10) : null
+    };
+    el("zk-odeslat").disabled = true;
+    rpc("web_registrace_test", data).then(function (v) {
+      var roky = (v.rocniky_ucasti || []).join(", ") || "žádný (nový tým)";
+      el("zk-vysledek").innerHTML =
+        "<h2>" + esc(v.tym) + " – " + esc(v.vs) + "</h2><dl>" +
+        "<dt>Mail</dt><dd>" + varianta(v.varianta) + "</dd>" +
+        "<dt>Účet v mailu</dt><dd>" + esc(v.ucet) + "</dd>" +
+        "<dt>Faktura</dt><dd>" + (v.fakturovat ? "ano – " + esc(v.odberatel) + ", plnění " + esc(v.duzp_rok) + ", datum faktury " + datum(v.datum_faktury) : "ne") + "</dd>" +
+        "<dt>Pokyny k platbě</dt><dd>" + (v.pokyny_nejdriv ? "nejdřív " + datum(v.pokyny_nejdriv) : "hned po schválení") + "</dd>" +
+        "<dt>Počítá se do limitu 5</dt><dd>" + (v.pocita_se_do_limitu && v.varianta === "zakladni" ? "ano" : "ne") + "</dd>" +
+        "<dt>Jde do fronty</dt><dd>" + (v.do_fronty ? "ano, čeká na vaše schválení" : "ne, odešel by hned") + "</dd>" +
+        "<dt>Běželi v ročnících</dt><dd>" + esc(roky) + "</dd>" +
+        (v.upozorneni ? "<dt>Upozornění</dt><dd>" + esc(v.upozorneni) + "</dd>" : "") +
+        "</dl>";
+      el("zk-vysledek").classList.remove("zk-skryte");
+      el("zk-vysledek").scrollIntoView({ behavior: "smooth", block: "start" });
+      form.reset(); el("zk-faktura").classList.add("zk-skryte");
+      nactiFrontu();
+    }).catch(function (err) {
+      el("zk-chyba").textContent = err.message;
+      el("zk-chyba").classList.remove("zk-skryte");
+    }).then(function () { el("zk-odeslat").disabled = false; });
+  });
+
+  function nactiFrontu() {
+    rpc("web_test_fronta").then(function (radky) {
+      var tb = el("zk-fronta").querySelector("tbody");
+      el("zk-zbyva").textContent = radky.length ? (radky[0].v1_zbyva == null ? "bez limitu" : radky[0].v1_zbyva) : "5";
+      if (!radky.length) { tb.innerHTML = '<tr><td colspan="6" class="zk-sub">Zatím žádná zkušební přihláška.</td></tr>'; return; }
+      tb.innerHTML = radky.map(function (r) {
+        var v = r.varianta_schvalena || r.varianta_navrh;
+        var sk = r.skupina === "faktura" ? "faktura, plnění " + r.duzp_rok + '<div class="zk-sub">faktura ' + datum(r.datum_faktury) + (r.pokyny_nejdriv ? ", pokyny od " + datum(r.pokyny_nejdriv) : "") + "</div>" : "bez faktury";
+        return "<tr><td><strong>" + esc(r.tym) + "</strong><div class=\"zk-sub\">" + esc(r.vs) + " · " + esc(r.kapitan) + " · " + esc(r.email) + "</div>" +
+          (r.upozorneni ? '<div class="zk-sub" style="color:#8a5a00">' + esc(r.upozorneni) + "</div>" : "") + "</td>" +
+          "<td>" + sk + "</td><td>" + esc((r.rocniky_ucasti || []).join(", ") || "–") + "</td>" +
+          "<td>" + varianta(v) + "</td><td>" + esc(r.stav) + "</td><td>" +
+          '<button class="zk-male" data-id="' + r.id + '" data-stav="schvaleno" data-var="zakladni">Schválit – var. 1</button>' +
+          '<button class="zk-male" data-id="' + r.id + '" data-stav="schvaleno" data-var="zvlastni">Schválit – var. 2</button>' +
+          '<button class="zk-male" data-id="' + r.id + '" data-stav="odeslano">Odeslat</button>' +
+          '<button class="zk-male" data-id="' + r.id + '" data-stav="zamitnuto">Zamítnout</button>' +
+          '<button class="zk-male" data-id="' + r.id + '" data-stav="ceka">Vrátit</button></td></tr>';
+      }).join("");
+    }).catch(function (err) {
+      el("zk-fronta").querySelector("tbody").innerHTML = '<tr><td colspan="6">' + esc(err.message) + "</td></tr>";
+    });
+  }
+
+  el("zk-fronta").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-id]"); if (!b) return;
+    rpc("web_test_rozhodnout", { p_id: +b.dataset.id, p_stav: b.dataset.stav, p_varianta: b.dataset.var || null })
+      .then(nactiFrontu)
+      .catch(function (err) { alertBox(err.message); });
+  });
+  function alertBox(t) { el("zk-chyba").textContent = t; el("zk-chyba").classList.remove("zk-skryte"); el("zk-chyba").scrollIntoView({ behavior: "smooth", block: "center" }); }
+
+  el("zk-smazat").addEventListener("click", function () {
+    rpc("web_test_smazat").then(function (t) { el("zk-smazano").textContent = t; el("zk-vysledek").classList.add("zk-skryte"); nactiFrontu(); })
+      .catch(function (err) { alertBox(err.message); });
+  });
+
+  nactiFrontu();
+})();
+</script>
