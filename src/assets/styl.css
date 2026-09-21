@@ -105,3 +105,4 @@ a { color: var(--hb); }
 /* patička */
 .paticka { background: var(--hb-svetla); border-top: 1px solid var(--ram); padding: 24px 0; font-size: .92rem; }
 .paticka p { margin: 4px 0; }
+.paticka .verze { color: var(--seda); font-size: .78rem; margin-top: 10px; }
