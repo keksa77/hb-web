@@ -64,7 +64,10 @@
     var t = await platnyToken();
     if (!t) throw new Error("Nejste přihlášen.");
     var hlavicky = { apikey: HB.klic, Authorization: "Bearer " + t, "Content-Type": "application/json" };
-    if (volby.vratit) hlavicky.Prefer = "return=representation";
+    var prefer = [];
+    if (volby.vratit) prefer.push("return=representation");
+    if (volby.prefer) prefer.push(volby.prefer);
+    if (prefer.length) hlavicky.Prefer = prefer.join(",");
     var r = await fetch(HB.url + "/rest/v1/" + cesta, {
       method: volby.metoda || "GET", headers: hlavicky,
       body: volby.telo ? JSON.stringify(volby.telo) : undefined
@@ -101,7 +104,7 @@
   // Hlavička: jméno, menu, odhlášení. Stránky, které přihlášení vyžadují, zavolají HBA.vyzadovat().
   async function vyzadovat() {
     var j = await ja();
-    if (!j || !j.osoba_id) { location.href = HB.zaklad + "/admin/?zpet=" + encodeURIComponent(location.pathname); return null; }
+    if (!j || !j.osoba_id) { location.href = HB.zaklad + "/admin/?zpet=" + encodeURIComponent(location.pathname + location.hash); return null; }
     if ((j.uroven || 0) < 30) {
       document.querySelector(".adm-hlavni").innerHTML =
         '<p class="adm-chyba">Váš účet nemá organizátorská práva. Požádejte správce o přidělení role.</p>';
@@ -113,7 +116,15 @@
   function zobrazKdo(j) {
     document.getElementById("adm-jmeno").textContent = (j.jmeno || j.email) + (j.role ? " · " + j.role : "");
     document.getElementById("adm-kdo").hidden = false;
-    document.getElementById("adm-menu").hidden = !((j.uroven || 0) >= 30);
+    var jeOrg = (j.uroven || 0) >= 30;
+    document.getElementById("adm-menu").hidden = !jeOrg;
+    if (jeOrg) {
+      // Počet čekajících ostrých mailů v menu (zkušební přihlášky se nepočítají).
+      db("web_maily_ke_schvaleni?select=id,web_tym!inner(testovaci)&stav=eq.ceka&web_tym.testovaci=is.false").then(function (r) {
+        var el = document.getElementById("adm-pocet-fronta");
+        if (el) el.textContent = r.length ? "(" + r.length + ")" : "";
+      }).catch(function () {});
+    }
   }
   document.addEventListener("click", function (e) {
     if (e.target && e.target.id === "adm-odhlasit") odhlasit();
