@@ -6,28 +6,44 @@
 <meta name="robots" content="noindex, nofollow">
 <title>{{ titulek }} – administrace Hory Bory</title>
 <link rel="stylesheet" href="{{ web.zaklad }}/assets/styl.css">
+{% if tabulka %}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/css/tabulator_simple.min.css">{% endif %}
 <link rel="stylesheet" href="{{ web.zaklad }}/assets/admin.css">
 </head>
-<body class="adm">
+<body class="adm{% if tabulka %} adm-s-tabulkou{% endif %}">
 <header class="adm-hlavicka">
-  <div class="adm-obal adm-hlavicka-obal">
-    <a class="adm-znacka" href="{{ web.zaklad }}/admin/">Hory Bory · administrace</a>
-    <nav class="adm-menu" id="adm-menu" hidden>
-      <a href="{{ web.zaklad }}/admin/fronta/"{% if sekce == "fronta" %} aria-current="page"{% endif %}>Fronta ke schválení</a>
-    </nav>
-    <div class="adm-kdo" id="adm-kdo" hidden>
-      <span id="adm-jmeno"></span>
-      <button type="button" class="adm-odkaz" id="adm-odhlasit">Odhlásit</button>
-    </div>
+  <a class="adm-znacka" href="{{ web.zaklad }}/admin/">Hory Bory · administrace</a>
+  <div class="adm-kdo" id="adm-kdo" hidden>
+    <span id="adm-jmeno"></span>
+    <button type="button" class="adm-odkaz" id="adm-odhlasit">Odhlásit</button>
   </div>
 </header>
-<main class="adm-obal adm-hlavni">
-  {{ content | safe }}
-</main>
+<div class="adm-telo">
+  <nav class="adm-menu" id="adm-menu" hidden>
+    <div class="adm-menu-skupina">Registrace</div>
+    <a href="{{ web.zaklad }}/admin/fronta/"{% if sekce == "fronta" %} aria-current="page"{% endif %}>Fronta mailů <span class="adm-pocet" id="adm-pocet-fronta"></span></a>
+    <a href="{{ web.zaklad }}/admin/tymy/"{% if sekce == "tymy" %} aria-current="page"{% endif %}>Týmy</a>
+    <span class="adm-pripravuje" title="Připravuje se">Kapitáni a běžci</span>
+    <div class="adm-menu-skupina">Ročník</div>
+    <span class="adm-pripravuje" title="Připravuje se">Nastavení a ceník</span>
+    <span class="adm-pripravuje" title="Připravuje se">Texty mailů</span>
+    <span class="adm-pripravuje" title="Připravuje se">Seznam pro variantu 2</span>
+    <div class="adm-menu-skupina">Web</div>
+    <span class="adm-pripravuje" title="Připravuje se">Stránky a bloky</span>
+    <span class="adm-pripravuje" title="Připravuje se">FAQ</span>
+  </nav>
+  <main class="adm-hlavni">
+    {{ content | safe }}
+  </main>
+</div>
 <script>
   window.HB = { url: "{{ web.supabaseUrl }}", klic: "{{ web.supabaseKlic }}", zaklad: "{{ web.zaklad }}" };
 </script>
 <script src="{{ web.zaklad }}/assets/admin.js"></script>
+{% if tabulka %}
+<script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="{{ web.zaklad }}/assets/admin-tabulka.js"></script>
+{% endif %}
 {% if skript %}<script src="{{ web.zaklad }}/assets/{{ skript }}"></script>{% endif %}
 </body>
 </html>
