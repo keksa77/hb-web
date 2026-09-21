@@ -22,7 +22,10 @@
     <div class="adm-menu-skupina">Registrace</div>
     <a href="{{ web.zaklad }}/admin/fronta/"{% if sekce == "fronta" %} aria-current="page"{% endif %}>Fronta mailů <span class="adm-pocet" id="adm-pocet-fronta"></span></a>
     <a href="{{ web.zaklad }}/admin/tymy/"{% if sekce == "tymy" %} aria-current="page"{% endif %}>Týmy</a>
-    <span class="adm-pripravuje" title="Připravuje se">Kapitáni a běžci</span>
+    <a href="{{ web.zaklad }}/admin/bezci/"{% if sekce == "bezci" %} aria-current="page"{% endif %}>Běžci</a>
+    <div class="adm-menu-skupina">Závod</div>
+    <a href="{{ web.zaklad }}/admin/casy/"{% if sekce == "casy" %} aria-current="page"{% endif %}>Časy</a>
+    <a href="{{ web.zaklad }}/admin/vysledky/"{% if sekce == "vysledky" %} aria-current="page"{% endif %}>Výsledky</a>
     <div class="adm-menu-skupina">Ročník</div>
     <span class="adm-pripravuje" title="Připravuje se">Nastavení a ceník</span>
     <span class="adm-pripravuje" title="Připravuje se">Texty mailů</span>
