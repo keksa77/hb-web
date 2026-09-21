@@ -1,40 +1,10 @@
 ---
 permalink: "/admin/fronta/index.html"
 layout: admin.njk
-titulek: "Fronta ke schválení"
+titulek: "Fronta mailů"
 sekce: "fronta"
+tabulka: true
 skript: "admin-fronta.js"
 eleventyExcludeFromCollections: true
 ---
-<h1>Fronta ke schválení</h1>
-<p class="adm-sub">
-  Do 10. 1. 2027 čeká každý registrační mail s pokyny k platbě na vaše rozhodnutí.
-  <strong>Maily se zatím skutečně neodesílají</strong> — napojení na odesílání přijde v dalším kroku,
-  tady se rozhoduje o variantě.
-</p>
-
-<div class="adm-souhrn" id="adm-souhrn"></div>
-
-<div class="adm-filtry">
-  <label>Stav
-    <select id="f-stav">
-      <option value="ceka" selected>Čeká</option>
-      <option value="vyrizene">Vyřízené</option>
-      <option value="vse">Vše</option>
-    </select>
-  </label>
-  <label>Skupina
-    <select id="f-skupina">
-      <option value="vse" selected>Všechny</option>
-      <option value="faktura">S fakturou</option>
-      <option value="bez faktury">Bez faktury</option>
-    </select>
-  </label>
-  <label class="adm-zaskrt"><input type="checkbox" id="f-test"> Ukázat zkušební přihlášky</label>
-  <button type="button" class="adm-male" id="f-obnovit">Obnovit</button>
-</div>
-
-<p class="adm-chyba" id="adm-chyba" hidden></p>
-<p class="adm-ok" id="adm-ok" hidden></p>
-
-<div id="adm-seznam"><p class="adm-sub">Načítám…</p></div>
+<div id="adm-tabulka-obal" class="adm-tabulka-obal"><p class="adm-sub">Načítám…</p></div>
