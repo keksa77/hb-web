@@ -19,7 +19,7 @@
     if (stav === "vyrizene") q += "&stav=neq.ceka";
     if (skupina !== "vse") q += "&skupina=eq." + encodeURIComponent(skupina);
     radky = await HBA.db(q);
-    vykresli();
+    await vykresli();
     await souhrn(test);
   }
 
@@ -34,8 +34,23 @@
       (test ? '<div class="adm-test"><b>TEST</b><span>zobrazené jsou zkušební přihlášky</span></div>' : "");
   }
 
-  function vykresli() {
-    if (!radky.length) { el("adm-seznam").innerHTML = '<p class="adm-sub">Nic tu není.</p>'; return; }
+  async function vykresli() {
+    if (!radky.length) {
+      var zprava = el("f-test").checked
+        ? "Žádná zkušební přihláška. Založit ji můžete na stránce zkušební přihlášky."
+        : "Ostrá fronta je prázdná — registrace HB27 ještě nezačala, takže zatím nikdo nečeká.";
+      var tlacitko = "";
+      if (!el("f-test").checked) {
+        try {
+          var t = await HBA.db("web_v_fronta_mailu?select=id&testovaci=is.true&stav=eq.ceka");
+          if (t.length) tlacitko = ' <button type="button" class="adm-male" id="ukazat-test">Ukázat ' + t.length + ' zkušební přihlášky</button>';
+        } catch (err) { /* jen nápověda */ }
+      }
+      el("adm-seznam").innerHTML = '<div class="adm-karta"><p style="margin:0">' + zprava + tlacitko + '</p></div>';
+      var b = document.getElementById("ukazat-test");
+      if (b) b.addEventListener("click", function () { el("f-test").checked = true; nacti().catch(function (err) { hlaska("adm-chyba", err.message); }); });
+      return;
+    }
     el("adm-seznam").innerHTML = radky.map(karta).join("");
   }
 
