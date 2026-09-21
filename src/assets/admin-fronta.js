@@ -1,130 +1,97 @@
-// Fronta ke schválení registračních mailů.
-// Rozhodnutí se zapisuje do web_maily_ke_schvaleni; kdo a kdy rozhodl, doplní databáze.
+// Fronta registračních mailů ke schválení – tabulka.
+// Do 10. 1. 2027 čeká každý registrační mail s pokyny k platbě na rozhodnutí organizátora.
 // Limit 5 týmů na variantu 1, zákaz varianty 2 pro fakturované týmy a zákaz pokynů před 1. 1.
-// u plnění 2027 hlídají triggery v databázi — tady se jen ukáže jejich hláška.
+// u plnění 2027 hlídají triggery v databázi – tabulka jen ukáže jejich hlášku.
 (function () {
-  var e = HBA.esc, VAR = { zakladni: "Varianta 1", zvlastni: "Varianta 2" };
-  var ucty = {}, radky = [];
+  var e = HBA.esc;
+  var STAV = { ceka: "čeká", schvaleno: "schváleno", zamitnuto: "zamítnuto", odeslano: "odesláno" };
+  var VAR = { zakladni: "Varianta 1", zvlastni: "Varianta 2" };
+  function an(b) { return b == null ? "" : b ? "ano" : "ne"; }
 
-  function el(id) { return document.getElementById(id); }
-  function hlaska(id, text) {
-    ["adm-chyba", "adm-ok"].forEach(function (x) { el(x).hidden = true; });
-    if (text) { el(id).textContent = text; el(id).hidden = false; }
+  async function zmen(r, telo) {
+    var v = await HBA.db("web_maily_ke_schvaleni?id=eq." + r.id, { metoda: "PATCH", telo: telo, vratit: true });
+    if (!v || !v.length) throw new Error("Změna se neuložila — nejspíš na ni nemáte práva.");
   }
-
-  async function nacti() {
-    var stav = el("f-stav").value, skupina = el("f-skupina").value, test = el("f-test").checked;
-    var q = "web_v_fronta_mailu?select=*&order=vytvoreno.asc&testovaci=is." + (test ? "true" : "false");
-    if (stav === "ceka") q += "&stav=eq.ceka";
-    if (stav === "vyrizene") q += "&stav=neq.ceka";
-    if (skupina !== "vse") q += "&skupina=eq." + encodeURIComponent(skupina);
-    radky = await HBA.db(q);
-    await vykresli();
-    await souhrn(test);
-  }
-
-  async function souhrn(test) {
-    var vse = await HBA.db("web_v_fronta_mailu?select=stav,skupina,varianta&testovaci=is." + (test ? "true" : "false"));
-    var ceka = vse.filter(function (r) { return r.stav === "ceka"; });
-    var zbyva = await HBA.rpc("web_v1_zbyva", { p_rok: "HB27", p_testovaci: test });
-    el("adm-souhrn").innerHTML =
-      '<div><b>' + ceka.length + '</b><span>čeká na rozhodnutí</span></div>' +
-      '<div><b>' + ceka.filter(function (r) { return r.skupina === "faktura"; }).length + '</b><span>z toho s fakturou</span></div>' +
-      '<div><b>' + (zbyva == null ? "–" : zbyva) + '</b><span>volných míst na variantu 1<br>před 1. 1. 2027 (z 5)</span></div>' +
-      (test ? '<div class="adm-test"><b>TEST</b><span>zobrazené jsou zkušební přihlášky</span></div>' : "");
-  }
-
-  async function vykresli() {
-    if (!radky.length) {
-      var zprava = el("f-test").checked
-        ? "Žádná zkušební přihláška. Založit ji můžete na stránce zkušební přihlášky."
-        : "Ostrá fronta je prázdná — registrace HB27 ještě nezačala, takže zatím nikdo nečeká.";
-      var tlacitko = "";
-      if (!el("f-test").checked) {
-        try {
-          var t = await HBA.db("web_v_fronta_mailu?select=id&testovaci=is.true&stav=eq.ceka");
-          if (t.length) tlacitko = ' <button type="button" class="adm-male" id="ukazat-test">Ukázat ' + t.length + ' zkušební přihlášky</button>';
-        } catch (err) { /* jen nápověda */ }
-      }
-      el("adm-seznam").innerHTML = '<div class="adm-karta"><p style="margin:0">' + zprava + tlacitko + '</p></div>';
-      var b = document.getElementById("ukazat-test");
-      if (b) b.addEventListener("click", function () { el("f-test").checked = true; nacti().catch(function (err) { hlaska("adm-chyba", err.message); }); });
-      return;
-    }
-    el("adm-seznam").innerHTML = radky.map(karta).join("");
-  }
-
-  function karta(r) {
-    var v = r.varianta, u = ucty[v] || {};
-    var fakt = r.fakturovat
-      ? '<dl class="adm-dl">' +
-          '<dt>Odběratel</dt><dd>' + e(r.odberatel_nazev) + (r.odberatel_ic ? ", IČ " + e(r.odberatel_ic) : "") + '</dd>' +
-          '<dt>Plnění</dt><dd>' + e(r.duzp_rok) + ' · faktura ' + HBA.datum(r.datum_faktury) + '</dd>' +
-          (r.pokyny_nejdriv ? '<dt>Pokyny k platbě</dt><dd>nejdřív ' + HBA.datum(r.pokyny_nejdriv) + '</dd>' : "") +
-          '<dt>Limit 5</dt><dd>' + (r.pocita_se_do_limitu ? "počítá se" : "nepočítá se") + '</dd>' +
-        '</dl>'
-      : '<p class="adm-sub">Bez faktury.</p>';
-    var rozhodnuto = r.stav !== "ceka"
-      ? '<p class="adm-sub">' + ({ schvaleno: "Schváleno", zamitnuto: "Zamítnuto", odeslano: "Odesláno" }[r.stav] || e(r.stav)) +
-        ' · ' + e(r.rozhodl || "?") + ' · ' + HBA.cas(r.rozhodnuto) + '</p>'
-      : "";
-    var tl = r.stav === "ceka"
-      ? '<button class="adm-tlacitko" data-akce="schvalit" data-var="' + v + '">Schválit – ' + VAR[v] + '</button>' +
-        (r.fakturovat ? "" :
-          '<button class="adm-male" data-akce="schvalit" data-var="' + (v === "zakladni" ? "zvlastni" : "zakladni") + '">Schválit jako ' +
-          VAR[v === "zakladni" ? "zvlastni" : "zakladni"] + '</button>') +
-        '<button class="adm-male adm-male-cervene" data-akce="zamitnout">Zamítnout</button>'
-      : '<button class="adm-male" data-akce="vratit">Vrátit do fronty</button>';
-
-    return '<article class="adm-karta adm-polozka adm-' + (r.fakturovat ? "faktura" : "bez") + '" data-id="' + r.id + '">' +
-      '<header><h2>' + e(r.tym) + '</h2><span class="adm-vs">' + e(r.vs || "bez VS") + '</span>' +
-        '<span class="adm-stitek adm-stitek-' + v + '">' + VAR[v] + (u.cislo_uctu ? " · " + e(u.cislo_uctu) : "") + '</span></header>' +
-      '<div class="adm-mrizka">' +
-        '<div><h3>Kapitán</h3><p>' + e(r.kapitan) + '<br><a href="mailto:' + e(r.email) + '">' + e(r.email) + '</a>' +
-          (r.telefon ? '<br>' + e(r.telefon) : "") + '</p>' +
-          '<p class="adm-sub">Přihláška ' + HBA.cas(r.vytvoreno) + '</p></div>' +
-        '<div><h3>Faktura</h3>' + fakt + '</div>' +
-        '<div><h3>Běželi</h3><p>' + (r.rocniky_ucasti && r.rocniky_ucasti.length ? e(r.rocniky_ucasti.join(", ")) : "poprvé") + '</p>' +
-          (r.fakturovat_upozorneni ? '<p class="adm-upozorneni">' + e(r.fakturovat_upozorneni) + '</p>' : "") + '</div>' +
-      '</div>' +
-      rozhodnuto +
-      '<label class="adm-pole adm-poznamka">Poznámka<input data-poznamka value="' + e(r.poznamka || "") + '"></label>' +
-      '<div class="adm-akce">' + tl + '</div>' +
-    '</article>';
-  }
-
-  async function rozhodni(id, akce, varianta, poznamka) {
-    var telo = { poznamka: poznamka || null };
-    if (akce === "schvalit") { telo.stav = "schvaleno"; telo.varianta_schvalena = varianta; }
-    if (akce === "zamitnout") { telo.stav = "zamitnuto"; }
-    if (akce === "vratit") { telo.stav = "ceka"; telo.varianta_schvalena = null; }
-    var vysl = await HBA.db("web_maily_ke_schvaleni?id=eq." + id, { metoda: "PATCH", telo: telo, vratit: true });
-    if (!vysl || !vysl.length) throw new Error("Změna se neuložila — nejspíš na ni nemáte práva.");
-  }
-
-  document.addEventListener("click", async function (ev) {
-    var b = ev.target.closest("button[data-akce]"); if (!b) return;
-    var k = b.closest("[data-id]"), id = k.getAttribute("data-id");
-    var pozn = k.querySelector("[data-poznamka]").value.trim();
-    b.disabled = true; hlaska();
-    try {
-      await rozhodni(id, b.dataset.akce, b.dataset.var, pozn);
-      hlaska("adm-ok", "Uloženo: " + k.querySelector("h2").textContent + ".");
-      await nacti();
-    } catch (err) {
-      hlaska("adm-chyba", err.message);
-      b.disabled = false;
-      el("adm-chyba").scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  });
 
   document.addEventListener("DOMContentLoaded", async function () {
     var j = await HBA.vyzadovat(); if (!j) return;
-    try {
-      (await HBA.db("rocnik_ucet?select=varianta,cislo_uctu&rok=eq.HB27")).forEach(function (u) { ucty[u.varianta] = u; });
-    } catch (err) { /* účet je jen pro informaci */ }
-    ["f-stav", "f-skupina", "f-test"].forEach(function (x) { el(x).addEventListener("change", function () { nacti().catch(function (err) { hlaska("adm-chyba", err.message); }); }); });
-    el("f-obnovit").addEventListener("click", function () { nacti().catch(function (err) { hlaska("adm-chyba", err.message); }); });
-    nacti().catch(function (err) { hlaska("adm-chyba", err.message); });
+    HBT({
+      sekce: "fronta",
+      nazev: "Fronta mailů",
+      idPole: "id",
+      sirkaAkci: 170,
+      nacist: function () { return HBA.db("web_v_fronta_mailu?select=*&order=vytvoreno.asc"); },
+      pripravit: function (r) {
+        r.stav_text = STAV[r.stav] || r.stav;
+        r.faktura = an(r.fakturovat);
+        r.varianta_text = VAR[r.varianta] || r.varianta;
+        r.navrh_text = VAR[r.varianta_navrh] || r.varianta_navrh;
+        r.limit_text = an(r.pocita_se_do_limitu);
+        r.testovaci_text = an(r.testovaci);
+        r.ucasti = (r.rocniky_ucasti || []).join(", ");
+        r.pocet_ucasti = (r.rocniky_ucasti || []).length;
+        r.vytvoreno_m = HBT.mistniCas(r.vytvoreno);
+        r.rozhodnuto_m = HBT.mistniCas(r.rozhodnuto);
+        return r;
+      },
+      popisRadku: function (r) { return r.tym + (r.vs ? " (" + r.vs + ")" : ""); },
+      vychozi: { h: [{ field: "stav_text", value: ["čeká"] }, { field: "testovaci_text", value: ["ne"] }] },
+      sloupce: [
+        { pole: "stav_text", nazev: "Stav", typ: "vycet", sirka: 95 },
+        { pole: "tym", nazev: "Tým", sirka: 190 },
+        { pole: "vs", nazev: "VS", sirka: 80 },
+        { pole: "varianta_text", nazev: "Varianta", typ: "vycet", sirka: 105, napoveda: "Schválená varianta, dokud není schválená, tak navržená" },
+        { pole: "navrh_text", nazev: "Návrh", typ: "vycet", sirka: 100, skryty: true },
+        { pole: "faktura", nazev: "Faktura", typ: "bool", sirka: 80 },
+        { pole: "duzp_rok", nazev: "Plnění", typ: "vycet", sirka: 80, napoveda: "Rok zdanitelného plnění na faktuře" },
+        { pole: "datum_faktury", nazev: "Datum faktury", typ: "datum", sirka: 115 },
+        { pole: "pokyny_nejdriv", nazev: "Pokyny nejdřív", typ: "datum", sirka: 115, napoveda: "Kdy nejdřív smí odejít pokyny k platbě" },
+        { pole: "limit_text", nazev: "Do limitu 5", typ: "bool", sirka: 95 },
+        { pole: "kapitan", nazev: "Kapitán", sirka: 150 },
+        { pole: "email", nazev: "E-mail", sirka: 190 },
+        { pole: "telefon", nazev: "Telefon", sirka: 115 },
+        { pole: "ucasti", nazev: "Účasti", sirka: 120, napoveda: "Ročníky, kterých se tým nebo kapitán zúčastnil" },
+        { pole: "pocet_ucasti", nazev: "Počet účastí", typ: "cislo", sirka: 90 },
+        { pole: "odberatel_nazev", nazev: "Odběratel", sirka: 160 },
+        { pole: "odberatel_ic", nazev: "IČ", sirka: 90 },
+        { pole: "fakturovat_upozorneni", nazev: "Upozornění", sirka: 200 },
+        { pole: "poznamka", nazev: "Poznámka", sirka: 180, uprava: { tabulka: "web_maily_ke_schvaleni", klic: "id", dlouhy: true } },
+        { pole: "vytvoreno_m", nazev: "Přihlášeno", typ: "cas", sirka: 130 },
+        { pole: "rozhodl", nazev: "Rozhodl", sirka: 120 },
+        { pole: "rozhodnuto_m", nazev: "Rozhodnuto", typ: "cas", sirka: 130 },
+        { pole: "rok", nazev: "Ročník", typ: "vycet", sirka: 75, skryty: true },
+        { pole: "testovaci_text", nazev: "Zkušební", typ: "bool", sirka: 85 }
+      ],
+      akceRadku: function (r) {
+        if (r.stav !== "ceka") return '<button type="button" class="adm-mini" data-akce="vratit">Vrátit do fronty</button>';
+        var h = '<button type="button" class="adm-mini' + (r.varianta_navrh === "zakladni" ? " adm-mini-hlavni" : "") + '" data-akce="schvalit" data-arg="zakladni" title="Schválit – varianta 1">✓ V1</button>';
+        if (!r.fakturovat) h += '<button type="button" class="adm-mini' + (r.varianta_navrh === "zvlastni" ? " adm-mini-hlavni" : "") + '" data-akce="schvalit" data-arg="zvlastni" title="Schválit – varianta 2">✓ V2</button>';
+        return h + '<button type="button" class="adm-mini adm-mini-cervene" data-akce="zamitnout" title="Zamítnout">✗</button>';
+      },
+      akce: {
+        schvalit: function (r, varianta) { return zmen(r, { stav: "schvaleno", varianta_schvalena: varianta || r.varianta_navrh }); },
+        zamitnout: function (r) { return zmen(r, { stav: "zamitnuto" }); },
+        vratit: function (r) { return zmen(r, { stav: "ceka", varianta_schvalena: null }); }
+      },
+      hromadne: [
+        { nazev: "Schválit navrženou variantu", akce: "schvalit", jen: function (r) { return r.stav === "ceka"; } },
+        { nazev: "Zamítnout", akce: "zamitnout", jen: function (r) { return r.stav === "ceka"; } },
+        { nazev: "Vrátit do fronty", akce: "vratit", jen: function (r) { return r.stav !== "ceka"; } }
+      ],
+      historie: function (r) { return [{ tabulka: "web_maily_ke_schvaleni", id: r.id }]; },
+      info: async function () {
+        var h = [];
+        try {
+          var z = await HBA.rpc("web_v1_zbyva", { p_rok: "HB27", p_testovaci: false });
+          h.push("Volná místa na variantu 1 před 1. 1. 2027: <b>" + e(z) + " z 5</b>");
+        } catch (err) {}
+        var vse = await HBA.db("web_v_fronta_mailu?select=stav,testovaci");
+        var ostre = vse.filter(function (r) { return !r.testovaci; }).length;
+        var test = vse.length - ostre;
+        if (!ostre) h.push("Ostrá fronta je prázdná — registrace HB27 ještě nezačala." + (test ? " Zkušební přihlášky (" + test + ") uvidíte po zrušení filtru Zkušební." : ""));
+        h.push("Maily se zatím skutečně neodesílají.");
+        return h.join(" · ");
+      }
+    });
   });
 })();
