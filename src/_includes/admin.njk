@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>{{ titulek }} – administrace Hory Bory</title>
+<link rel="stylesheet" href="{{ web.zaklad }}/assets/styl.css">
+<link rel="stylesheet" href="{{ web.zaklad }}/assets/admin.css">
+</head>
+<body class="adm">
+<header class="adm-hlavicka">
+  <div class="adm-obal adm-hlavicka-obal">
+    <a class="adm-znacka" href="{{ web.zaklad }}/admin/">Hory Bory · administrace</a>
+    <nav class="adm-menu" id="adm-menu" hidden>
+      <a href="{{ web.zaklad }}/admin/fronta/"{% if sekce == "fronta" %} aria-current="page"{% endif %}>Fronta ke schválení</a>
+    </nav>
+    <div class="adm-kdo" id="adm-kdo" hidden>
+      <span id="adm-jmeno"></span>
+      <button type="button" class="adm-odkaz" id="adm-odhlasit">Odhlásit</button>
+    </div>
+  </div>
+</header>
+<main class="adm-obal adm-hlavni">
+  {{ content | safe }}
+</main>
+<script>
+  window.HB = { url: "{{ web.supabaseUrl }}", klic: "{{ web.supabaseKlic }}", zaklad: "{{ web.zaklad }}" };
+</script>
+<script src="{{ web.zaklad }}/assets/admin.js"></script>
+{% if skript %}<script src="{{ web.zaklad }}/assets/{{ skript }}"></script>{% endif %}
+</body>
+</html>
