@@ -68,6 +68,27 @@
     if (!f) return true;
     return bezDiakritiky(ceskeDatum(hodnota)).replace(/\s/g, "").indexOf(bezDiakritiky(f).replace(/\s/g, "")) >= 0;
   }
+  // Editor okamžiku v buňce: ukáže hodnotu česky („4. 9. 2027 08:00:00“), přepisuje se stejně.
+  function editorCasu(cell, onRendered, success, cancel) {
+    var puvodni = ceskeDatum(cell.getValue());
+    var i = document.createElement("input");
+    i.type = "text"; i.value = puvodni; i.style.width = "100%"; i.style.boxSizing = "border-box";
+    onRendered(function () { i.focus(); i.select(); });
+    function hotovo() { if (i.value.trim() === puvodni) cancel(); else success(i.value.trim()); }
+    i.addEventListener("blur", hotovo);
+    i.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter") hotovo();
+      if (ev.key === "Escape") cancel();
+    });
+    return i;
+  }
+  // Pro Excel: český datum a čas → sériové číslo Excelu; doba „25:45:34“ → zlomek dne.
+  function excelDatum(t) {
+    var m = String(t || "").match(/^(\d{1,2})\. (\d{1,2})\. (\d{4})(?: (\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+    if (!m) return null;
+    var ms = Date.UTC(+m[3], +m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0));
+    return { v: (ms - Date.UTC(1899, 11, 30)) / 86400000, cas: !!m[4], sek: !!m[6] };
+  }
   // (Starý filtr od–do se už nepoužívá – zůstává kvůli uloženým pohledům.)
   function editorRozsahu(typ) {
     return function (cell, onRendered, success) {
@@ -187,6 +208,7 @@
       } else if (typ === "datum" || typ === "cas") {
         c.headerFilter = "input"; c.headerFilterFunc = filtrCasu;
         c.formatter = function (cell) { return ceskeDatum(cell.getValue()); };
+        c.accessorDownload = function (v) { return ceskeDatum(v); };
         c.headerTooltip = (s.napoveda ? s.napoveda + "\n" : "") + "Filtr: napište, co hledáte, např. 5. 9. nebo 14:3.";
       } else if (typ === "vycet" || typ === "bool") {
         c.headerFilter = "list";
@@ -211,6 +233,7 @@
         else if (u.hodnoty) { c.editor = "list"; c.editorParams = { values: u.hodnoty }; }
         else if (typ === "cislo") c.editor = "number";
         else if (typ === "datum") c.editor = "date";
+        else if (typ === "cas") c.editor = editorCasu;
         else c.editor = "input";
         c.cssClass = "adm-upravitelne";
       }
@@ -365,8 +388,35 @@
     }
     el("t-xlsx").addEventListener("click", function () {
       if (!window.XLSX) { chyba(new Error("Knihovna pro Excel se nenačetla. Zkuste CSV.")); return; }
-      tab.download("xlsx", nazevSouboru("xlsx"), { sheetName: N.nazev.slice(0, 31) }, "active");
+      tab.download("xlsx", nazevSouboru("xlsx"), { sheetName: N.nazev.slice(0, 31), documentProcessing: excelCasy }, "active");
     });
+    // Časové sloupce v Excelu jako skutečné datum/čas a doba, se kterými jde počítat.
+    function excelCasy(wb) {
+      var druhy = {};
+      N.sloupce.forEach(function (s) {
+        if (s.typ === "cas" || s.typ === "datum") druhy[s.nazev] = "okamzik";
+        else if (s.trvani) druhy[s.nazev] = "trvani";
+      });
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var rozsah = XLSX.utils.decode_range(ws["!ref"]);
+      for (var c = rozsah.s.c; c <= rozsah.e.c; c++) {
+        var hlava = ws[XLSX.utils.encode_cell({ r: 0, c: c })];
+        var druh = hlava && druhy[hlava.v];
+        if (!druh) continue;
+        for (var r = 1; r <= rozsah.e.r; r++) {
+          var bunka = ws[XLSX.utils.encode_cell({ r: r, c: c })];
+          if (!bunka || bunka.v === "" || bunka.v == null) continue;
+          if (druh === "okamzik") {
+            var d = excelDatum(bunka.v);
+            if (d) { bunka.t = "n"; bunka.v = d.v; bunka.z = d.cas ? (d.sek ? "d.m.yyyy h:mm:ss" : "d.m.yyyy h:mm") : "d.m.yyyy"; delete bunka.w; }
+          } else {
+            var sek = trvaniS(bunka.v);
+            if (sek != null) { bunka.t = "n"; bunka.v = sek / 86400; bunka.z = "[h]:mm:ss"; delete bunka.w; }
+          }
+        }
+      }
+      return wb;
+    }
     el("t-csv").addEventListener("click", function () {
       tab.download("csv", nazevSouboru("csv"), { delimiter: ";", bom: true }, "active");
     });
@@ -520,7 +570,7 @@
           } else if (s.uprava.dlouhy) {
             vstup = '<textarea data-pole="' + e(s.pole) + '" rows="2">' + e(v) + '</textarea>';
           } else {
-            vstup = '<input data-pole="' + e(s.pole) + '" type="' + (typ === "cislo" ? "number" : typ === "datum" ? "date" : "text") + '" value="' + e(v) + '">';
+            vstup = '<input data-pole="' + e(s.pole) + '" type="' + (typ === "cislo" ? "number" : typ === "datum" ? "date" : "text") + '" value="' + e(typ === "cas" ? ceskeDatum(v) : v) + '">';
           }
           zobraz = vstup;
         } else {
@@ -552,7 +602,8 @@
         var r = tab.getRow(otevreny).getData(), zmeny = [];
         el("t-panel").querySelectorAll("[data-pole]").forEach(function (i) {
           var s = N.sloupce.find(function (x) { return x.pole === i.dataset.pole; });
-          if (String(r[s.pole] ?? "") !== i.value) zmeny.push({ s: s, v: i.value });
+          var puvodni = s.typ === "cas" ? ceskeDatum(r[s.pole]) : String(r[s.pole] ?? "");
+          if (puvodni !== i.value.trim()) zmeny.push({ s: s, v: i.value.trim() });
         });
         if (!zmeny.length) return;
         ev.target.disabled = true; hlaska();

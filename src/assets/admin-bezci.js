@@ -60,8 +60,8 @@
         { pole: "kapitan_t", nazev: "Kapitán", typ: "bool", sirka: 75 },
         { pole: "email", nazev: "E-mail", sirka: 180, uprava: o("email") },
         { pole: "telefon", nazev: "Telefon", sirka: 110, uprava: o("telefon") },
-        { pole: "vykonnost_10km", nazev: "Čas na 10 km", sirka: 95, razeni: "vykonnost_s", zarovnat: "right",
-          napoveda: "Nahlášená výkonnost – minuty:sekundy",
+        { pole: "vykonnost_10km", nazev: "Čas na 10 km", sirka: 95, razeni: "vykonnost_s", zarovnat: "right", trvani: true,
+          napoveda: "Nahlášená výkonnost: 52 = 52 minut, 52:30 = minuty:sekundy, 1:02:30 = hodiny:minuty:sekundy",
           uprava: s("vykonnost_10km", { ulozit: async function (r, v) {
             var x = await HBA.db("web_soupiska?id=eq." + r.id, { metoda: "PATCH", telo: { vykonnost_10km: vykonnost(v) }, vratit: true });
             if (!x || !x.length) throw new Error("Změna se neuložila — nejspíš na ni nemáte práva.");
