@@ -132,3 +132,27 @@
 .tabulator .tabulator-header .tabulator-col[aria-sort="none"] .tabulator-col-sorter { display: none; }
 .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title-holder { position: relative; }
 .tabulator .tabulator-header .tabulator-col[aria-sort="none"] .tabulator-col-content .tabulator-col-title { padding-right: 0; }
+/* Autofiltr jako v Excelu: řádek filtrů je skrytý, v hlavičce je šipka ▾ a nabídka */
+.tabulator .tabulator-header .tabulator-col .tabulator-header-filter { display: none; }
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content { padding-bottom: 3px; }
+.tabulator .tabulator-header .tabulator-col .tabulator-col-title { display: flex; align-items: center; gap: 4px; }
+.adm-af-nadpis { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; }
+.adm-af { flex: 0 0 auto; width: 17px; height: 17px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid #bdbdbd; border-radius: 2px; background: #fff; color: #444; cursor: pointer; }
+.adm-af:hover { border-color: #888; background: #f3f3f3; }
+.adm-af.aktivni { color: #fff; background: var(--m-aktivni); border-color: var(--m-aktivni); }
+.adm-af-menu { position: fixed; z-index: 50; background: #fff; border: 1px solid #a6a6a6; box-shadow: 2px 3px 8px rgba(0,0,0,.2);
+  width: 250px; padding: 4px 0; font-size: .85rem; display: flex; flex-direction: column; overflow: hidden; }
+.adm-af-menu[hidden] { display: none; }
+.adm-af-menu hr { border: 0; border-top: 1px solid #e1e1e1; margin: 3px 0; }
+.adm-af-polozka { text-align: left; background: none; border: 0; padding: 4px 12px; cursor: pointer; font: inherit; color: #222; }
+.adm-af-polozka:hover:not([disabled]) { background: #e5f1e9; }
+.adm-af-polozka[disabled] { color: #aaa; cursor: default; }
+.adm-af-podm { display: flex; align-items: center; gap: 6px; padding: 3px 12px; white-space: nowrap; }
+.adm-af-podm input, .adm-af-hledat { flex: 1; min-width: 0; border: 1px solid #bdbdbd; padding: 3px 5px; font: inherit; }
+.adm-af-hledat { margin: 2px 12px 4px; flex: 0 0 auto; }
+.adm-af-seznam { flex: 1 1 auto; min-height: 60px; max-height: 260px; overflow: auto; margin: 0 12px; border: 1px solid #d0d0d0; padding: 2px 4px; }
+.adm-af-seznam label { display: block; white-space: nowrap; padding: 1px 0; cursor: pointer; }
+.adm-af-seznam label[hidden] { display: none; }
+.adm-af-tlacitka { display: flex; justify-content: flex-end; gap: 6px; padding: 6px 12px 3px; }
+.adm-af-ok { min-width: 60px; }

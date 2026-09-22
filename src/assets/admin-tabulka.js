@@ -1,6 +1,6 @@
 // Tabulka administrace – společný základ pro všechny sekce (fronta, týmy, …).
 // Postavené na knihovně Tabulator (licence MIT). Umí:
-//  - filtr pod hlavičkou každého sloupce, všechny filtry platí najednou,
+//  - filtr jako v Excelu (šipka ▾ v hlavičce: řazení, podmínka, seznam hodnot), všechny filtry platí najednou,
 //  - hledání přes všechny sloupce, řazení podle více sloupců (Shift + klik),
 //  - skrývání, přesouvání a šířku sloupců (pamatuje si prohlížeč),
 //  - uložené pohledy v databázi (web_admin_pohled) a filtr v adrese stránky,
@@ -89,48 +89,34 @@
     var ms = Date.UTC(+m[3], +m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0));
     return { v: (ms - Date.UTC(1899, 11, 30)) / 86400000, cas: !!m[4], sek: !!m[6] };
   }
-  // (Starý filtr od–do se už nepoužívá – zůstává kvůli uloženým pohledům.)
-  function editorRozsahu(typ) {
-    return function (cell, onRendered, success) {
-      var v = cell.getValue() || {};
-      var obal = document.createElement("div");
-      obal.className = "adm-rozsah";
-      var t = typ === "cislo" ? "number" : "date";
-      obal.innerHTML = '<input type="' + t + '" placeholder="od" title="od">' +
-                       '<input type="' + t + '" placeholder="do" title="do">';
-      var od = obal.children[0], dd = obal.children[1];
-      od.value = v.od || ""; dd.value = v.do || "";
-      function zmena() { success(od.value || dd.value ? { od: od.value, do: dd.value } : ""); }
-      od.addEventListener("input", zmena); dd.addEventListener("input", zmena);
-      od.addEventListener("keydown", function (ev) { ev.stopPropagation(); });
-      dd.addEventListener("keydown", function (ev) { ev.stopPropagation(); });
-      return obal;
-    };
+  // ---------- autofiltr jako v Excelu ----------
+  var IKONA_SIPKA = '<svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M1 3h8L5 8z" fill="currentColor"/></svg>';
+  var IKONA_TRYCHTYR = '<svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true"><path d="M0.5 1h9L6 5v4L4 8V5z" fill="currentColor"/></svg>';
+  function skrytyFiltr() { var x = document.createElement("span"); x.hidden = true; return x; }
+  // Hodnota buňky → položka v seznamu filtru (u datumu a času jen den).
+  function klic(typ, v) {
+    if (prazdne(v)) return "(prázdné)";
+    if (typ === "datum" || typ === "cas") { var m = String(v).match(/^\d{4}-\d{2}-\d{2}/); return m ? m[0] : String(v); }
+    return String(v);
   }
-  function filtrRozsahu(typ) {
-    return function (f, hodnota) {
-      if (!f) return true;
-      if (prazdne(hodnota)) return false;
-      if (typ === "cislo") {
-        var n = Number(hodnota);
-        if (f.od !== "" && f.od != null && n < Number(f.od)) return false;
-        if (f.do !== "" && f.do != null && n > Number(f.do)) return false;
-        return true;
-      }
-      var d = String(hodnota).slice(0, 10);
-      if (f.od && d < f.od) return false;
-      if (f.do && d > f.do) return false;
-      return true;
-    };
+  function popisKlice(typ, k) {
+    if (k === "(prázdné)") return k;
+    return typ === "datum" || typ === "cas" ? ceskeDatum(k) : k;
   }
-  function filtrVyctu(vybrane, hodnota) {
-    if (!vybrane || !vybrane.length) return true;
-    var h = prazdne(hodnota) ? "(prázdné)" : String(hodnota);
-    return vybrane.indexOf(h) >= 0;
+  // Jeden filtr pro všechny sloupce: seznam zaškrtnutých hodnot, nebo podmínka napsaná textem.
+  function filtrSloupce(typ, f, h) {
+    if (f == null || f === "") return true;
+    if (Array.isArray(f)) return !f.length || f.indexOf(klic(typ, h)) >= 0;
+    if (typeof f === "object") return true; // starý filtr od–do z uložených pohledů
+    if (typ === "cislo") return filtrCisla(f, h);
+    if (typ === "datum" || typ === "cas") return filtrCasu(f, h);
+    return filtrObsahuje(f, h);
   }
-  function popisFiltru(f) {
+
+  function popisFiltru(f, typ) {
     if (f == null || f === "") return "";
-    if (Array.isArray(f)) return f.join(" nebo ");
+    if (Array.isArray(f)) return f.map(function (k) { return popisKlice(typ, k); }).join(" nebo ");
+    if (typ === "cislo" && typeof f === "string") return f;
     if (typeof f === "object") {
       if (f.od && f.do) return f.od + " až " + f.do;
       if (f.od) return "od " + f.od;
@@ -194,31 +180,23 @@
       var c = { title: s.nazev, field: s.pole, visible: !s.skryty, headerTooltip: s.napoveda || s.nazev,
                 width: s.sirka, minWidth: 40, tooltip: true };
       // Šířka aspoň na celý nadpis, ať se nezkracuje na „Ro…“.
-      var naNadpis = Math.round(s.nazev.length * 7.2 + 22);
+      var naNadpis = Math.round(s.nazev.length * 7.2 + 40);
       if (!c.width || c.width < naNadpis) c.width = naNadpis;
       var typ = s.typ || "text";
-      c.headerFilterPlaceholder = "";
-      if (typ === "text") {
-        c.headerFilter = "input"; c.headerFilterFunc = filtrObsahuje;
-        c.headerTooltip = (s.napoveda ? s.napoveda + "\n" : "") + "Filtr: napište část textu.";
-      } else if (typ === "cislo") {
-        c.headerFilter = "input"; c.headerFilterFunc = filtrCisla;
+      // Filtr jako v Excelu: řádek s filtry je skrytý, ovládá se šipkou ▾ v hlavičce (viz autofiltr níže).
+      c.headerFilter = skrytyFiltr;
+      c.headerFilterFunc = function (f, h) { return filtrSloupce(typ, f, h); };
+      c.headerFilterEmptyCheck = function (v) { return v == null || v === "" || (Array.isArray(v) && !v.length); };
+      c.titleFormatter = function () {
+        return '<span class="adm-af-nadpis">' + e(s.nazev) + '</span>' +
+               '<button type="button" class="adm-af" data-pole="' + e(s.pole) + '" title="Řadit a filtrovat">' + IKONA_SIPKA + '</button>';
+      };
+      c.headerTooltip = s.napoveda || false;
+      if (typ === "cislo") {
         c.hozAlign = "right"; c.sorter = "number"; c.sorterParams = { alignEmptyValues: "bottom" };
-        c.headerTooltip = (s.napoveda ? s.napoveda + "\n" : "") + "Filtr: 3 (přesně), >2, <10, 2-5 (rozsah).";
       } else if (typ === "datum" || typ === "cas") {
-        c.headerFilter = "input"; c.headerFilterFunc = filtrCasu;
         c.formatter = function (cell) { return ceskeDatum(cell.getValue()); };
         c.accessorDownload = function (v) { return ceskeDatum(v); };
-        c.headerTooltip = (s.napoveda ? s.napoveda + "\n" : "") + "Filtr: napište, co hledáte, např. 5. 9. nebo 14:3.";
-      } else if (typ === "vycet" || typ === "bool") {
-        c.headerFilter = "list";
-        c.headerFilterParams = { valuesLookup: function (cell) {
-            var h = {}; cell.getTable().getData().forEach(function (r) { var v = r[s.pole]; h[prazdne(v) ? "(prázdné)" : v] = 1; });
-            return Object.keys(h).sort();
-          }, multiselect: true, clearable: true, placeholderEmpty: "—", placeholderLoading: "" };
-        c.headerTooltip = (s.napoveda ? s.napoveda + "\n" : "") + "Filtr: klikněte a zaškrtněte hodnoty.";
-        c.headerFilterFunc = filtrVyctu;
-        c.headerFilterEmptyCheck = function (v) { return !v || !v.length; };
       }
       if (s.formatter) c.formatter = s.formatter;
       if (s.razeni) c.sorter = function (a, b, ar, br) {
@@ -356,7 +334,7 @@
       var h = [];
       if (hledat) h.push('<span class="adm-stitek-filtr">hledat: ' + e(hledat) + '</span>');
       tab.getHeaderFilters().forEach(function (f) {
-        var p = typy[f.field] === "cislo" && typeof f.value === "string" ? f.value : popisFiltru(f.value); if (!p) return;
+        var p = popisFiltru(f.value, typy[f.field]); if (!p) return;
         h.push('<span class="adm-stitek-filtr">' + e(popisy[f.field] || f.field) + ': ' + e(p) +
                ' <button type="button" data-zrus="' + e(f.field) + '" title="Zrušit tento filtr">×</button></span>');
       });
@@ -371,6 +349,148 @@
       el("t-pohled").value = ""; ulozStav();
     });
     el("t-obnovit").addEventListener("click", function () { hlaska(); nacist(false).catch(chyba); });
+
+    // --- autofiltr: šipka ▾ v hlavičce otevře nabídku jako v Excelu ---
+    var menu = document.createElement("div");
+    menu.className = "adm-af-menu"; menu.hidden = true;
+    document.body.appendChild(menu);
+    var menuPole = null;
+    function zavriMenu() { menu.hidden = true; menuPole = null; }
+    function hodnotaFiltru(pole) {
+      var f = tab.getHeaderFilters().find(function (x) { return x.field === pole; });
+      return f ? f.value : "";
+    }
+    // Hodnoty do seznamu: z řádků, které projdou ostatními filtry (jako v Excelu).
+    function hodnotySloupce(pole, typ) {
+      var jine = tab.getHeaderFilters().filter(function (f) { return f.field !== pole; });
+      var q = bezDiakritiky(hledat), vsechnaPole = N.sloupce.map(function (s) { return s.pole; });
+      var h = {};
+      tab.getData().forEach(function (r) {
+        for (var i = 0; i < jine.length; i++) { if (!filtrSloupce(typy[jine[i].field], jine[i].value, r[jine[i].field])) return; }
+        if (q && !vsechnaPole.some(function (p) { return bezDiakritiky(r[p]).indexOf(q) >= 0; })) return;
+        h[klic(typ, r[pole])] = r[pole];
+      });
+      var k = Object.keys(h);
+      k.sort(function (a, b) {
+        if (a === "(prázdné)") return 1; if (b === "(prázdné)") return -1;
+        if (typ === "cislo") return Number(a) - Number(b);
+        return a.localeCompare(b, "cs", { numeric: true });
+      });
+      return k;
+    }
+    function otevriMenu(tlacitko) {
+      var pole = tlacitko.dataset.pole, typ = typy[pole] || "text", nazev = popisy[pole] || pole;
+      if (menuPole === pole && !menu.hidden) { zavriMenu(); return; }
+      menuPole = pole;
+      var f = hodnotaFiltru(pole);
+      var podminka = typeof f === "string" ? f : "";
+      var vybrane = Array.isArray(f) && f.length ? f : null;
+      var hodnoty = hodnotySloupce(pole, typ);
+      if (vybrane) vybrane.forEach(function (k) { if (hodnoty.indexOf(k) < 0) hodnoty.push(k); });
+      var razeni = typ === "cislo" ? ["od nejmenšího", "od největšího"] : (typ === "datum" || typ === "cas") ? ["od nejstaršího", "od nejnovějšího"] : ["od A do Z", "od Z do A"];
+      var podmPopis = typ === "cislo" ? "Podmínka" : "Obsahuje";
+      var podmNapoveda = typ === "cislo" ? "např. 5, >2, <10, 2-5" : (typ === "datum" || typ === "cas") ? "např. 5. 9. nebo 14:3" : "část textu";
+      menu.innerHTML =
+        '<button type="button" class="adm-af-polozka" data-m="asc">↑ Seřadit ' + razeni[0] + '</button>' +
+        '<button type="button" class="adm-af-polozka" data-m="desc">↓ Seřadit ' + razeni[1] + '</button>' +
+        '<hr>' +
+        '<button type="button" class="adm-af-polozka" data-m="zrus"' + (f === "" || f == null || (Array.isArray(f) && !f.length) ? " disabled" : "") + '>✕ Vymazat filtr ze sloupce „' + e(nazev) + '“</button>' +
+        '<label class="adm-af-podm">' + podmPopis + ' <input type="text" data-m="podm" placeholder="' + e(podmNapoveda) + '" value="' + e(podminka) + '"></label>' +
+        '<hr>' +
+        '<input type="search" class="adm-af-hledat" data-m="hledat" placeholder="Hledat v seznamu">' +
+        '<div class="adm-af-seznam">' +
+          '<label><input type="checkbox" data-vse> (Vybrat vše)</label>' +
+          hodnoty.map(function (k) {
+            var zaskrt = podminka ? true : !vybrane || vybrane.indexOf(k) >= 0;
+            return '<label data-text="' + e(bezDiakritiky(popisKlice(typ, k))) + '"><input type="checkbox" value="' + e(k) + '"' + (zaskrt ? " checked" : "") + '> ' + e(popisKlice(typ, k)) + '</label>';
+          }).join("") +
+        '</div>' +
+        '<div class="adm-af-tlacitka"><button type="button" class="adm-male adm-af-ok" data-m="ok">OK</button><button type="button" class="adm-male" data-m="zpet">Zrušit</button></div>';
+      var r = tlacitko.closest(".tabulator-col").getBoundingClientRect();
+      menu.hidden = false;
+      var sirka = menu.offsetWidth;
+      menu.style.left = Math.max(4, Math.min(r.left, window.innerWidth - sirka - 8)) + "px";
+      menu.style.top = (r.bottom + 1) + "px";
+      menu.style.maxHeight = (window.innerHeight - r.bottom - 12) + "px";
+      obnovVse();
+      var p = menu.querySelector('[data-m="podm"]');
+      if (podminka) { p.focus(); p.select(); } else menu.querySelector('[data-m="hledat"]').focus();
+    }
+    function viditelnePolozky() {
+      return Array.prototype.filter.call(menu.querySelectorAll(".adm-af-seznam label[data-text]"), function (l) { return !l.hidden; });
+    }
+    function obnovVse() {
+      var vid = viditelnePolozky(), zaskrt = vid.filter(function (l) { return l.firstChild.checked; }).length;
+      var vse = menu.querySelector("[data-vse]");
+      vse.checked = vid.length > 0 && zaskrt === vid.length;
+      vse.indeterminate = zaskrt > 0 && zaskrt < vid.length;
+    }
+    function potvrdMenu() {
+      var pole = menuPole; if (!pole) return;
+      var podm = menu.querySelector('[data-m="podm"]').value.trim();
+      var hledano = menu.querySelector('[data-m="hledat"]').value.trim();
+      var vsechny = menu.querySelectorAll(".adm-af-seznam label[data-text]");
+      var vid = viditelnePolozky();
+      var vybrane = vid.filter(function (l) { return l.firstChild.checked; }).map(function (l) { return l.firstChild.value; });
+      var hodnota;
+      if (podm) hodnota = podm;
+      else if (!hledano && vybrane.length === vsechny.length) hodnota = "";
+      else hodnota = vybrane;
+      zavriMenu();
+      tab.setHeaderFilterValue(pole, hodnota);
+    }
+    menu.addEventListener("click", function (ev) {
+      ev.stopPropagation();
+      var b = ev.target.closest("[data-m]"); if (!b || b.tagName === "INPUT") return;
+      var m = b.dataset.m, pole = menuPole;
+      if (m === "asc" || m === "desc") { zavriMenu(); tab.setSort(pole, m); }
+      else if (m === "zrus") { zavriMenu(); tab.setHeaderFilterValue(pole, ""); }
+      else if (m === "ok") potvrdMenu();
+      else if (m === "zpet") zavriMenu();
+    });
+    menu.addEventListener("change", function (ev) {
+      if (ev.target.hasAttribute("data-vse")) {
+        var z = ev.target.checked;
+        viditelnePolozky().forEach(function (l) { l.firstChild.checked = z; });
+      }
+      if (ev.target.type === "checkbox") menu.querySelector('[data-m="podm"]').value = "";
+      obnovVse();
+    });
+    menu.addEventListener("input", function (ev) {
+      if (ev.target.dataset.m !== "hledat") return;
+      var q = bezDiakritiky(ev.target.value.trim());
+      menu.querySelectorAll(".adm-af-seznam label[data-text]").forEach(function (l) { l.hidden = q && l.dataset.text.indexOf(q) < 0; });
+      obnovVse();
+    });
+    menu.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter") { ev.preventDefault(); potvrdMenu(); }
+      if (ev.key === "Escape") zavriMenu();
+    });
+    document.addEventListener("click", function (ev) { if (!menu.hidden && !menu.contains(ev.target)) zavriMenu(); });
+    window.addEventListener("resize", zavriMenu);
+    el("t-tabulka").addEventListener("scroll", zavriMenu, true);
+    // Klik na šipku nesmí zároveň řadit ani přesouvat sloupec – zachytíme ho dřív než Tabulator.
+    ["mousedown", "pointerdown", "touchstart"].forEach(function (u) {
+      el("t-tabulka").addEventListener(u, function (ev) { if (ev.target.closest(".adm-af")) ev.stopPropagation(); }, true);
+    });
+    el("t-tabulka").addEventListener("click", function (ev) {
+      var b = ev.target.closest(".adm-af"); if (!b) return;
+      ev.stopPropagation(); ev.preventDefault();
+      otevriMenu(b);
+    }, true);
+    // Filtrovaný sloupec má místo šipky trychtýř.
+    function obnovIkony() {
+      var aktivni = {};
+      tab.getHeaderFilters().forEach(function (f) { if (!(f.value == null || f.value === "" || (Array.isArray(f.value) && !f.value.length))) aktivni[f.field] = 1; });
+      el("t-tabulka").querySelectorAll(".adm-af").forEach(function (b) {
+        var a = !!aktivni[b.dataset.pole];
+        if (b.classList.contains("aktivni") !== a) { b.classList.toggle("aktivni", a); b.innerHTML = a ? IKONA_TRYCHTYR : IKONA_SIPKA; }
+        b.title = a ? "Filtr je zapnutý – klikněte pro změnu" : "Řadit a filtrovat";
+      });
+    }
+    tab.on("dataFiltered", function () { setTimeout(obnovIkony, 0); });
+    tab.on("columnMoved", function () { setTimeout(obnovIkony, 0); });
+    tab.on("columnVisibilityChanged", function () { setTimeout(obnovIkony, 0); });
 
     // --- sloupce: skrýt / zobrazit ---
     el("t-sloupce").addEventListener("click", function (ev) {
