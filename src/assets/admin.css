@@ -1,108 +1,134 @@
-/* Administrace Hory Bory – doplněk k styl.css. Menu vlevo, tabulka přes zbytek šířky, hustě jako v Excelu. */
-.adm { background: #f7f4f4; font-size: 15px; margin: 0; }
-.adm-hlavicka { background: var(--hb-tmava); color: #fff; display: flex; align-items: center; gap: 16px; padding: 8px 16px; height: 44px; box-sizing: border-box; }
-.adm-znacka { color: #fff; font-weight: 700; text-decoration: none; }
-.adm-kdo { margin-left: auto; display: flex; gap: 12px; align-items: center; font-size: .9rem; }
+/* Administrace Hory Bory – jednoduše, jako tabulka v Excelu.
+   Vínová jen v horní liště a v menu; tabulka je šedobílá mřížka, buňky na sebe navazují. */
+:root { --m-car: #d4d4d4; --m-hlava: #f3f3f3; --m-vyber: #dcebfb; --m-aktivni: #217346; }
+.adm { background: #fff; font-size: 14px; margin: 0; }
+.adm-hlavicka { background: var(--hb-tmava); color: #fff; display: flex; align-items: center; gap: 12px; padding: 0 14px; height: 38px; box-sizing: border-box; }
+.adm-znacka { color: #fff; font-weight: 700; text-decoration: none; font-size: .95rem; }
+.adm-verze { color: rgba(255,255,255,.6); font-size: .75rem; }
+.adm-kdo { margin-left: auto; display: flex; gap: 10px; align-items: center; font-size: .85rem; }
 .adm-kdo[hidden], .adm-menu[hidden] { display: none; }
-.adm-odkaz { background: none; border: 1px solid rgba(255,255,255,.5); color: #fff; border-radius: 5px; padding: 3px 10px; font: inherit; cursor: pointer; }
-.adm-telo { display: flex; min-height: calc(100vh - 44px); }
-.adm-menu { flex: 0 0 180px; background: #2d2626; color: #ddd; padding: 8px 0; font-size: .9rem; }
-.adm-menu a, .adm-menu span.adm-pripravuje { display: block; padding: 5px 16px; color: #eee; text-decoration: none; }
-.adm-menu a:hover { background: #3d3434; }
-.adm-menu a[aria-current="page"] { background: var(--hb); color: #fff; font-weight: 700; }
-.adm-menu .adm-pripravuje { color: #8d8484 !important; cursor: default; }
-.adm-menu-skupina { color: #a99; font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; padding: 12px 16px 3px; }
-.adm-pocet { font-weight: 400; opacity: .85; }
+.adm-odkaz { background: none; border: 1px solid rgba(255,255,255,.5); color: #fff; padding: 2px 8px; font: inherit; cursor: pointer; }
+.adm-telo { display: flex; min-height: calc(100vh - 38px); }
+.adm-menu { flex: 0 0 160px; background: #f7f7f7; border-right: 1px solid var(--m-car); padding: 6px 0; font-size: .88rem; }
+.adm-menu a, .adm-menu span.adm-pripravuje { display: block; padding: 4px 14px; color: #222; text-decoration: none; }
+.adm-menu a:hover { background: #ebebeb; }
+.adm-menu a[aria-current="page"] { background: var(--hb); color: #fff; }
+.adm-menu .adm-pripravuje { color: #aaa !important; cursor: default; }
+.adm-menu-skupina { color: #888; font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; padding: 10px 14px 2px; }
+.adm-pocet { opacity: .8; }
 .adm-hlavni { flex: 1; min-width: 0; padding: 16px 20px 40px; }
-.adm-s-tabulkou .adm-hlavni { padding: 10px 12px 0; display: flex; flex-direction: column; height: calc(100vh - 44px); box-sizing: border-box; }
-.adm h1 { font-size: 1.25rem; margin: 0; }
-.adm h3 { font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; color: var(--seda); margin: 14px 0 4px; }
-.adm-sub { color: var(--seda); font-size: .92rem; margin: 4px 0 14px; }
-.adm-sub-mini { color: var(--seda); font-size: .8rem; }
-.adm-karta { background: #fff; border: 1px solid var(--ram); border-radius: 8px; padding: 16px 18px; margin-bottom: 12px; }
-.adm-prihlaseni { max-width: 26rem; margin: 30px auto; }
+.adm-s-tabulkou .adm-hlavni { padding: 0; display: flex; flex-direction: column; height: calc(100vh - 38px); box-sizing: border-box; }
+.adm h1 { font-size: 1rem; margin: 0; }
+.adm h3 { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: #777; margin: 12px 0 4px; }
+.adm-sub { color: #666; font-size: .9rem; margin: 4px 0 14px; }
+.adm-sub-mini { color: #777; font-size: .78rem; }
+.adm-karta { background: #fff; border: 1px solid var(--m-car); padding: 16px 18px; margin-bottom: 12px; }
+.adm-prihlaseni { max-width: 24rem; margin: 30px auto; }
 .adm-pole { display: block; font-weight: 700; font-size: .9rem; margin: 0 0 12px; }
-.adm-pole input { display: block; width: 100%; margin-top: 4px; padding: 8px 10px; border: 1px solid #cfc4c5; border-radius: 5px; font: inherit; font-weight: 400; background: #fff; box-sizing: border-box; }
-.adm-tlacitko { background: var(--hb); color: #fff; border: 0; border-radius: 5px; padding: 7px 14px; font: inherit; font-weight: 700; cursor: pointer; }
+.adm-pole input { display: block; width: 100%; margin-top: 4px; padding: 6px 8px; border: 1px solid var(--m-car); font: inherit; font-weight: 400; box-sizing: border-box; }
+.adm-tlacitko { background: var(--hb); color: #fff; border: 1px solid var(--hb); padding: 4px 12px; font: inherit; cursor: pointer; }
 .adm-tlacitko:disabled, .adm-male:disabled, .adm-mini:disabled { opacity: .45; cursor: default; }
-.adm-male { background: #fff; color: var(--hb); border: 1px solid #cfc4c5; border-radius: 4px; padding: 3px 9px; font: inherit; font-size: .85rem; cursor: pointer; }
-.adm-male:hover:not(:disabled) { border-color: var(--hb); }
-.adm-odkaz-tmavy { background: none; border: 0; color: var(--seda); text-decoration: underline; font: inherit; font-size: .85rem; cursor: pointer; }
-.adm-chyba { background: #fbecec; border: 1px solid #e0a5a5; color: #7a1f1f; border-radius: 5px; padding: 6px 12px; margin: 4px 0; font-size: .9rem; }
-.adm-ok { background: #eef5f0; border: 1px solid #b7d6c0; color: #2c5c3a; border-radius: 5px; padding: 6px 12px; margin: 4px 0; font-size: .9rem; }
+.adm-tlacitko-male { padding: 2px 10px; font-size: .85rem; }
+.adm-male { background: #fff; color: #222; border: 1px solid var(--m-car); padding: 2px 8px; font: inherit; font-size: .85rem; cursor: pointer; }
+.adm-male:hover:not(:disabled) { background: #f0f0f0; }
+.adm-odkaz-tmavy { background: none; border: 0; color: #555; text-decoration: underline; font: inherit; font-size: .85rem; cursor: pointer; }
+.adm-chyba { background: #fdecea; border-bottom: 1px solid #e6b0aa; color: #7a1f1f; padding: 4px 12px; margin: 0; font-size: .88rem; }
+.adm-ok { background: #e8f3ec; border-bottom: 1px solid #b7d6c0; color: #245a34; padding: 4px 12px; margin: 0; font-size: .88rem; }
 .adm-chyba[hidden], .adm-ok[hidden] { display: none; }
 
-/* Lišta nad tabulkou */
+/* Lišta nad tabulkou – jeden řádek jako panel nástrojů */
 .adm-tabulka-obal { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-.adm-lista { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin-bottom: 6px; font-size: .88rem; }
-.adm-lista h1 { margin-right: 10px; }
-.adm-lista input[type=search] { flex: 1 1 180px; max-width: 320px; padding: 4px 8px; border: 1px solid #cfc4c5; border-radius: 4px; font: inherit; }
-.adm-pocet-radku { color: var(--seda); margin-right: auto; }
-.adm-pohled select { padding: 3px 4px; border: 1px solid #cfc4c5; border-radius: 4px; font: inherit; max-width: 200px; }
-.adm-lista-2 { min-height: 22px; }
+.adm-lista { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; padding: 5px 8px; border-bottom: 1px solid var(--m-car); background: #fafafa; font-size: .85rem; }
+.adm-lista h1 { margin-right: 8px; }
+.adm-lista input[type=search] { flex: 0 1 240px; padding: 2px 6px; border: 1px solid var(--m-car); font: inherit; }
+.adm-pocet-radku { color: #666; margin-right: auto; padding-left: 4px; }
+.adm-pohled { color: #666; }
+.adm-pohled select { padding: 1px 2px; border: 1px solid var(--m-car); font: inherit; max-width: 180px; }
+.adm-lista-2 { background: #fff; min-height: 0; padding: 3px 8px; }
+.adm-lista-2:empty { display: none; }
 .adm-stitky { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
-.adm-stitek-filtr { background: #f3e6e8; border: 1px solid #dcbcc2; border-radius: 12px; padding: 0 4px 0 9px; font-size: .8rem; }
-.adm-stitek-filtr button { border: 0; background: none; color: var(--hb); cursor: pointer; font-size: .95rem; padding: 0 4px; }
-.adm-hromadne { background: #fff8ea; border: 1px solid #ecd49a; border-radius: 5px; padding: 3px 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.adm-stitek-filtr { background: #fff6d6; border: 1px solid #e8d38a; padding: 0 2px 0 6px; font-size: .78rem; }
+.adm-stitek-filtr button { border: 0; background: none; color: #555; cursor: pointer; padding: 0 3px; }
+.adm-hromadne { background: #fff6d6; border: 1px solid #e8d38a; padding: 2px 6px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
 .adm-hromadne[hidden] { display: none; }
-.adm-info { color: var(--seda); font-size: .82rem; margin-left: auto; }
+.adm-info { color: #777; font-size: .78rem; margin-left: auto; }
 .adm-rozbal { position: relative; }
-.adm-rozbal-obsah { position: absolute; z-index: 20; right: 0; top: 100%; background: #fff; border: 1px solid #cfc4c5; border-radius: 5px; padding: 6px 10px; max-height: 60vh; overflow: auto; box-shadow: 0 4px 14px rgba(0,0,0,.15); min-width: 200px; }
+.adm-rozbal-obsah { position: absolute; z-index: 20; right: 0; top: 100%; background: #fff; border: 1px solid #aaa; padding: 4px 8px; max-height: 60vh; overflow: auto; box-shadow: 2px 2px 6px rgba(0,0,0,.15); min-width: 200px; }
 .adm-rozbal-obsah[hidden] { display: none; }
 .adm-rozbal-obsah label { display: block; white-space: nowrap; font-size: .85rem; padding: 1px 0; }
-.adm-ulozit-pohled { background: #fff; border: 1px solid var(--ram); border-radius: 5px; padding: 6px 10px; margin-bottom: 6px; font-size: .88rem; }
+.adm-ulozit-pohled { border-bottom: 1px solid var(--m-car); padding: 4px 8px; font-size: .85rem; background: #fafafa; }
 .adm-ulozit-pohled[hidden] { display: none; }
-.adm-ulozit-pohled input { padding: 3px 6px; border: 1px solid #cfc4c5; border-radius: 4px; font: inherit; }
+.adm-ulozit-pohled input { padding: 1px 6px; border: 1px solid var(--m-car); font: inherit; }
 
 /* Tabulka + panel vpravo */
-.adm-prostor { display: flex; flex: 1; min-height: 0; gap: 8px; padding-bottom: 8px; }
-#t-tabulka { flex: 1; min-width: 0; border: 1px solid #d8cfd0; background: #fff; font-size: 12.5px; }
-.adm-panel { flex: 0 0 360px; background: #fff; border: 1px solid #d8cfd0; overflow: auto; padding: 8px 12px; font-size: .85rem; }
+.adm-prostor { display: flex; flex: 1; min-height: 0; }
+#t-tabulka { flex: 1; min-width: 0; border: 0; background: #fff; }
+.adm-panel { flex: 0 0 340px; background: #fff; border-left: 1px solid var(--m-car); overflow: auto; font-size: .85rem; }
 .adm-panel[hidden] { display: none; }
-.adm-panel-hlava { display: flex; align-items: center; gap: 8px; position: sticky; top: -8px; background: #fff; padding: 4px 0; }
-.adm-panel-hlava b { flex: 1; color: var(--hb); font-size: 1rem; }
-.adm-panel-akce { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 8px; }
-.adm-panel-pole { display: grid; grid-template-columns: 38% 1fr; gap: 3px 8px; margin: 0; }
-.adm-panel-pole dt { color: var(--seda); padding-top: 3px; }
-.adm-panel-pole dd { margin: 0; word-break: break-word; }
-.adm-panel-pole input, .adm-panel-pole select, .adm-panel-pole textarea { width: 100%; box-sizing: border-box; padding: 2px 5px; border: 1px solid #d6cbcc; border-radius: 3px; font: inherit; background: #fffdf5; }
-.adm-panel-ulozit { position: sticky; bottom: -8px; background: #fff; padding: 8px 0; }
+.adm-panel-hlava { display: flex; align-items: center; gap: 6px; position: sticky; top: 0; background: var(--m-hlava); border-bottom: 1px solid var(--m-car); padding: 4px 8px; z-index: 2; }
+.adm-panel-hlava b { flex: 1; font-size: .9rem; }
+.adm-panel-akce { display: flex; flex-wrap: wrap; gap: 3px; padding: 5px 8px; border-bottom: 1px solid var(--m-car); }
+.adm-panel > .adm-sub-mini { display: block; padding: 5px 8px; margin: 0; }
+/* Pole v panelu jako dva sloupce buněk, které na sebe navazují */
+.adm-panel-pole { display: grid; grid-template-columns: 40% 60%; margin: 0; }
+.adm-panel-pole dt, .adm-panel-pole dd { margin: 0; border-bottom: 1px solid #e6e6e6; min-height: 22px; box-sizing: border-box; }
+.adm-panel-pole dt { background: var(--m-hlava); color: #555; padding: 3px 8px; border-right: 1px solid #e6e6e6; }
+.adm-panel-pole dd { padding: 3px 6px; word-break: break-word; }
+.adm-panel-pole dd:has(input), .adm-panel-pole dd:has(select), .adm-panel-pole dd:has(textarea) { padding: 0; }
+.adm-panel-pole input, .adm-panel-pole select, .adm-panel-pole textarea { width: 100%; height: 100%; min-height: 22px; box-sizing: border-box; padding: 3px 6px; border: 0; font: inherit; background: #fff; outline: none; }
+.adm-panel-pole input:focus, .adm-panel-pole select:focus, .adm-panel-pole textarea:focus { box-shadow: inset 0 0 0 2px var(--m-aktivni); }
+.adm-panel-ulozit { position: sticky; bottom: 0; background: #fff; border-top: 1px solid var(--m-car); padding: 6px 8px; }
+.adm-panel h3 { padding: 0 8px; }
+.adm-historie { padding: 0 8px 8px; }
 .adm-historie ul { list-style: none; padding: 0; margin: 0; }
-.adm-historie li { border-top: 1px solid #eee; padding: 4px 0; font-size: .8rem; word-break: break-word; }
-
-/* Tabulator – hustě jako v Excelu, barvy Hory Bory */
-.tabulator { font-size: 12.5px; }
-.tabulator .tabulator-header { background: #78212E; color: #fff; border-bottom: 1px solid #5a1822; }
-.tabulator .tabulator-header .tabulator-col { background: #78212E; border-right: 1px solid #8f3a47; }
-.tabulator .tabulator-header .tabulator-col .tabulator-col-content { padding: 3px 5px; }
-.tabulator .tabulator-header .tabulator-col .tabulator-header-filter { margin-top: 3px; }
-.tabulator .tabulator-header .tabulator-col input, .tabulator .tabulator-header .tabulator-col select { font-size: 11.5px; padding: 1px 3px !important; border: 1px solid #c9b3b7; border-radius: 2px; color: #222; background: #fff; box-sizing: border-box; width: 100%; }
-.tabulator .tabulator-header .tabulator-col.tabulator-sortable.tabulator-col-sorter-element:hover { background: #8f2a39; }
-.tabulator .tabulator-header .tabulator-col .tabulator-col-sorter .tabulator-arrow { border-bottom-color: #d9a9b1; }
-.tabulator-row { min-height: 22px; }
-.tabulator-row .tabulator-cell { padding: 2px 5px; border-right: 1px solid #eee4e5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tabulator-row.tabulator-row-even { background: #faf7f7; }
-.tabulator-row.tabulator-selectable:hover { background: #f3e6e8; cursor: pointer; }
-.tabulator-row.tabulator-selected { background: #f7e3b8 !important; }
-.tabulator-row.adm-radek-otevreny { box-shadow: inset 3px 0 0 #78212E; background: #f3e6e8; }
-.tabulator .tabulator-cell.adm-upravitelne { cursor: cell; }
-.tabulator .tabulator-cell.tabulator-editing { border: 1px solid #78212E; padding: 0; }
-.tabulator .tabulator-placeholder span { color: #888 !important; font-size: 14px !important; font-weight: 400 !important; }
-.adm-rozsah { display: flex; flex-direction: column; gap: 2px; }
-.adm-rozsah input { width: 100%; }
-.adm-mini { background: #fff; color: #333; border: 1px solid #cdbfc1; border-radius: 3px; padding: 0 6px; margin-right: 3px; font-size: 11.5px; line-height: 17px; cursor: pointer; }
-.adm-mini-hlavni { background: #2c5c3a; color: #fff; border-color: #2c5c3a; }
-.adm-mini-cervene { color: #8a2a2a; }
-@media (max-width: 800px) {
-  .adm-telo { flex-direction: column; }
-  .adm-menu { flex: none; display: flex; flex-wrap: wrap; padding: 4px; }
-  .adm-menu-skupina, .adm-menu .adm-pripravuje { display: none !important; }
-  .adm-panel { position: fixed; inset: 44px 0 0 auto; width: min(360px, 100vw); z-index: 30; }
-}
-/* Hláška „žádný řádek“ vlevo, ať je vidět i u široké tabulky */
-.tabulator .tabulator-tableholder .tabulator-placeholder { justify-content: flex-start; }
-.tabulator .tabulator-tableholder .tabulator-placeholder .tabulator-placeholder-contents { position: sticky; left: 0; padding: 24px 16px; text-align: left; }
-.adm-tlacitko-male { padding: 3px 10px; font-size: .85rem; }
+.adm-historie li { border-top: 1px solid #eee; padding: 3px 0; font-size: .78rem; word-break: break-word; }
 .adm-historie li.adm-neplati { color: #999; }
 .adm-historie li.adm-neplati b { text-decoration: line-through; }
-.adm-verze { color: rgba(255,255,255,.6); font-size: .78rem; }
+
+/* Tabulator jako Excel: šedá hlavička, tenká mřížka, filtry jako řádek buněk */
+.tabulator { font-size: 12.5px; border: 0; background: #fff; }
+.tabulator .tabulator-header { background: var(--m-hlava); color: #222; border-bottom: 1px solid #bfbfbf; font-weight: 600; }
+.tabulator .tabulator-header .tabulator-col { background: var(--m-hlava); border-right: 1px solid var(--m-car); }
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content { padding: 3px 5px 0; }
+.tabulator .tabulator-header .tabulator-col .tabulator-col-title { white-space: nowrap; }
+.tabulator .tabulator-header .tabulator-col .tabulator-header-filter { margin: 3px -5px 0; }
+.tabulator .tabulator-header .tabulator-col .tabulator-header-filter input,
+.tabulator .tabulator-header .tabulator-col .tabulator-header-filter select {
+  display: block; width: 100%; height: 21px; box-sizing: border-box; margin: 0; padding: 1px 5px !important;
+  border: 0; border-top: 1px solid var(--m-car); border-radius: 0; background: #fff; font: 12px system-ui, sans-serif; color: #222; outline: none; }
+.tabulator .tabulator-header .tabulator-col .tabulator-header-filter input:focus { box-shadow: inset 0 0 0 2px var(--m-aktivni); }
+.tabulator .tabulator-header .tabulator-col.tabulator-sortable.tabulator-col-sorter-element:hover { background: #e9e9e9; }
+.tabulator .tabulator-header .tabulator-col .tabulator-col-sorter .tabulator-arrow { border-bottom-color: #aaa; }
+.tabulator .tabulator-header .tabulator-col[aria-sort="ascending"] .tabulator-col-sorter .tabulator-arrow { border-bottom-color: #222; }
+.tabulator .tabulator-header .tabulator-col[aria-sort="descending"] .tabulator-col-sorter .tabulator-arrow { border-top-color: #222; }
+.tabulator-row { min-height: 21px; background: #fff; border-bottom: 1px solid #e6e6e6; }
+.tabulator-row.tabulator-row-even { background: #fff; }
+.tabulator-row .tabulator-cell { padding: 2px 5px; border-right: 1px solid #e6e6e6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tabulator-row .tabulator-cell.tabulator-row-header, .tabulator .tabulator-header .tabulator-col.tabulator-row-header { background: var(--m-hlava); border-right: 1px solid #bfbfbf; }
+.tabulator-row.tabulator-selectable:hover { background: #f5f5f5; cursor: default; }
+.tabulator-row.tabulator-selected, .tabulator-row.tabulator-selected:hover { background: var(--m-vyber) !important; }
+.tabulator-row.adm-radek-otevreny { background: #eef4fb; box-shadow: inset 3px 0 0 var(--m-aktivni); }
+.tabulator .tabulator-cell.adm-upravitelne { cursor: cell; }
+.tabulator .tabulator-cell.tabulator-editing { box-shadow: inset 0 0 0 2px var(--m-aktivni); padding: 0; border-right-color: transparent; }
+.tabulator .tabulator-cell.tabulator-editing input, .tabulator .tabulator-cell.tabulator-editing select { border: 0 !important; padding: 2px 5px !important; font: inherit; outline: none; }
+.tabulator .tabulator-frozen.tabulator-frozen-left { border-right: 1px solid #bfbfbf; }
+.tabulator .tabulator-tableholder .tabulator-placeholder { justify-content: flex-start; align-items: flex-start; }
+.tabulator .tabulator-tableholder .tabulator-placeholder .tabulator-placeholder-contents { position: sticky; left: 0; padding: 16px; text-align: left; color: #888 !important; font-size: 13px !important; font-weight: 400 !important; }
+.tabulator .tabulator-placeholder span { color: #888 !important; font-size: 13px !important; font-weight: 400 !important; }
+.tabulator-edit-list { font-size: 12.5px; border-radius: 0 !important; }
+.tabulator-edit-list .tabulator-edit-list-item.active { background: var(--m-vyber); color: #222; }
+.adm-mini { background: #fff; color: #222; border: 1px solid var(--m-car); padding: 0 5px; margin-right: 2px; font-size: 11.5px; line-height: 16px; cursor: pointer; }
+.adm-mini:hover:not(:disabled) { background: #f0f0f0; }
+.adm-mini-hlavni { background: var(--m-aktivni); color: #fff; border-color: var(--m-aktivni); }
+.adm-mini-hlavni:hover:not(:disabled) { background: #1a5c38; }
+.adm-mini-cervene { color: #9b1c1c; }
+@media (max-width: 800px) {
+  .adm-telo { flex-direction: column; }
+  .adm-menu { flex: none; display: flex; flex-wrap: wrap; padding: 2px; border-right: 0; border-bottom: 1px solid var(--m-car); }
+  .adm-menu-skupina, .adm-menu .adm-pripravuje { display: none !important; }
+  .adm-panel { position: fixed; inset: 38px 0 0 auto; width: min(340px, 100vw); z-index: 30; }
+}
+/* Šipka řazení jen u sloupce, podle kterého se řadí – jako v Excelu */
+.tabulator .tabulator-header .tabulator-col[aria-sort="none"] .tabulator-col-sorter { display: none; }
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title-holder { position: relative; }
+.tabulator .tabulator-header .tabulator-col[aria-sort="none"] .tabulator-col-content .tabulator-col-title { padding-right: 0; }

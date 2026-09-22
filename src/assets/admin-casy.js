@@ -27,6 +27,10 @@
         r.dobeh_m = HBT.mistniCas(r.dobeh, true);
         r.cas_etapy_s = HBT.trvaniS(r.cas_etapy);
         r.cas_etapy_t = HBT.trvaniText(r.cas_etapy);
+        r.plan_cas_s = HBT.trvaniS(r.plan_cas_etapy);
+        r.plan_cas_t = HBT.trvaniText(r.plan_cas_etapy);
+        r.prubezny_s = HBT.trvaniS(r.cas_tymu_prubezny);
+        r.prubezny_t = HBT.trvaniText(r.cas_tymu_prubezny);
         r.pauza_t = HBT.trvaniText(r.pauza);
         r.penalizace_t = HBT.trvaniText(r.penalizace);
         r.pausal_t = an(r.pausal);
@@ -47,10 +51,13 @@
         { pole: "bezec", nazev: "Běžec", sirka: 140 },
         { pole: "plan_start_m", nazev: "Plán start", typ: "cas", sirka: 140, napoveda: "Z platné kalkulace startu" },
         { pole: "plan_konec_m", nazev: "Plán doběh", typ: "cas", sirka: 140 },
+        { pole: "plan_cas_t", nazev: "Plán čas etapy", sirka: 95, razeni: "plan_cas_s", zarovnat: "right", napoveda: "Plánovaný doběh − plánovaný start" },
         { pole: "start_m", nazev: "Start", typ: "cas", sirka: 140, napoveda: "Skutečný start = doběh předchozí etapy + pauza (u 1. etapy start týmu)" },
         { pole: "dobeh_m", nazev: "Doběh", typ: "cas", sirka: 140, uprava: zapis("dobeh"),
           napoveda: "Zadejte 14:32 nebo 14:32:10, den se dopočítá. Prázdná hodnota čas zruší." },
         { pole: "cas_etapy_t", nazev: "Čas etapy", sirka: 85, razeni: "cas_etapy_s", zarovnat: "right" },
+        { pole: "prubezny_t", nazev: "Čas týmu průběžně", sirka: 110, razeni: "prubezny_s", zarovnat: "right",
+          napoveda: "Součet časů etap 1 až tato. Prázdné, dokud některé dřívější etapě chybí čas." },
         { pole: "pauza_t", nazev: "Pauza po etapě", sirka: 95, zarovnat: "right", uprava: zapis("pauza"), napoveda: "Např. 0:10:00" },
         { pole: "penalizace_t", nazev: "Penalizace", sirka: 90, zarovnat: "right", uprava: zapis("penalizace"), napoveda: "Přičte se k času etapy" },
         { pole: "pausal_t", nazev: "Paušál", typ: "bool", sirka: 75, uprava: zapis("pausal"), napoveda: "Etapa se počítá paušálem z nastavení etapy" },

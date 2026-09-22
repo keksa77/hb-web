@@ -50,7 +50,25 @@
   function filtrObsahuje(hledane, hodnota) {
     return bezDiakritiky(hodnota).indexOf(bezDiakritiky(hledane)) >= 0;
   }
-  // Filtr „od–do“ pro čísla a data: dvě políčka pod sebou.
+  // Filtr čísel v jednom políčku: „3“, „>2“, „<10“, „>=5“, „2-5“.
+  function filtrCisla(f, hodnota) {
+    f = String(f || "").replace(/\s/g, "").replace(",", ".");
+    if (!f) return true;
+    if (prazdne(hodnota)) return false;
+    var n = Number(hodnota), m;
+    if ((m = f.match(/^(-?[\d.]+)-(-?[\d.]+)$/))) return n >= +m[1] && n <= +m[2];
+    if ((m = f.match(/^(>=|<=|>|<|=)(-?[\d.]+)$/))) {
+      var x = +m[2];
+      return m[1] === ">" ? n > x : m[1] === "<" ? n < x : m[1] === ">=" ? n >= x : m[1] === "<=" ? n <= x : n === x;
+    }
+    return String(hodnota) === f;
+  }
+  // Filtr datumu a času: hledá v tom, co je vidět v buňce („5. 9.“, „14:3“).
+  function filtrCasu(f, hodnota) {
+    if (!f) return true;
+    return bezDiakritiky(ceskeDatum(hodnota)).replace(/\s/g, "").indexOf(bezDiakritiky(f).replace(/\s/g, "")) >= 0;
+  }
+  // (Starý filtr od–do se už nepoužívá – zůstává kvůli uloženým pohledům.)
   function editorRozsahu(typ) {
     return function (cell, onRendered, success) {
       var v = cell.getValue() || {};
@@ -147,29 +165,36 @@
     }
     function chyba(err) { hlaska("chyba", err && err.message ? err.message : String(err)); }
 
-    var popisy = {};
-    N.sloupce.forEach(function (s) { popisy[s.pole] = s.nazev; });
+    var popisy = {}, typy = {};
+    N.sloupce.forEach(function (s) { popisy[s.pole] = s.nazev; typy[s.pole] = s.typ || "text"; });
 
     // --- sloupce pro Tabulator ---
     function sloupec(s) {
       var c = { title: s.nazev, field: s.pole, visible: !s.skryty, headerTooltip: s.napoveda || s.nazev,
                 width: s.sirka, minWidth: 40, tooltip: true };
+      // Šířka aspoň na celý nadpis, ať se nezkracuje na „Ro…“.
+      var naNadpis = Math.round(s.nazev.length * 7.2 + 22);
+      if (!c.width || c.width < naNadpis) c.width = naNadpis;
       var typ = s.typ || "text";
+      c.headerFilterPlaceholder = "";
       if (typ === "text") {
-        c.headerFilter = "input"; c.headerFilterFunc = filtrObsahuje; c.headerFilterPlaceholder = "obsahuje";
-      } else if (typ === "cislo" || typ === "datum" || typ === "cas") {
-        var t = typ === "cislo" ? "cislo" : "datum";
-        c.headerFilter = editorRozsahu(t); c.headerFilterFunc = filtrRozsahu(t);
-        c.headerFilterLiveFilter = true;
-        c.headerFilterEmptyCheck = function (v) { return !v || (!v.od && !v.do); };
-        if (typ === "cislo") { c.hozAlign = "right"; c.sorter = "number"; c.sorterParams = { alignEmptyValues: "bottom" }; }
-        if (typ === "datum" || typ === "cas") c.formatter = function (cell) { return ceskeDatum(cell.getValue()); };
+        c.headerFilter = "input"; c.headerFilterFunc = filtrObsahuje;
+        c.headerTooltip = (s.napoveda ? s.napoveda + "\n" : "") + "Filtr: napište část textu.";
+      } else if (typ === "cislo") {
+        c.headerFilter = "input"; c.headerFilterFunc = filtrCisla;
+        c.hozAlign = "right"; c.sorter = "number"; c.sorterParams = { alignEmptyValues: "bottom" };
+        c.headerTooltip = (s.napoveda ? s.napoveda + "\n" : "") + "Filtr: 3 (přesně), >2, <10, 2-5 (rozsah).";
+      } else if (typ === "datum" || typ === "cas") {
+        c.headerFilter = "input"; c.headerFilterFunc = filtrCasu;
+        c.formatter = function (cell) { return ceskeDatum(cell.getValue()); };
+        c.headerTooltip = (s.napoveda ? s.napoveda + "\n" : "") + "Filtr: napište, co hledáte, např. 5. 9. nebo 14:3.";
       } else if (typ === "vycet" || typ === "bool") {
         c.headerFilter = "list";
         c.headerFilterParams = { valuesLookup: function (cell) {
             var h = {}; cell.getTable().getData().forEach(function (r) { var v = r[s.pole]; h[prazdne(v) ? "(prázdné)" : v] = 1; });
             return Object.keys(h).sort();
-          }, multiselect: true, clearable: true, placeholderEmpty: "—" };
+          }, multiselect: true, clearable: true, placeholderEmpty: "—", placeholderLoading: "" };
+        c.headerTooltip = (s.napoveda ? s.napoveda + "\n" : "") + "Filtr: klikněte a zaškrtněte hodnoty.";
         c.headerFilterFunc = filtrVyctu;
         c.headerFilterEmptyCheck = function (v) { return !v || !v.length; };
       }
@@ -217,10 +242,10 @@
       headerSortClickElement: "header",
       editTriggerEvent: "dblclick",
       persistence: { columns: ["width", "visible"] },
-      persistenceID: "hb-admin-" + N.sekce,
+      persistenceID: "hb-admin-v2-" + N.sekce,
       locale: "cs",
       langs: { cs: { data: { loading: "Načítám…", error: "Chyba" },
-                     headerFilters: { "default": "filtr…" } } }
+                     headerFilters: { "default": "" } } }
     });
 
     var hotovo = false;
@@ -252,7 +277,10 @@
 
     function pouzijStav(st) {
       tab.clearHeaderFilter();
-      (st.h || []).forEach(function (f) { try { tab.setHeaderFilterValue(f.field, f.value); } catch (err) {} });
+      (st.h || []).forEach(function (f) {
+        if (f.value && typeof f.value === "object" && !Array.isArray(f.value)) return; // starý filtr od–do
+        try { tab.setHeaderFilterValue(f.field, f.value); } catch (err) {}
+      });
       if (st.s && st.s.length) tab.setSort(st.s.map(function (x) { return { column: x.field, dir: x.dir }; }));
       else tab.clearSort();
       hledat = st.q || ""; el("t-hledat").value = hledat; pouzijHledani();
@@ -296,7 +324,7 @@
       var h = [];
       if (hledat) h.push('<span class="adm-stitek-filtr">hledat: ' + e(hledat) + '</span>');
       tab.getHeaderFilters().forEach(function (f) {
-        var p = popisFiltru(f.value); if (!p) return;
+        var p = typy[f.field] === "cislo" && typeof f.value === "string" ? f.value : popisFiltru(f.value); if (!p) return;
         h.push('<span class="adm-stitek-filtr">' + e(popisy[f.field] || f.field) + ': ' + e(p) +
                ' <button type="button" data-zrus="' + e(f.field) + '" title="Zrušit tento filtr">×</button></span>');
       });
