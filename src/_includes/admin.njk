@@ -28,7 +28,9 @@
     <a href="{{ web.zaklad }}/admin/casy/"{% if sekce == "casy" %} aria-current="page"{% endif %}>Časy</a>
     <a href="{{ web.zaklad }}/admin/vysledky/"{% if sekce == "vysledky" %} aria-current="page"{% endif %}>Výsledky</a>
     <div class="adm-menu-skupina">Ročník</div>
-    <span class="adm-pripravuje" title="Připravuje se">Nastavení a ceník</span>
+    <a href="{{ web.zaklad }}/admin/nastaveni/"{% if sekce == "nastaveni" %} aria-current="page"{% endif %}>Nastavení ročníku</a>
+    <a href="{{ web.zaklad }}/admin/nastaveni-obecne/"{% if sekce == "nastaveni-obecne" %} aria-current="page"{% endif %}>Obecné nastavení</a>
+    <span class="adm-pripravuje" title="Připravuje se">Ceník a účty</span>
     <span class="adm-pripravuje" title="Připravuje se">Texty mailů</span>
     <span class="adm-pripravuje" title="Připravuje se">Seznam pro variantu 2</span>
     <div class="adm-menu-skupina">Web</div>
