@@ -1,0 +1,115 @@
+---
+pagination:
+  data: trasa.etapy
+  size: 1
+  alias: e
+permalink: "{{ e.adresa }}index.html"
+layout: zaklad.njk
+eleventyComputed:
+  titulek: "Etapa {{ e.cislo }}: {{ e.nazev }}"
+  metaPopis: "Etapa {{ e.cislo }} závodu Hory Bory: {{ e.nazev }}, {{ e.delkaKm }} km, převýšení {{ e.prevyseni }} m."
+  adresa: "/trasa/"
+---
+<nav class="etapa-drobky" aria-label="Kde jste">
+  <a href="{{ web.zaklad }}/trasa/">Trasa a etapy</a> <span aria-hidden="true">›</span> Etapa {{ e.cislo }}
+</nav>
+
+<h1 class="etapa-nadpis"><span class="etapa-cislo">{{ e.cislo }}</span> {{ e.nazev }}</h1>
+
+<ul class="etapa-cisla">
+  <li><strong>{{ e.delkaKm }} km</strong><span>délka</span></li>
+  <li><strong>{{ e.prevyseni }} m</strong><span>stoupání</span></li>
+  <li><strong>{{ e.klesani }} m</strong><span>klesání</span></li>
+  {% if e.penalizace %}<li><strong>{{ e.penalizace }}</strong><span>penalizace</span></li>{% endif %}
+</ul>
+
+{% if e.povrch %}<p class="etapa-povrch">Povrch: {{ e.povrch }}</p>{% endif %}
+
+<section class="etapa-blok">
+  <h2>Výškový profil</h2>
+  <figure class="profil">
+    <svg viewBox="0 0 {{ e.svg.S }} {{ e.svg.V }}" preserveAspectRatio="none" role="img"
+         aria-label="Výškový profil etapy {{ e.cislo }}: začíná v {{ e.profil.min }} m n. m., nejvýše {{ e.profil.max }} m n. m.">
+      <path class="profil-plocha" d="{{ e.svg.plocha }}"></path>
+      <path class="profil-cara" d="{{ e.svg.cara }}"></path>
+    </svg>
+    <figcaption>
+      <span>{{ e.start.nazev }} · {{ e.start.vyska }} m n. m.</span>
+      <span class="profil-vrchol">nejvýše {{ e.profil.max }} m n. m.</span>
+      <span>{{ e.cil.nazev }} · {{ e.cil.vyska }} m n. m.</span>
+    </figcaption>
+  </figure>
+</section>
+
+<section class="etapa-blok etapa-body">
+  <div class="etapa-bod">
+    <h2>Start</h2>
+    <p class="etapa-misto">{{ e.start.nazev }}</p>
+    {% if e.start.detail %}<p class="etapa-gps">{{ e.start.detail }}</p>{% endif %}
+  </div>
+  <div class="etapa-bod">
+    <h2>Cíl</h2>
+    <p class="etapa-misto">{{ e.cil.nazev }}</p>
+    {% if e.cil.detail %}<p class="etapa-gps">{{ e.cil.detail }}</p>{% endif %}
+  </div>
+</section>
+
+{% if e.popis %}
+<section class="etapa-blok">
+  <h2>Trasa běžce</h2>
+  <div class="text etapa-popis">{{ e.popis | safe }}</div>
+</section>
+{% endif %}
+
+<section class="etapa-blok etapa-mapa">
+  <h2>Mapa trasy</h2>
+  <img src="{{ web.zaklad }}{{ e.obrazky.mapa }}" alt="Mapa trasy etapy {{ e.cislo }}" loading="lazy" width="900" height="1100">
+  {% if e.mapaUrl %}
+  <div class="etapa-qr">
+    <a href="{{ e.mapaUrl }}" rel="noopener"><img src="{{ web.zaklad }}{{ e.obrazky.qr }}" alt="QR kód na trasu etapy {{ e.cislo }} v mapách" width="120" height="120"></a>
+    <p>Trasa v mapě<br><a href="{{ e.mapaUrl }}" rel="noopener">otevřít na mapy.com</a></p>
+  </div>
+  {% endif %}
+</section>
+
+<section class="etapa-blok etapa-parkovani">
+  <h2>Parkování v cíli</h2>
+  <img src="{{ web.zaklad }}{{ e.obrazky.parkoviste }}" alt="Letecký snímek parkoviště u cíle etapy {{ e.cislo }}" loading="lazy" width="700" height="450">
+  {% if e.autoKm %}
+  <p class="etapa-auto">Autem z předchozí předávky {{ e.autoKm }} km, přibližně {{ e.autoMin }} minut.</p>
+  {% endif %}
+</section>
+
+{% if e.useky.length %}
+<section class="etapa-blok etapa-useky-blok">
+  <h2>Úseky etapy</h2>
+  <div class="table-responsive">
+  <table class="etapa-useky">
+    <thead>
+      <tr><th>Od&nbsp;km</th><th>Do&nbsp;km</th><th>Délka</th><th>Ráz</th><th>Povrch</th><th>Sklon</th><th>Auto</th></tr>
+    </thead>
+    <tbody>
+      {% for u in e.useky %}
+      <tr>
+        <td>{{ (u.od_m / 1000) | round(1) }}</td>
+        <td>{{ (u.do_m / 1000) | round(1) }}</td>
+        <td>{% if u.delka_m < 1000 %}{{ u.delka_m }} m{% else %}{{ (u.delka_m / 1000) | round(1) }} km{% endif %}</td>
+        <td>{{ u.raz }}</td>
+        <td>{{ u.povrch }}</td>
+        <td>{{ u.sklon_pct }} %</td>
+        <td>{% if u.auto %}ano{% else %}ne{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="etapa-vysvetlivka">Sloupec „Auto“ říká, jestli se dá úsek objet autem — doprovod podle něj pozná, kde běžce uvidí.</p>
+</section>
+{% endif %}
+
+<nav class="etapa-sousedi" aria-label="Další etapy">
+  {% if e.predchozi %}<a class="etapa-zpet" href="{{ web.zaklad }}{{ e.predchozi.adresa }}">‹ {{ e.predchozi.cislo }}. {{ e.predchozi.nazev }}</a>{% endif %}
+  {% if e.dalsi %}<a class="etapa-vpred" href="{{ web.zaklad }}{{ e.dalsi.adresa }}">{{ e.dalsi.cislo }}. {{ e.dalsi.nazev }} ›</a>{% endif %}
+</nav>
+
+<p class="etapa-tisk"><button type="button" class="c-btn" onclick="window.print()">Vytisknout kartu etapy</button></p>

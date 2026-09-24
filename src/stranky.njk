@@ -29,6 +29,32 @@ eleventyComputed:
   </section>
 {% endfor %}
 
+{% if stranka.kod == "trasa" and trasa.etapy.length %}
+  <p class="trasa-souhrn">
+    {{ trasa.celkem.etap }} etap, {{ trasa.celkem.km }} km, celkem {{ trasa.celkem.prevyseni }} m stoupání.
+    Každá etapa má vlastní stránku s profilem, mapou a popisem trasy.
+  </p>
+  <div class="table-responsive">
+  <table class="trasa-tabulka">
+    <thead>
+      <tr><th>Č.</th><th>Etapa</th><th>Délka</th><th>Stoupání</th><th>Klesání</th><th>Povrch</th></tr>
+    </thead>
+    <tbody>
+      {% for e in trasa.etapy %}
+      <tr>
+        <td class="trasa-cislo">{{ e.cislo }}</td>
+        <td><a href="{{ web.zaklad }}{{ e.adresa }}">{{ e.nazev }}</a></td>
+        <td>{{ e.delkaKm }} km</td>
+        <td>{{ e.prevyseni }} m</td>
+        <td>{{ e.klesani }} m</td>
+        <td class="trasa-povrch">{{ e.povrch }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+{% endif %}
+
 {% if stranka.kod == "casto-se-ptate" %}
   <div class="faq">
   {% for o in obsah.otazky %}
