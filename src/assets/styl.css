@@ -106,3 +106,104 @@ a { color: var(--hb); }
 .paticka { background: var(--hb-svetla); border-top: 1px solid var(--ram); padding: 24px 0; font-size: .92rem; }
 .paticka p { margin: 4px 0; }
 .paticka .verze { color: var(--seda); font-size: .78rem; margin-top: 10px; }
+
+/* ---- trasa a etapy ---------------------------------------------------- */
+
+.trasa-souhrn { font-size: 1.05rem; color: var(--seda); margin: 0 0 16px; }
+.trasa-tabulka { border-collapse: collapse; width: 100%; margin: 12px 0; }
+.trasa-tabulka th { background: var(--hb); color: #fff; text-align: left; padding: 8px 10px; font-size: .92rem; }
+.trasa-tabulka td { border: 1px solid var(--ram); padding: 7px 10px; }
+.trasa-tabulka tbody tr:nth-child(odd) { background: #fff; }
+.trasa-tabulka tbody tr:nth-child(even) { background: var(--hb-svetla); }
+.trasa-cislo { text-align: right; width: 3em; color: var(--seda); }
+.trasa-povrch { font-size: .88rem; color: var(--seda); }
+
+.etapa-drobky { font-size: .9rem; color: var(--seda); margin: 0 0 8px; }
+.etapa-drobky a { color: var(--seda); }
+.etapa-nadpis { display: flex; align-items: center; gap: 12px; }
+.etapa-cislo {
+  display: inline-grid; place-items: center; flex: none;
+  width: 2.1em; height: 2.1em; border-radius: 50%;
+  background: var(--hb); color: #fff; font-size: .78em;
+}
+
+.etapa-cisla { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 12px; padding: 0; }
+.etapa-cisla li {
+  flex: 1 1 7.5rem; border: 1px solid var(--ram); border-radius: 8px;
+  padding: 10px 12px; background: #fff;
+}
+.etapa-cisla strong { display: block; font-size: 1.25rem; color: var(--hb); line-height: 1.2; }
+.etapa-cisla span { font-size: .85rem; color: var(--seda); }
+.etapa-povrch { color: var(--seda); margin: 0 0 8px; }
+
+.etapa-blok { margin: 28px 0 0; }
+.etapa-blok h2 { margin-top: 0; }
+
+.profil { margin: 0; }
+.profil svg { width: 100%; height: 180px; display: block; background: #fff; border: 1px solid var(--ram); border-radius: 8px; }
+.profil-plocha { fill: var(--hb-svetla); }
+.profil-cara { fill: none; stroke: var(--hb); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.profil figcaption {
+  display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  font-size: .85rem; color: var(--seda); padding-top: 6px;
+}
+.profil-vrchol { font-weight: 600; }
+
+.etapa-body { display: grid; gap: 16px; }
+@media (min-width: 40rem) { .etapa-body { grid-template-columns: 1fr 1fr; } }
+.etapa-misto { font-size: 1.1rem; font-weight: 600; margin: 0 0 2px; }
+.etapa-gps { font-size: .88rem; color: var(--seda); margin: 0; }
+
+.etapa-popis { max-width: 46rem; }
+.etapa-mapa img, .etapa-parkovani img { max-width: 100%; height: auto; border: 1px solid var(--ram); border-radius: 8px; }
+.etapa-mapa img { max-width: 34rem; }
+.etapa-qr { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.etapa-qr img { width: 100px; height: 100px; border: 0; }
+.etapa-qr p { margin: 0; font-size: .9rem; color: var(--seda); }
+.etapa-auto { color: var(--seda); margin: 8px 0 0; }
+
+.etapa-useky { border-collapse: collapse; width: 100%; font-size: .92rem; }
+.etapa-useky th { background: var(--hb); color: #fff; text-align: left; padding: 6px 9px; }
+.etapa-useky td { border: 1px solid var(--ram); padding: 5px 9px; }
+.etapa-vysvetlivka { font-size: .85rem; color: var(--seda); }
+
+.etapa-sousedi { display: flex; justify-content: space-between; gap: 12px; margin: 32px 0 0; font-size: .95rem; }
+.etapa-vpred { margin-left: auto; text-align: right; }
+.etapa-tisk { margin: 24px 0 0; }
+
+/* ---- tisk karty etapy -------------------------------------------------
+   Z této stránky se tiskne karta etapy do PDF. Dvě stránky A4: první
+   s čísly, profilem a popisem, druhá s mapou. */
+@media print {
+  @page { size: A4 portrait; margin: 12mm 12mm 14mm; }
+  body { background: #fff; font-size: 10.5pt; }
+  .hlavicka, .paticka, .preskocit, .etapa-drobky, .etapa-sousedi, .etapa-tisk,
+  .upozorneni, .etapa-vysvetlivka { display: none !important; }
+  main { padding: 0; }
+  .obal { max-width: none; padding: 0; }
+  a { color: inherit; text-decoration: none; }
+  h1 { font-size: 20pt; margin: 0 0 8pt; }
+  h2 { font-size: 12pt; margin: 10pt 0 4pt; page-break-after: avoid; }
+  .etapa-cisla li { border-color: #bbb; padding: 5pt 7pt; }
+  .etapa-cisla strong { font-size: 13pt; }
+  .profil svg { height: 30mm; border-color: #bbb; }
+  .etapa-blok { margin-top: 10pt; page-break-inside: avoid; }
+  .etapa-popis { max-width: none; }
+  /* karta má dvě stránky: první s čísly a popisem, druhá s mapou a úseky */
+  main { display: flex; flex-direction: column; }
+  .etapa-nadpis { order: 1; }
+  .etapa-cisla { order: 2; }
+  .etapa-povrch { order: 3; }
+  .etapa-blok { order: 4; }
+  .etapa-parkovani { order: 5; }
+  .etapa-mapa { order: 6; page-break-before: always; }
+  .etapa-useky-blok { order: 7; }
+  .etapa-mapa { display: flex; gap: 6mm; align-items: flex-start; flex-wrap: wrap; }
+  .etapa-mapa h2 { flex-basis: 100%; }
+  .etapa-mapa img { width: 120mm; border-color: #bbb; }
+  .etapa-qr { display: block; margin: 0; }
+  .etapa-qr img { width: 30mm; height: 30mm; }
+  .etapa-useky { font-size: 8.5pt; }
+  .etapa-parkovani img { width: 105mm; }
+  .trasa-tabulka { font-size: 9pt; }
+}
