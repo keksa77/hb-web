@@ -37,7 +37,7 @@ eleventyComputed:
   <div class="table-responsive">
   <table class="trasa-tabulka">
     <thead>
-      <tr><th>Č.</th><th>Etapa</th><th>Délka</th><th>Stoupání</th><th>Klesání</th><th>Povrch</th></tr>
+      <tr><th>Č.</th><th>Etapa</th><th>Délka</th><th>Stoupání</th><th>Klesání</th><th>Povrch</th><th>Karta</th></tr>
     </thead>
     <tbody>
       {% for e in trasa.etapy %}
@@ -48,6 +48,7 @@ eleventyComputed:
         <td>{{ e.prevyseni }} m</td>
         <td>{{ e.klesani }} m</td>
         <td class="trasa-povrch">{{ e.povrch }}</td>
+        <td>{% if e.pdf %}<a href="{{ web.zaklad }}{{ e.pdf }}">PDF</a>{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>

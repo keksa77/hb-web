@@ -10,6 +10,9 @@ eleventyComputed:
   metaPopis: "Etapa {{ e.cislo }} závodu Hory Bory: {{ e.nazev }}, {{ e.delkaKm }} km, převýšení {{ e.prevyseni }} m."
   adresa: "/trasa/"
 ---
+<meta name="hb-rok" content="{{ trasa.rokCislo }}">
+
+
 <nav class="etapa-drobky" aria-label="Kde jste">
   <a href="{{ web.zaklad }}/trasa/">Trasa a etapy</a> <span aria-hidden="true">›</span> Etapa {{ e.cislo }}
 </nav>
@@ -33,10 +36,15 @@ eleventyComputed:
       <path class="profil-plocha" d="{{ e.svg.plocha }}"></path>
       <path class="profil-cara" d="{{ e.svg.cara }}"></path>
     </svg>
+    <div class="profil-osa">
+      {% for o in e.svg.osa %}
+      <span class="kotva-{{ o.kotva }}" style="left: {{ (o.x / e.svg.S * 100) | round(2) }}%">{{ o.km }}{% if o.jednotka %}&nbsp;km{% endif %}</span>
+      {% endfor %}
+    </div>
     <figcaption>
-      <span>{{ e.start.nazev }} · {{ e.start.vyska }} m n. m.</span>
+      <span>{{ e.start.kod }} {{ e.start.nazev }} · {{ e.profil.startV }} m n. m.</span>
       <span class="profil-vrchol">nejvýše {{ e.profil.max }} m n. m.</span>
-      <span>{{ e.cil.nazev }} · {{ e.cil.vyska }} m n. m.</span>
+      <span>{{ e.cil.kod }} {{ e.cil.nazev }} · {{ e.profil.cilV }} m n. m.</span>
     </figcaption>
   </figure>
 </section>
@@ -44,15 +52,16 @@ eleventyComputed:
 <section class="etapa-blok etapa-body">
   <div class="etapa-bod">
     <h2>Start</h2>
-    <p class="etapa-misto">{{ e.start.nazev }}</p>
+    <p class="etapa-misto"><span class="etapa-kod">{{ e.start.kod }}</span> {{ e.start.nazev }}</p>
     {% if e.start.detail %}<p class="etapa-gps">{{ e.start.detail }}</p>{% endif %}
   </div>
   <div class="etapa-bod">
     <h2>Cíl</h2>
-    <p class="etapa-misto">{{ e.cil.nazev }}</p>
+    <p class="etapa-misto"><span class="etapa-kod">{{ e.cil.kod }}</span> {{ e.cil.nazev }}</p>
     {% if e.cil.detail %}<p class="etapa-gps">{{ e.cil.detail }}</p>{% endif %}
   </div>
 </section>
+
 
 {% if e.popis %}
 <section class="etapa-blok">
@@ -60,6 +69,7 @@ eleventyComputed:
   <div class="text etapa-popis">{{ e.popis | safe }}</div>
 </section>
 {% endif %}
+
 
 <section class="etapa-blok etapa-mapa">
   <h2>Mapa trasy</h2>
@@ -112,4 +122,79 @@ eleventyComputed:
   {% if e.dalsi %}<a class="etapa-vpred" href="{{ web.zaklad }}{{ e.dalsi.adresa }}">{{ e.dalsi.cislo }}. {{ e.dalsi.nazev }} ›</a>{% endif %}
 </nav>
 
-<p class="etapa-tisk"><button type="button" class="c-btn" onclick="window.print()">Vytisknout kartu etapy</button></p>
+<p class="etapa-tisk">
+  {% if e.pdf %}<a class="c-btn" href="{{ web.zaklad }}{{ e.pdf }}">Stáhnout kartu etapy (PDF)</a>{% endif %}
+  {% if e.gpx %}<a class="c-btn c-btn-vedlejsi" href="{{ web.zaklad }}{{ e.gpx }}" download>Stáhnout GPX</a>{% endif %}
+</p>
+<p class="etapa-tisk-pozn">Kartu je nejlepší vytisknout ze staženého PDF — má hotovou tiskovou podobu na dvě strany A4.</p>
+
+{#  Tištěná karta etapy. Na obrazovce se nezobrazuje, v tisku naopak nahrazuje
+    celou stránku. Je to samostatná struktura — dva listy A4, každý s vlastní
+    hlavičkou a patičkou — aby se nemusela ohýbat podoba webové stránky.  #}
+<div class="karta" aria-hidden="true">
+  {% set hlavicka %}
+  <div class="karta-hlavicka">
+    <img src="{{ web.zaklad }}/assets/etapy/karta-hlavicka.png" alt="">
+    {#  Odznak etapy. Překrývá menší oranžové kolečko zapečené v hlavičce:
+        po obvodu bílé slovo ETAPA, číslice vycentrovaná v horní polovině.  #}
+    <svg class="karta-odznak" viewBox="0 0 100 100" role="img" aria-label="Etapa {{ e.cislo }}">
+      <circle cx="50" cy="50" r="49" fill="#F7B211"/>
+      <path id="oblouk-{{ e.cislo }}" fill="none" d="M 12 50 a 38 38 0 0 0 76 0"/>
+      <text class="karta-odznak-cislo" x="50" y="48" text-anchor="middle">{{ e.cislo }}</text>
+      <text class="karta-odznak-slovo">
+        <textPath href="#oblouk-{{ e.cislo }}" startOffset="50%" text-anchor="middle">ETAPA</textPath>
+      </text>
+    </svg>
+  </div>
+  {% endset %}
+  {% set paticka %}<div class="karta-paticka"><span>Hory Bory – Závod {{ trasa.rokCislo }}</span></div>{% endset %}
+
+  <section class="karta-list">
+    {{ hlavicka | safe }}
+    <div class="karta-telo">
+      <dl class="karta-radky">
+        <dt>Start</dt><dd><b>{{ e.start.kod }}</b> {{ e.start.plny }}</dd>
+        <dt>Cíl</dt><dd><b>{{ e.cil.kod }}</b> {{ e.cil.plny }}</dd>
+        <dt>Trasa běžce</dt><dd class="karta-popis">{{ e.popis }}</dd>
+        <dt>Délka, povrch,<br>stoupání, klesání</dt>
+        <dd>{{ e.delkaKm }} km, {{ e.povrch }},<br>stoupání {{ e.prevyseni }} m, klesání {{ e.klesani }} m</dd>
+      </dl>
+
+      <div class="karta-pas">
+        <div class="karta-profil">
+          <svg viewBox="0 0 {{ e.svg.S }} {{ e.svg.V }}" preserveAspectRatio="none">
+            <path class="profil-plocha" d="{{ e.svg.plocha }}"></path>
+            <path class="profil-cara" d="{{ e.svg.cara }}"></path>
+          </svg>
+          <div class="karta-vysky">
+            {% for b in e.svg.popisky %}
+            <span class="kotva-{{ b.kotva }}" style="left: {{ (b.x / e.svg.S * 100) | round(2) }}%">
+              <strong>{{ b.v }}</strong><em>m n. m.</em>
+            </span>
+            {% endfor %}
+          </div>
+          <div class="karta-osa">
+            {% for o in e.svg.osa %}
+            <span class="kotva-{{ o.kotva }}" style="left: {{ (o.x / e.svg.S * 100) | round(2) }}%">{{ o.km }}{% if o.jednotka %} km{% endif %}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="karta-qr">
+          <p>Cíl etapy – trasa pro auto</p>
+          <img src="{{ web.zaklad }}{{ e.obrazky.qr }}" alt="">
+        </div>
+      </div>
+
+      <img class="karta-parkoviste" src="{{ web.zaklad }}{{ e.obrazky.parkoviste }}" alt="">
+    </div>
+    {{ paticka | safe }}
+  </section>
+
+  <section class="karta-list">
+    {{ hlavicka | safe }}
+    <div class="karta-telo">
+      <img class="karta-mapa" src="{{ web.zaklad }}{{ e.obrazky.mapa }}" alt="">
+    </div>
+    {{ paticka | safe }}
+  </section>
+</div>
