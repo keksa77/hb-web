@@ -52,6 +52,21 @@ jobs:
             exit 1
           fi
 
+      - name: Nainstalovat prohlížeč pro tisk karet
+        run: npx playwright install --with-deps chromium
+
+      - name: Vytisknout karty etap do PDF
+        env:
+          ZAKLAD_URL: /hb-web
+        run: |
+          node nastroje/karty-pdf.mjs
+          pocet=$(find _site/karty -name '*.pdf' | wc -l)
+          echo "Karet: $pocet"
+          if [ "$pocet" -lt 30 ]; then
+            echo "Karet je míň než 30 — něco se nevytisklo."
+            exit 1
+          fi
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
