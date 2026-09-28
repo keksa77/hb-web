@@ -1,5 +1,6 @@
 // Role a práva – kdo co smí v administraci a v databázi (tabulky web_pravo a web_osoba_pravo).
-// Právo „Všechno“ zahrnuje všechna ostatní. Přidělovat a odebírat smí jen držitel práva „Role a práva“.
+// Právo „Všechno“ zahrnuje všechna ostatní. Přidělovat a odebírat smí jen držitel práva „Role a práva“ s úpravami.
+// Každé právo je „jen čtení“ (databáze dovolí jen číst) nebo „úpravy“ (číst i měnit).
 // Databáze nedovolí odebrat poslední právo ke správě práv.
 (function () {
   var e = HBA.esc;
@@ -10,7 +11,7 @@
     ev.preventDefault();
     var f = ev.target, hl = document.getElementById("prava-hlaska");
     try {
-      var t = await HBA.rpc("web_pravo_pridat", { p_email: f.email.value, p_pravo: f.pravo.value, p_poznamka: f.poznamka.value });
+      var t = await HBA.rpc("web_pravo_pridat", { p_email: f.email.value, p_pravo: f.pravo.value, p_poznamka: f.poznamka.value, p_rozsah: f.rozsah.value });
       hl.textContent = t; hl.style.color = "#6E7338";
       f.email.value = ""; f.poznamka.value = "";
       var b = document.getElementById("t-obnovit"); if (b) b.click();
@@ -38,6 +39,7 @@
         { pole: "jmeno", nazev: "Osoba", sirka: 150 },
         { pole: "email", nazev: "E-mail", sirka: 200 },
         { pole: "pravo_nazev", nazev: "Právo", typ: "vycet", sirka: 180 },
+        { pole: "rozsah_text", nazev: "Rozsah", typ: "vycet", sirka: 100 },
         { pole: "pravo_popis", nazev: "Co zahrnuje", sirka: 320 },
         { pole: "role", nazev: "Role", sirka: 110 },
         { pole: "ucet", nazev: "Má přihlašovací účet", typ: "bool", sirka: 120 },
@@ -54,10 +56,11 @@
       historie: function (r) { return [{ tabulka: "web_osoba_pravo", id: r.id }]; },
       info: async function () {
         var prava = await HBA.db("web_pravo?select=kod,nazev&order=poradi");
-        return "Právo <b>Všechno</b> zahrnuje všechna ostatní. " +
+        return "Právo <b>Všechno</b> zahrnuje všechna ostatní. <b>Jen čtení</b> = databáze dovolí data vidět, ne měnit; <b>úpravy</b> = číst i měnit. Změnu rozsahu uděláte přidáním stejného práva s jiným rozsahem. " +
           '<form id="prava-pridat" style="display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center;margin-left:8px">' +
           '<input name="email" type="email" required placeholder="e-mail osoby" style="width:200px">' +
           '<select name="pravo">' + prava.map(function (p) { return '<option value="' + e(p.kod) + '">' + e(p.nazev) + '</option>'; }).join("") + '</select>' +
+          '<select name="rozsah"><option value="uprava">úpravy</option><option value="cteni">jen čtení</option></select>' +
           '<input name="poznamka" placeholder="poznámka (nepovinná)" style="width:170px">' +
           '<button type="submit" class="adm-mini adm-mini-hlavni">Přidat právo</button>' +
           '<span id="prava-hlaska" style="font-weight:600"></span></form>';
