@@ -11,7 +11,7 @@ eleventyExcludeFromCollections: true
   .zk-form legend{font-weight:700;padding:0 6px}
   .zk-radek{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 14px}
   .zk-form label.pole{display:block;font-size:14px;font-weight:600}
-  .zk-form label.pole input{display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid #cfc4c5;border-radius:5px;font:inherit;font-weight:400}
+  .zk-form label.pole input,.zk-form label.pole select{display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid #cfc4c5;border-radius:5px;font:inherit;font-weight:400;background:#fff}
   .zk-volba{display:flex;gap:10px;align-items:flex-start;margin:8px 0;cursor:pointer}
   .zk-volba input{margin-top:4px;width:17px;height:17px;accent-color:#78212E;flex:none}
   .zk-pozn{font-size:13px;color:#2c5c3a;background:#eef5f0;border-radius:4px;padding:5px 10px;margin:0 0 6px 27px}
@@ -48,7 +48,12 @@ eleventyExcludeFromCollections: true
       <label class="pole">Příjmení *<input name="prijmeni" required></label>
       <label class="pole">E-mail *<input name="email" type="email" required></label>
       <label class="pole">Telefon<input name="telefon" type="tel"></label>
+      <label class="pole">Kraj *<select name="kraj" id="zk-kraj" required>
+        <option value="">Načítám…</option></select></label>
+      <label class="pole">Kategorie týmu *<select name="kategorie" id="zk-kategorie" required>
+        <option value="">Načítám…</option></select></label>
     </div>
+    <p class="zk-pozn" id="zk-popis-kategorie" style="margin-left:0"></p>
   </fieldset>
 
   <fieldset>
@@ -110,9 +115,51 @@ eleventyExcludeFromCollections: true
   function varianta(v) { return '<span class="' + (v === "zakladni" ? "zk-var1" : "zk-var2") + '">' + esc(UCTY[v] || v) + "</span>"; }
 
   var form = el("zk-form");
+
+  // Číselníky se tahají až v prohlížeči, ať se po změně v databázi nemusí přestavovat web.
+  function cist(cesta) {
+    return fetch(URL_DB + "/rest/v1/" + cesta, {
+      headers: { apikey: KLIC, Authorization: "Bearer " + KLIC }
+    }).then(function (o) {
+      if (!o.ok) throw new Error("Nepodařilo se načíst číselník.");
+      return o.json();
+    });
+  }
+
+  var ZEME = { CZ: "Česko", SK: "Slovensko", PL: "Polsko" };
+  var POPIS_KATEGORII = {};
+
+  cist("web_kraj?select=kod,nazev,zeme&aktivni=eq.true&order=poradi").then(function (r) {
+    var sel = el("zk-kraj"), zeme = null, cil = sel;
+    sel.innerHTML = '<option value="">— vyberte —</option>';
+    r.forEach(function (k) {
+      if (k.zeme !== zeme) {
+        zeme = k.zeme;
+        cil = document.createElement("optgroup");
+        cil.label = ZEME[zeme] || zeme;
+        sel.appendChild(cil);
+      }
+      var o = document.createElement("option");
+      o.value = k.kod; o.textContent = k.nazev;
+      cil.appendChild(o);
+    });
+  }).catch(function () { el("zk-kraj").innerHTML = '<option value="">Číselník se nenačetl</option>'; });
+
+  cist("web_kategorie?select=kod,nazev,popis&aktivni=eq.true&order=poradi").then(function (r) {
+    var sel = el("zk-kategorie");
+    sel.innerHTML = '<option value="">— vyberte —</option>';
+    r.forEach(function (k) {
+      POPIS_KATEGORII[k.kod] = k.popis || "";
+      var o = document.createElement("option");
+      o.value = k.kod; o.textContent = k.nazev;
+      sel.appendChild(o);
+    });
+  }).catch(function () { el("zk-kategorie").innerHTML = '<option value="">Číselník se nenačetl</option>'; });
+
   form.addEventListener("change", function () {
     var ano = form.faktura.value === "ano";
     el("zk-faktura").classList.toggle("zk-skryte", !ano);
+    el("zk-popis-kategorie").textContent = POPIS_KATEGORII[form.kategorie.value] || "";
   });
 
   form.addEventListener("submit", function (e) {
@@ -121,7 +168,8 @@ eleventyExcludeFromCollections: true
     var f = form, ano = f.faktura.value === "ano";
     var data = {
       p_nazev: f.nazev.value, p_jmeno: f.jmeno.value, p_prijmeni: f.prijmeni.value,
-      p_email: f.email.value, p_telefon: f.telefon.value, p_fakturovat: ano,
+      p_email: f.email.value, p_telefon: f.telefon.value,
+      p_kraj: f.kraj.value || null, p_kategorie: f.kategorie.value || null, p_fakturovat: ano,
       p_odberatel_nazev: ano ? f.odberatel_nazev.value : null, p_odberatel_ic: ano ? f.odberatel_ic.value : null,
       p_odberatel_dic: ano ? f.odberatel_dic.value : null, p_odberatel_adresa: ano ? f.odberatel_adresa.value : null,
       p_duzp_rok: ano ? parseInt(f.duzp.value, 10) : null
@@ -131,6 +179,8 @@ eleventyExcludeFromCollections: true
       var roky = (v.rocniky_ucasti || []).join(", ") || "žádný (nový tým)";
       el("zk-vysledek").innerHTML =
         "<h2>" + esc(v.tym) + " – " + esc(v.vs) + "</h2><dl>" +
+        "<dt>Kraj</dt><dd>" + esc(v.kraj) + "</dd>" +
+        "<dt>Kategorie</dt><dd>" + esc(v.kategorie) + "</dd>" +
         "<dt>Mail</dt><dd>" + varianta(v.varianta) + "</dd>" +
         "<dt>Účet v mailu</dt><dd>" + esc(v.ucet) + "</dd>" +
         "<dt>Faktura</dt><dd>" + (v.fakturovat ? "ano – " + esc(v.odberatel) + ", plnění " + esc(v.duzp_rok) + ", datum faktury " + datum(v.datum_faktury) : "ne") + "</dd>" +
@@ -143,6 +193,7 @@ eleventyExcludeFromCollections: true
       el("zk-vysledek").classList.remove("zk-skryte");
       el("zk-vysledek").scrollIntoView({ behavior: "smooth", block: "start" });
       form.reset(); el("zk-faktura").classList.add("zk-skryte");
+      el("zk-popis-kategorie").textContent = "";
       nactiFrontu();
     }).catch(function (err) {
       el("zk-chyba").textContent = err.message;
