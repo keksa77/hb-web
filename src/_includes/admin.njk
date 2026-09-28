@@ -21,21 +21,21 @@
 <div class="adm-telo">
   <nav class="adm-menu" id="adm-menu" hidden>
     <div class="adm-menu-skupina">Registrace</div>
-    <a href="{{ web.zaklad }}/admin/fronta/"{% if sekce == "fronta" %} aria-current="page"{% endif %}>Fronta mailů <span class="adm-pocet" id="adm-pocet-fronta"></span></a>
-    <a href="{{ web.zaklad }}/admin/odchozi/"{% if sekce == "odchozi" %} aria-current="page"{% endif %}>Odchozí maily <span class="adm-pocet" id="adm-pocet-odchozi"></span></a>
-    <a href="{{ web.zaklad }}/admin/tymy/"{% if sekce == "tymy" %} aria-current="page"{% endif %}>Týmy</a>
-    <a href="{{ web.zaklad }}/admin/bezci/"{% if sekce == "bezci" %} aria-current="page"{% endif %}>Běžci</a>
+    <a data-pravo="fronta_mailu" href="{{ web.zaklad }}/admin/fronta/"{% if sekce == "fronta" %} aria-current="page"{% endif %}>Fronta mailů <span class="adm-pocet" id="adm-pocet-fronta"></span></a>
+    <a data-pravo="odchozi_maily" href="{{ web.zaklad }}/admin/odchozi/"{% if sekce == "odchozi" %} aria-current="page"{% endif %}>Odchozí maily <span class="adm-pocet" id="adm-pocet-odchozi"></span></a>
+    <a data-pravo="tymy" href="{{ web.zaklad }}/admin/tymy/"{% if sekce == "tymy" %} aria-current="page"{% endif %}>Týmy</a>
+    <a data-pravo="bezci" href="{{ web.zaklad }}/admin/bezci/"{% if sekce == "bezci" %} aria-current="page"{% endif %}>Běžci</a>
     <div class="adm-menu-skupina">Závod</div>
-    <a href="{{ web.zaklad }}/admin/casy/"{% if sekce == "casy" %} aria-current="page"{% endif %}>Časy</a>
-    <a href="{{ web.zaklad }}/admin/vysledky/"{% if sekce == "vysledky" %} aria-current="page"{% endif %}>Výsledky</a>
+    <a data-pravo="casy_vysledky" href="{{ web.zaklad }}/admin/casy/"{% if sekce == "casy" %} aria-current="page"{% endif %}>Časy</a>
+    <a data-pravo="casy_vysledky" href="{{ web.zaklad }}/admin/vysledky/"{% if sekce == "vysledky" %} aria-current="page"{% endif %}>Výsledky</a>
     <div class="adm-menu-skupina">Ročník</div>
-    <a href="{{ web.zaklad }}/admin/etapy/"{% if sekce == "etapy" %} aria-current="page"{% endif %}>Etapy a předávky</a>
-    <a href="{{ web.zaklad }}/admin/nastaveni/"{% if sekce == "nastaveni" %} aria-current="page"{% endif %}>Nastavení ročníku</a>
-    <a href="{{ web.zaklad }}/admin/nastaveni-obecne/"{% if sekce == "nastaveni-obecne" %} aria-current="page"{% endif %}>Obecné nastavení</a>
-    <a href="{{ web.zaklad }}/admin/cenik/"{% if sekce == "cenik" %} aria-current="page"{% endif %}>Ceník startovného</a>
-    <a href="{{ web.zaklad }}/admin/ucty/"{% if sekce == "ucty" %} aria-current="page"{% endif %}>Bankovní účty</a>
-    <a href="{{ web.zaklad }}/admin/maily/"{% if sekce == "maily" %} aria-current="page"{% endif %}>Texty mailů</a>
-    <a href="{{ web.zaklad }}/admin/prava/"{% if sekce == "prava" %} aria-current="page"{% endif %}>Role a práva</a>
+    <a data-pravo="etapy" href="{{ web.zaklad }}/admin/etapy/"{% if sekce == "etapy" %} aria-current="page"{% endif %}>Etapy a předávky</a>
+    <a data-pravo="nastaveni" href="{{ web.zaklad }}/admin/nastaveni/"{% if sekce == "nastaveni" %} aria-current="page"{% endif %}>Nastavení ročníku</a>
+    <a data-pravo="nastaveni" href="{{ web.zaklad }}/admin/nastaveni-obecne/"{% if sekce == "nastaveni-obecne" %} aria-current="page"{% endif %}>Obecné nastavení</a>
+    <a data-pravo="cenik_ucty" href="{{ web.zaklad }}/admin/cenik/"{% if sekce == "cenik" %} aria-current="page"{% endif %}>Ceník startovného</a>
+    <a data-pravo="cenik_ucty" href="{{ web.zaklad }}/admin/ucty/"{% if sekce == "ucty" %} aria-current="page"{% endif %}>Bankovní účty</a>
+    <a data-pravo="texty_mailu" href="{{ web.zaklad }}/admin/maily/"{% if sekce == "maily" %} aria-current="page"{% endif %}>Texty mailů</a>
+    <a data-pravo="prava" href="{{ web.zaklad }}/admin/prava/"{% if sekce == "prava" %} aria-current="page"{% endif %}>Role a práva</a>
     <span class="adm-pripravuje" title="Připravuje se">Seznam pro variantu 2</span>
     <div class="adm-menu-skupina">Web</div>
     <span class="adm-pripravuje" title="Připravuje se">Stránky a bloky</span>
