@@ -22,12 +22,14 @@ document.addEventListener("DOMContentLoaded", async function () {
   var j = await HBA.ja();
   if (j && j.osoba_id) {
     HBA.zobrazKdo(j);
-    if ((j.uroven || 0) < 30) {
-      document.querySelector(".adm-hlavni").innerHTML = '<p class="adm-chyba">Váš účet nemá organizátorská práva. Požádejte správce o přidělení role.</p>';
+    // první stránka z menu, na kterou má právo (pořadí menu)
+    var prvni = document.querySelector("#adm-menu a[data-pravo]:not([hidden])");
+    if (!prvni || document.getElementById("adm-menu").hidden) {
+      document.querySelector(".adm-hlavni").innerHTML = '<p class="adm-chyba">Váš účet zatím nemá žádné právo v administraci. Požádejte správce o přidělení práva.</p>';
       return;
     }
     var zpet = new URLSearchParams(location.search).get("zpet");
-    location.replace(zpet && zpet.indexOf(HB.zaklad + "/admin/") === 0 ? zpet : HB.zaklad + "/admin/fronta/");
+    location.replace(zpet && zpet.indexOf(HB.zaklad + "/admin/") === 0 ? zpet : prvni.getAttribute("href"));
     return;
   }
   document.getElementById("adm-prihlaseni").hidden = false;
