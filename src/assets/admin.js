@@ -101,24 +101,63 @@
     return datum(d) + " " + String(x.getHours()).padStart(2, "0") + ":" + String(x.getMinutes()).padStart(2, "0");
   }
 
+  // Práva přihlášeného: { kod: "uprava" | "cteni" } (web_ja → web_moje_prava; „kod:cteni“ = jen čtení).
+  function mojePrava(j) {
+    var m = {};
+    (j && j.prava || []).forEach(function (p) {
+      var x = String(p).split(":"); m[x[0]] = x[1] === "cteni" ? "cteni" : "uprava";
+    });
+    return m;
+  }
+  function maPristup(j) { return (j.uroven || 0) >= 30 || Object.keys(mojePrava(j)).length > 0; }
+
   // Hlavička: jméno, menu, odhlášení. Stránky, které přihlášení vyžadují, zavolají HBA.vyzadovat().
+  // Vstup do administrace má každý, kdo má aspoň jedno právo (stránka Role a práva); menu ukáže jen jeho stránky.
   async function vyzadovat() {
     var j = await ja();
     if (!j || !j.osoba_id) { location.href = HB.zaklad + "/admin/?zpet=" + encodeURIComponent(location.pathname + location.hash); return null; }
-    if ((j.uroven || 0) < 30) {
-      document.querySelector(".adm-hlavni").innerHTML =
-        '<p class="adm-chyba">Váš účet nemá organizátorská práva. Požádejte správce o přidělení role.</p>';
+    var hl = document.querySelector(".adm-hlavni");
+    if (!maPristup(j)) {
+      hl.innerHTML = '<p class="adm-chyba">Váš účet zatím nemá žádné právo v administraci. Požádejte správce o přidělení práva.</p>';
       zobrazKdo(j); return null;
     }
     zobrazKdo(j);
+    var tady = document.querySelector('#adm-menu a[aria-current="page"]');
+    var kod = tady && tady.getAttribute("data-pravo");
+    if (kod) {
+      var p = mojePrava(j), rozsah = p.vse || p[kod];
+      if (p.vse === "cteni" && p[kod] === "uprava") rozsah = "uprava";
+      if (!rozsah) {
+        hl.innerHTML = '<p class="adm-chyba">Na tuto stránku nemáte právo („' + esc(tady.textContent.trim()) + '“). Požádejte správce o přidělení.</p>';
+        return null;
+      }
+      if (rozsah === "cteni") {
+        var b = document.createElement("p");
+        b.className = "adm-jen-cteni";
+        b.style.cssText = "margin:8px 16px 0;padding:6px 10px;background:#F6EEDC;border-left:3px solid #78212E;font-size:13px";
+        b.textContent = "Máte tu jen čtení — změny databáze neuloží.";
+        hl.insertBefore(b, hl.firstChild);
+      }
+    }
     return j;
   }
   function zobrazKdo(j) {
     document.getElementById("adm-jmeno").textContent = (j.jmeno || j.email) + (j.role ? " · " + j.role : "");
     document.getElementById("adm-kdo").hidden = false;
-    var jeOrg = (j.uroven || 0) >= 30;
-    document.getElementById("adm-menu").hidden = !jeOrg;
-    if (jeOrg) {
+    var p = mojePrava(j), pristup = maPristup(j);
+    document.getElementById("adm-menu").hidden = !pristup;
+    if (!pristup) return;
+    // v menu jen stránky, na které má právo (čtení nebo úpravy)
+    Array.prototype.forEach.call(document.querySelectorAll("#adm-menu a[data-pravo]"), function (a) {
+      a.hidden = !(p.vse || p[a.getAttribute("data-pravo")]);
+    });
+    // skupina bez viditelných odkazů se schová
+    Array.prototype.forEach.call(document.querySelectorAll("#adm-menu .adm-menu-skupina"), function (s) {
+      var n = s.nextElementSibling, vidi = false;
+      while (n && !n.classList.contains("adm-menu-skupina")) { if (n.tagName === "A" && !n.hidden) vidi = true; n = n.nextElementSibling; }
+      if (!vidi && s.nextElementSibling && s.nextElementSibling.tagName === "A") s.hidden = true;
+    });
+    if (p.vse || p.fronta_mailu) {
       // Počet čekajících ostrých mailů v menu (zkušební přihlášky se nepočítají).
       // Připomínka místo mailu: když nejstarší čeká déle než nastavený počet hodin
       // (Nastavení → Připomínka fronty), počet zčervená — týmům slibujeme potvrzení do 24 hodin.
@@ -136,6 +175,8 @@
           el.title = "Nejstarší registrace čeká na schválení " + Math.floor(stari) + " h — slib zní do 24 hodin.";
         }
       }).catch(function () {});
+    }
+    if (p.vse || p.odchozi_maily || p.fronta_mailu) {
       db("web_mail_fronta?select=id&stav=eq.ceka").then(function (r) {
         var el = document.getElementById("adm-pocet-odchozi");
         if (el) el.textContent = r.length ? "(" + r.length + ")" : "";
@@ -147,5 +188,5 @@
   });
 
   window.HBA = { prihlasit: prihlasit, odhlasit: odhlasit, db: db, rpc: rpc, ja: ja, token: platnyToken,
-                 vyzadovat: vyzadovat, zobrazKdo: zobrazKdo, esc: esc, datum: datum, cas: cas };
+                 vyzadovat: vyzadovat, zobrazKdo: zobrazKdo, mojePrava: mojePrava, esc: esc, datum: datum, cas: cas };
 })();
