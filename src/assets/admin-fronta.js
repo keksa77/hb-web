@@ -2,6 +2,8 @@
 // Do 10. 1. 2027 čeká každý registrační mail s pokyny k platbě na rozhodnutí organizátora.
 // Limit 5 týmů na variantu 1, zákaz varianty 2 pro fakturované týmy a zákaz pokynů před 1. 1.
 // u plnění 2027 hlídají triggery v databázi – tabulka jen ukáže jejich hlášku.
+// Tlačítko „Leden“ zapne u čekajícího mailu odklad platby: do mailu přijde prosba o platbu
+// v lednu 2027 se zachováním ceny první vlny (termín v Nastavení → Registrační mail).
 (function () {
   var e = HBA.esc;
   var STAV = { ceka: "čeká", schvaleno: "schváleno", zamitnuto: "zamítnuto", odeslano: "odesláno" };
@@ -19,7 +21,7 @@
       sekce: "fronta",
       nazev: "Fronta mailů",
       idPole: "id",
-      sirkaAkci: 170,
+      sirkaAkci: 235,
       nacist: function () { return HBA.db("web_v_fronta_mailu?select=*&order=vytvoreno.asc"); },
       pripravit: function (r) {
         r.stav_text = STAV[r.stav] || r.stav;
@@ -28,6 +30,7 @@
         r.navrh_text = VAR[r.varianta_navrh] || r.varianta_navrh;
         r.limit_text = an(r.pocita_se_do_limitu);
         r.testovaci_text = an(r.testovaci);
+        r.odklad_text = an(r.odklad_platby);
         r.ucasti = (r.rocniky_ucasti || []).join(", ");
         r.pocet_ucasti = (r.rocniky_ucasti || []).length;
         r.vytvoreno_m = HBT.mistniCas(r.vytvoreno);
@@ -43,6 +46,7 @@
         { pole: "varianta_text", nazev: "Varianta", typ: "vycet", sirka: 105, napoveda: "Schválená varianta, dokud není schválená, tak navržená" },
         { pole: "navrh_text", nazev: "Návrh", typ: "vycet", sirka: 100, skryty: true },
         { pole: "faktura", nazev: "Faktura", typ: "bool", sirka: 80 },
+        { pole: "odklad_text", nazev: "Platba v lednu", typ: "bool", sirka: 110, napoveda: "Z účetních důvodů prosíme o platbu v lednu 2027 se zachováním ceny první vlny" },
         { pole: "duzp_rok", nazev: "Plnění", typ: "vycet", sirka: 80, napoveda: "Rok zdanitelného plnění na faktuře" },
         { pole: "datum_faktury", nazev: "Datum faktury", typ: "datum", sirka: 115 },
         { pole: "pokyny_nejdriv", nazev: "Pokyny nejdřív", typ: "datum", sirka: 115, napoveda: "Kdy nejdřív smí odejít pokyny k platbě" },
@@ -66,17 +70,23 @@
         if (r.stav !== "ceka") return '<button type="button" class="adm-mini" data-akce="vratit">Vrátit do fronty</button>';
         var h = '<button type="button" class="adm-mini' + (r.varianta_navrh === "zakladni" ? " adm-mini-hlavni" : "") + '" data-akce="schvalit" data-arg="zakladni" title="Schválit – varianta 1">✓ V1</button>';
         if (!r.fakturovat) h += '<button type="button" class="adm-mini' + (r.varianta_navrh === "zvlastni" ? " adm-mini-hlavni" : "") + '" data-akce="schvalit" data-arg="zvlastni" title="Schválit – varianta 2">✓ V2</button>';
-        return h + '<button type="button" class="adm-mini adm-mini-cervene" data-akce="zamitnout" title="Zamítnout">✗</button>';
+        h += '<button type="button" class="adm-mini adm-mini-cervene" data-akce="zamitnout" title="Zamítnout">✗</button>';
+        return h + (r.odklad_platby
+          ? '<button type="button" class="adm-mini adm-mini-hlavni" data-akce="odklad" data-arg="ne" title="Zrušit odklad platby na leden">Leden ✓</button>'
+          : '<button type="button" class="adm-mini" data-akce="odklad" data-arg="ano" title="Přidat do mailu prosbu o platbu v lednu 2027 se zachováním ceny první vlny">Leden</button>');
       },
       akce: {
         schvalit: function (r, varianta) { return zmen(r, { stav: "schvaleno", varianta_schvalena: varianta || r.varianta_navrh }); },
         zamitnout: function (r) { return zmen(r, { stav: "zamitnuto" }); },
-        vratit: function (r) { return zmen(r, { stav: "ceka", varianta_schvalena: null }); }
+        vratit: function (r) { return zmen(r, { stav: "ceka", varianta_schvalena: null }); },
+        odklad: function (r, arg) { return HBA.rpc("web_fronta_odklad", { p_id: r.id, p_odklad: arg === "ano" }); }
       },
       hromadne: [
         { nazev: "Schválit navrženou variantu", akce: "schvalit", jen: function (r) { return r.stav === "ceka"; } },
         { nazev: "Zamítnout", akce: "zamitnout", jen: function (r) { return r.stav === "ceka"; } },
-        { nazev: "Vrátit do fronty", akce: "vratit", jen: function (r) { return r.stav !== "ceka"; } }
+        { nazev: "Vrátit do fronty", akce: "vratit", jen: function (r) { return r.stav !== "ceka"; } },
+        { nazev: "Platba v lednu – zapnout", akce: "odklad", arg: "ano", jen: function (r) { return r.stav === "ceka" && !r.odklad_platby; } },
+        { nazev: "Platba v lednu – zrušit", akce: "odklad", arg: "ne", jen: function (r) { return r.stav === "ceka" && r.odklad_platby; } }
       ],
       historie: function (r) { return [{ tabulka: "web_maily_ke_schvaleni", id: r.id }]; },
       info: async function () {
@@ -89,7 +99,7 @@
         var ostre = vse.filter(function (r) { return !r.testovaci; }).length;
         var test = vse.length - ostre;
         if (!ostre) h.push("Ostrá fronta je prázdná — registrace HB27 ještě nezačala." + (test ? " Zkušební přihlášky (" + test + ") uvidíte po zrušení filtru Zkušební." : ""));
-        h.push("Maily se zatím skutečně neodesílají.");
+        h.push("Odeslání: schválený mail odejde do 5 minut, pokud je jeho šablona zapnutá.");
         return h.join(" · ");
       }
     });
