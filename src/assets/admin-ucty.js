@@ -25,8 +25,7 @@
         { pole: "varianta_text", nazev: "Varianta mailu", sirka: 190 },
         { pole: "cislo_uctu", nazev: "Číslo účtu", sirka: 160, uprava: upr("cislo_uctu") },
         { pole: "iban", nazev: "IBAN", sirka: 260, uprava: upr("iban") },
-        { pole: "bic", nazev: "BIC/SWIFT", sirka: 130, uprava: upr("bic") },
-        { pole: "rok", nazev: "Ročník", typ: "vycet", sirka: 80 }
+        { pole: "bic", nazev: "BIC/SWIFT", sirka: 130, uprava: upr("bic") }
       ],
       info: function () {
         return Promise.resolve("Ročník <b>" + HBA.esc(ROK) + "</b>. Z těchto údajů se skládá číslo účtu, IBAN a QR platba v registračním mailu. " +

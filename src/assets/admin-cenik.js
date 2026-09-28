@@ -48,8 +48,7 @@
             if (!(n > 0)) throw new Error("Cena musí být kladné číslo.");
             return uloz(r, { cena_kc: n });
           } } },
-        { pole: "poradi", nazev: "Pořadí", typ: "cislo", sirka: 80 },
-        { pole: "rok", nazev: "Ročník", typ: "vycet", sirka: 80 }
+        { pole: "poradi", nazev: "Pořadí", typ: "cislo", sirka: 80 }
       ],
       info: async function () {
         var h = ["Ročník <b>" + e(ROK) + "</b>. Cena týmu se řídí dnem <b>platby</b>. Změny jsou hned vidět v nových mailech."];
