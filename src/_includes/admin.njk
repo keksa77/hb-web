@@ -22,6 +22,7 @@
   <nav class="adm-menu" id="adm-menu" hidden>
     <div class="adm-menu-skupina">Registrace</div>
     <a href="{{ web.zaklad }}/admin/fronta/"{% if sekce == "fronta" %} aria-current="page"{% endif %}>Fronta mailů <span class="adm-pocet" id="adm-pocet-fronta"></span></a>
+    <a href="{{ web.zaklad }}/admin/odchozi/"{% if sekce == "odchozi" %} aria-current="page"{% endif %}>Odchozí maily <span class="adm-pocet" id="adm-pocet-odchozi"></span></a>
     <a href="{{ web.zaklad }}/admin/tymy/"{% if sekce == "tymy" %} aria-current="page"{% endif %}>Týmy</a>
     <a href="{{ web.zaklad }}/admin/bezci/"{% if sekce == "bezci" %} aria-current="page"{% endif %}>Běžci</a>
     <div class="adm-menu-skupina">Závod</div>
