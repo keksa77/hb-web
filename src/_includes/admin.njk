@@ -42,6 +42,11 @@
     <span class="adm-pripravuje" title="Připravuje se">FAQ</span>
   </nav>
   <main class="adm-hlavni">
+    {%- set supabaseTabulky = { "fronta": 20757, "odchozi": 21501, "cenik": 20508, "ucty": 20643, "maily": 20571, "prava": 21940, "tymy": 20239, "bezci": 20220, "nastaveni": 21141 } -%}
+    {%- if supabaseTabulky[sekce] %}
+    <a href="https://supabase.com/dashboard/project/rjuxqlyckikuxfaeaozf/editor/{{ supabaseTabulky[sekce] }}?schema=public" target="_blank" rel="noopener"
+       style="float:right;margin:10px 16px 0 0;font-size:12.5px;color:#78212E" title="Stejná data přímo v databázi">Otevřít tabulku v Supabase ↗</a>
+    {%- endif %}
     {{ content | safe }}
   </main>
 </div>
