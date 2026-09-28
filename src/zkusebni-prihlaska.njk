@@ -57,6 +57,17 @@ eleventyExcludeFromCollections: true
   </fieldset>
 
   <fieldset>
+    <legend>Zástupce kapitána</legend>
+    <p class="zk-pozn" style="margin-left:0">Druhá kontaktní osoba týmu. Musí mít jiný e-mail než kapitán.</p>
+    <div class="zk-radek">
+      <label class="pole">Jméno *<input name="zastupce_jmeno" required></label>
+      <label class="pole">Příjmení *<input name="zastupce_prijmeni" required></label>
+      <label class="pole">E-mail *<input name="zastupce_email" type="email" required></label>
+      <label class="pole">Telefon *<input name="zastupce_telefon" type="tel" required></label>
+    </div>
+  </fieldset>
+
+  <fieldset>
     <legend>Faktura za startovné</legend>
     <label class="zk-volba"><input type="radio" name="faktura" value="ne" checked><span>Ne, fakturu nepotřebujeme</span></label>
     <label class="zk-volba"><input type="radio" name="faktura" value="ano"><span>Ano, startovné platí firma nebo organizace a potřebuje fakturu</span></label>
@@ -169,6 +180,8 @@ eleventyExcludeFromCollections: true
     var data = {
       p_nazev: f.nazev.value, p_jmeno: f.jmeno.value, p_prijmeni: f.prijmeni.value,
       p_email: f.email.value, p_telefon: f.telefon.value,
+      p_zastupce_jmeno: f.zastupce_jmeno.value, p_zastupce_prijmeni: f.zastupce_prijmeni.value,
+      p_zastupce_email: f.zastupce_email.value, p_zastupce_telefon: f.zastupce_telefon.value,
       p_kraj: f.kraj.value || null, p_kategorie: f.kategorie.value || null, p_fakturovat: ano,
       p_odberatel_nazev: ano ? f.odberatel_nazev.value : null, p_odberatel_ic: ano ? f.odberatel_ic.value : null,
       p_odberatel_dic: ano ? f.odberatel_dic.value : null, p_odberatel_adresa: ano ? f.odberatel_adresa.value : null,
@@ -179,6 +192,7 @@ eleventyExcludeFromCollections: true
       var roky = (v.rocniky_ucasti || []).join(", ") || "žádný (nový tým)";
       el("zk-vysledek").innerHTML =
         "<h2>" + esc(v.tym) + " – " + esc(v.vs) + "</h2><dl>" +
+        "<dt>Zástupce</dt><dd>" + esc(v.zastupce) + " · " + esc(v.zastupce_email) + "</dd>" +
         "<dt>Kraj</dt><dd>" + esc(v.kraj) + "</dd>" +
         "<dt>Kategorie</dt><dd>" + esc(v.kategorie) + "</dd>" +
         "<dt>Mail</dt><dd>" + varianta(v.varianta) + "</dd>" +
