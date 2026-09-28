@@ -120,8 +120,24 @@
     document.getElementById("adm-menu").hidden = !jeOrg;
     if (jeOrg) {
       // Počet čekajících ostrých mailů v menu (zkušební přihlášky se nepočítají).
-      db("web_maily_ke_schvaleni?select=id,web_tym!inner(testovaci)&stav=eq.ceka&web_tym.testovaci=is.false").then(function (r) {
+      // Připomínka místo mailu: když nejstarší čeká déle než nastavený počet hodin
+      // (Nastavení → Připomínka fronty), počet zčervená — týmům slibujeme potvrzení do 24 hodin.
+      Promise.all([
+        db("web_maily_ke_schvaleni?select=id,vytvoreno,web_tym!inner(testovaci)&stav=eq.ceka&web_tym.testovaci=is.false&order=vytvoreno.asc"),
+        db("parametr_hodnota?select=hodnota&klic=eq.pripominka_fronty_po_hodinach&rok=eq." + (HB.rocnik || "HB27")).catch(function () { return []; })
+      ]).then(function (v) {
+        var r = v[0], hod = Number((v[1][0] || {}).hodnota) || 12;
         var el = document.getElementById("adm-pocet-fronta");
+        if (!el) return;
+        el.textContent = r.length ? "(" + r.length + ")" : "";
+        var stari = r.length ? (Date.now() - new Date(r[0].vytvoreno).getTime()) / 3600000 : 0;
+        if (stari > hod) {
+          el.style.color = "#A3302B"; el.style.fontWeight = "700";
+          el.title = "Nejstarší registrace čeká na schválení " + Math.floor(stari) + " h — slib zní do 24 hodin.";
+        }
+      }).catch(function () {});
+      db("web_mail_fronta?select=id&stav=eq.ceka").then(function (r) {
+        var el = document.getElementById("adm-pocet-odchozi");
         if (el) el.textContent = r.length ? "(" + r.length + ")" : "";
       }).catch(function () {});
     }
@@ -130,6 +146,6 @@
     if (e.target && e.target.id === "adm-odhlasit") odhlasit();
   });
 
-  window.HBA = { prihlasit: prihlasit, odhlasit: odhlasit, db: db, rpc: rpc, ja: ja,
+  window.HBA = { prihlasit: prihlasit, odhlasit: odhlasit, db: db, rpc: rpc, ja: ja, token: platnyToken,
                  vyzadovat: vyzadovat, zobrazKdo: zobrazKdo, esc: esc, datum: datum, cas: cas };
 })();
