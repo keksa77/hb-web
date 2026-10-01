@@ -1,0 +1,45 @@
+---
+permalink: "/kapitan/prihlaseni/index.html"
+layout: zaklad.njk
+titulek: "Přihlášení do kapitánské sekce"
+metaPopis: "Kapitánská sekce Hory Bory – přihlášení odkazem z e-mailu."
+eleventyExcludeFromCollections: true
+---
+<link rel="stylesheet" href="{{ web.zaklad }}/assets/kapitan.css">
+<h1>Kapitánská sekce</h1>
+<div class="k-karta k-uzka" id="k-prihlaseni">
+  <p>Zadejte e-mail, který jste uvedli v registraci týmu (nebo pod kterým vás kapitán přidal na soupisku). Pošleme vám na něj odkaz, kterým se přihlásíte. Heslo není potřeba.</p>
+  <form id="k-form" novalidate>
+    <label class="k-pole" for="k-email">E-mail
+      <input id="k-email" name="email" type="email" autocomplete="email" required>
+    </label>
+    <button type="submit" class="k-tlacitko" id="k-poslat">Poslat přihlašovací odkaz</button>
+  </form>
+  <p id="k-stav" class="k-hlaska" role="status"></p>
+</div>
+<script>
+  window.HB = { url: "{{ web.supabaseUrl }}", klic: "{{ web.supabaseKlic }}", zaklad: "{{ web.zaklad }}" };
+</script>
+<script src="{{ web.zaklad }}/assets/kapitan.js"></script>
+<script>
+(async function () {
+  var stav = document.getElementById("k-stav");
+  var zpet = new URLSearchParams(location.search).get("zpet");
+  var cil = zpet && zpet.indexOf(HB.zaklad + "/kapitan/") === 0 ? zpet : HB.zaklad + "/kapitan/";
+  try { if (zpet) sessionStorage.setItem("hb_kapitan_zpet", cil); else cil = sessionStorage.getItem("hb_kapitan_zpet") || cil; } catch (e) {}
+  var o = HBK.prevezmiZOdkazu();
+  if (o && o.chyba) HBK.hlaska(stav, o.chyba, true);
+  if (await HBK.platnyToken()) { try { sessionStorage.removeItem("hb_kapitan_zpet"); } catch (e) {} location.replace(cil); return; }
+  document.getElementById("k-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    var email = document.getElementById("k-email").value.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { HBK.hlaska(stav, "Zadejte e-mail ve tvaru jmeno@domena.cz.", true); return; }
+    var b = document.getElementById("k-poslat"); b.disabled = true;
+    try {
+      await HBK.poslatOdkaz(email);
+      HBK.hlaska(stav, "Odkaz jsme poslali na " + email + ". Otevřete ho v tomto prohlížeči. Platí hodinu. Když nepřijde do pár minut, podívejte se do spamu.");
+    } catch (err) { HBK.hlaska(stav, err.message, true); }
+    b.disabled = false;
+  });
+})();
+</script>
