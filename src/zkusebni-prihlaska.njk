@@ -48,6 +48,7 @@ eleventyExcludeFromCollections: true
       <label class="pole">Příjmení *<input name="prijmeni" required></label>
       <label class="pole">E-mail *<input name="email" type="email" required></label>
       <label class="pole">Telefon<input name="telefon" type="tel"></label>
+      <label class="zk-volba" style="grid-column:1/-1"><input type="checkbox" name="bezim" checked><span>Poběžím také – zapište mě rovnou na soupisku (pak je telefon povinný)</span></label>
       <label class="pole">Kraj *<select name="kraj" id="zk-kraj" required>
         <option value="">Načítám…</option></select></label>
       <label class="pole">Kategorie týmu *<select name="kategorie" id="zk-kategorie" required>
@@ -185,13 +186,15 @@ eleventyExcludeFromCollections: true
       p_kraj: f.kraj.value || null, p_kategorie: f.kategorie.value || null, p_fakturovat: ano,
       p_odberatel_nazev: ano ? f.odberatel_nazev.value : null, p_odberatel_ic: ano ? f.odberatel_ic.value : null,
       p_odberatel_dic: ano ? f.odberatel_dic.value : null, p_odberatel_adresa: ano ? f.odberatel_adresa.value : null,
-      p_duzp_rok: ano ? parseInt(f.duzp.value, 10) : null
+      p_duzp_rok: ano ? parseInt(f.duzp.value, 10) : null,
+      p_bezim: f.bezim.checked
     };
     el("zk-odeslat").disabled = true;
     rpc("web_registrace_test", data).then(function (v) {
       var roky = (v.rocniky_ucasti || []).join(", ") || "žádný (nový tým)";
       el("zk-vysledek").innerHTML =
         "<h2>" + esc(v.tym) + " – " + esc(v.vs) + "</h2><dl>" +
+        "<dt>Kapitán běží</dt><dd>" + (v.kapitan_bezi ? "ano, je na soupisce" : "ne") + "</dd>" +
         "<dt>Zástupce</dt><dd>" + esc(v.zastupce) + " · " + esc(v.zastupce_email) + "</dd>" +
         "<dt>Kraj</dt><dd>" + esc(v.kraj) + "</dd>" +
         "<dt>Kategorie</dt><dd>" + esc(v.kategorie) + "</dd>" +
