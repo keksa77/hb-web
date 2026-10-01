@@ -1,0 +1,45 @@
+/* Kapitánská sekce – provizorní vzhled v barvách webu, než dorazí návrh grafika. */
+.k-lista { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; padding: 10px 14px; margin: 0 0 22px;
+  background: var(--hb-svetla); border: 1px solid var(--ram); border-radius: 8px; font-size: .95rem; }
+.k-lista a { text-decoration: none; font-weight: 600; }
+.k-lista a[aria-current="page"] { text-decoration: underline; text-underline-offset: 4px; }
+.k-tym { font-weight: 700; margin-right: auto; }
+.k-odkaz { background: none; border: 0; padding: 0; color: var(--hb); font: inherit; cursor: pointer; text-decoration: underline; }
+.k-karta { background: #fff; border: 1px solid var(--ram); border-radius: 8px; padding: 14px 18px; margin: 0 0 18px; }
+.k-karta h2 { margin-top: 0; }
+.k-uzka { max-width: 34rem; }
+.k-mrizka { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0 18px; }
+.k-dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 0; }
+.k-dl dt { color: var(--seda); }
+.k-dl dd { margin: 0; font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.k-pole { display: block; font-weight: 600; font-size: .95rem; margin: 0 0 12px; }
+.k-pole input, .k-pole select, .k-pole textarea { display: block; width: 100%; margin-top: 4px; padding: 8px 10px; font: inherit; font-weight: 400;
+  border: 1px solid #cfc4c5; border-radius: 6px; background: #fff; color: var(--text); }
+.k-pole small { display: block; font-weight: 400; color: var(--seda); font-size: .85rem; margin-top: 3px; }
+.k-formular { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 0 14px; }
+.k-tlacitko { background: var(--hb); color: #fff; border: 0; border-radius: 6px; padding: 10px 18px; font: inherit; font-weight: 700; cursor: pointer; }
+.k-tlacitko:hover { background: var(--hb-tmava); }
+.k-tlacitko:disabled { opacity: .5; cursor: default; }
+.k-vedlejsi { background: #fff; color: var(--hb); border: 1px solid #cfc4c5; border-radius: 6px; padding: 6px 12px; font: inherit; font-size: .9rem; cursor: pointer; }
+.k-akce { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+.k-hlaska { margin: 10px 0 0; font-weight: 600; }
+.k-hlaska:empty { display: none; }
+.k-hlaska-ok { color: #2c5c3a; }
+.k-hlaska-chyba, .k-chyba { color: #7a1f1f; }
+.k-chyba { background: #fbecec; border: 1px solid #e0a5a5; border-radius: 6px; padding: 10px 14px; }
+.k-upozorneni { margin: 0; padding-left: 1.2em; }
+.k-upozorneni li { margin: 4px 0; }
+.k-ok { color: #2c5c3a; font-weight: 600; }
+.k-stitek { display: inline-block; font-size: .8rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor; }
+.k-stitek-ok { color: #2c5c3a; } .k-stitek-ne { color: #7a1f1f; }
+.k-tabulka-obal { overflow-x: auto; }
+.k-tabulka { border-collapse: collapse; width: 100%; font-size: .93rem; background: #fff; }
+.k-tabulka th { background: var(--hb); color: #fff; text-align: left; padding: 7px 9px; font-weight: 600; white-space: nowrap; }
+.k-tabulka td { border-bottom: 1px solid var(--ram); padding: 7px 9px; vertical-align: top; }
+.k-tabulka td.k-cislo { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.k-tabulka tr.k-spatne td { background: #fbecec; }
+.k-tabulka select { font: inherit; padding: 5px 6px; border: 1px solid #cfc4c5; border-radius: 5px; max-width: 100%; }
+.k-text p { margin: 0 0 8px; }
+.k-tretiny span { display: inline-block; min-width: 3.4em; text-align: center; font-size: .8rem; border-radius: 4px; padding: 0 4px; margin-right: 3px; }
+.k-tretina-ano { background: #e3f0e6; color: #2c5c3a; }
+.k-tretina-ne { background: #fbecec; color: #7a1f1f; }
