@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     // první stránka z menu, na kterou má právo (pořadí menu)
     var prvni = document.querySelector("#adm-menu a[data-pravo]:not([hidden])");
     if (!prvni || document.getElementById("adm-menu").hidden) {
-      document.querySelector(".adm-hlavni").innerHTML = '<p class="adm-chyba">Váš účet zatím nemá žádné právo v administraci. Požádejte správce o přidělení práva.</p>';
+      document.querySelector(".adm-hlavni").innerHTML = '<p class="adm-chyba">Tvůj účet zatím nemá žádné právo v administraci. Požádej správce o přidělení práva.</p>';
       return;
     }
     var zpet = new URLSearchParams(location.search).get("zpet");
