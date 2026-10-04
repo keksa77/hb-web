@@ -9,6 +9,23 @@ import { readFile } from "node:fs/promises";
 // šablon tam, kde na Supabase není vidět. Při ostrém buildu se nepoužívá.
 const zeSouboru = process.env.OBSAH_ZE_SOUBORU;
 
+// Otázky FAQ se vypisují jako prostý text. Starý editor je ukládal jako HTML (<p>, &aacute;…),
+// a pak se na webu zobrazovaly kódy místo písmen. Proto se tu značky odstraní a znakové
+// entity převedou na písmena, ať se chyba nevrátí ani po další úpravě v editoru (4. 10. 2026).
+const ENTITY = { nbsp: " ", amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", ndash: "–", mdash: "—",
+  hellip: "…", bdquo: "„", ldquo: "“", rdquo: "”", sbquo: "‚", lsquo: "‘", rsquo: "’", bull: "•" };
+const DIAKRITIKA = { acute: "\u0301", caron: "\u030C", ring: "\u030A", uml: "\u0308" };
+function cistyText(s) {
+  return String(s ?? "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
+    .replace(/&([a-zA-Z])(acute|caron|ring|uml);/g, (_, pismeno, znamenko) => (pismeno + DIAKRITIKA[znamenko]).normalize("NFC"))
+    .replace(/&([a-zA-Z]+);/g, (cele, nazev) => ENTITY[nazev] ?? cele)
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 async function tabulka(cesta) {
   const url = `${web.supabaseUrl}/rest/v1/${cesta}`;
   const odpoved = await fetch(url, {
@@ -74,7 +91,7 @@ export default async function () {
     .filter((f) => f.aktivni)
     .map((f) => {
       const p = faqPreklady.find((x) => x.faq_id === f.id && x.jazyk === jazyk);
-      return p ? { poradi: f.poradi, otazka: p.otazka, odpoved: p.odpoved } : null;
+      return p ? { poradi: f.poradi, otazka: cistyText(p.otazka), odpoved: p.odpoved } : null;
     })
     .filter(Boolean);
 
