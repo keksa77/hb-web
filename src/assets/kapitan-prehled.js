@@ -2,7 +2,7 @@
 (function () {
   var e = HBK.esc;
   function bezcu(n) { n = Number(n); return n + " " + (n === 1 ? "běžec" : n >= 2 && n <= 4 ? "běžci" : "běžců"); }
-  var BLOKUJE = { etapy_chybi: 1, tretiny: 1, bez_etapy: 1 };   // bez nich nejde soupisku a etapy potvrdit
+  var BLOKUJE = { etapy_chybi: 1, tretiny: 1, bez_etapy: 1, neuplne: 1 };   // bez nich nejde soupisku a etapy potvrdit
 
   function vykresli(p) {
     var vede = p.role !== "bezec";
@@ -50,7 +50,7 @@
       h.push('<div class="k-akce"><button type="button" class="k-tlacitko" id="k-potvrdit"' + (blok.length || p.soupiska_potvrzena ? " disabled" : "") +
         ">Potvrdit soupisku a etapy</button>" +
         '<span class="pocet">' + (p.soupiska_potvrzena ? "Potvrzeno. Každá další změna potvrzení zruší."
-          : blok.length ? "Potvrdit půjde, až budou obsazené všechny etapy a každý běžec bude mít etapu z 1–10, 11–20 i 21–30."
+          : blok.length ? "Potvrdit půjde, až budou u všech běžců vyplněné údaje, obsazené všechny etapy a každý běžec bude mít etapu z 1–10, 11–20 i 21–30."
           : "Potvrzením nám dáš vědět, že soupisku a etapy máš hotové.") + "</span></div>" +
         '<p class="k-hlaska" id="k-hlaska" role="status"></p>');
     }

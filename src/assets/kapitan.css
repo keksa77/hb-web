@@ -58,3 +58,8 @@
 .k-historie li { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--ram); padding: 6px 0; }
 .k-historie li span { min-width: 0; }
 .k-tabulka tfoot td { font-weight: 700; border-top: 2px solid var(--ram); }
+
+/* Povinná pole a neúplní běžci */
+.k-pole .k-chybi { border-color: #b3261e; outline: 2px solid #f2b8b5; }
+.k-pole small.k-chyba-pole { color: #7a1f1f; font-weight: 600; }
+.k-tabulka tr.k-neuplny td:first-child { box-shadow: inset 4px 0 0 #b3261e; }
