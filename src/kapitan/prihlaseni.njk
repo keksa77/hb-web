@@ -8,7 +8,7 @@ eleventyExcludeFromCollections: true
 <link rel="stylesheet" href="{{ web.zaklad }}/assets/kapitan.css">
 <h1>Kapitánská sekce</h1>
 <div class="k-karta k-uzka" id="k-prihlaseni">
-  <p>Zadejte e-mail, který jste uvedli v registraci týmu (nebo pod kterým vás kapitán přidal na soupisku). Pošleme vám na něj odkaz, kterým se přihlásíte. Heslo není potřeba.</p>
+  <p>Zadej e-mail z registrace týmu (nebo ten, pod kterým tě kapitán přidal na soupisku). Pošleme ti na něj odkaz, kterým se přihlásíš. Heslo není potřeba.</p>
   <form id="k-form" novalidate>
     <label class="k-pole" for="k-email">E-mail
       <input id="k-email" name="email" type="email" autocomplete="email" required>
@@ -33,11 +33,11 @@ eleventyExcludeFromCollections: true
   document.getElementById("k-form").addEventListener("submit", async function (e) {
     e.preventDefault();
     var email = document.getElementById("k-email").value.trim();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { HBK.hlaska(stav, "Zadejte e-mail ve tvaru jmeno@domena.cz.", true); return; }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { HBK.hlaska(stav, "Zadej e-mail ve tvaru jmeno@domena.cz.", true); return; }
     var b = document.getElementById("k-poslat"); b.disabled = true;
     try {
       await HBK.poslatOdkaz(email);
-      HBK.hlaska(stav, "Odkaz jsme poslali na " + email + ". Otevřete ho v tomto prohlížeči. Platí hodinu. Když nepřijde do pár minut, podívejte se do spamu.");
+      HBK.hlaska(stav, "Odkaz jsme poslali na " + email + ". Otevři ho v tomhle prohlížeči. Platí hodinu. Když nepřijde do pár minut, podívej se do spamu.");
     } catch (err) { HBK.hlaska(stav, err.message, true); }
     b.disabled = false;
   });
