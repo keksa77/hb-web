@@ -35,8 +35,8 @@ eleventyExcludeFromCollections: true
 
 <p class="zk-pozor">
   <strong>Zkušební přihláška pro pořadatele.</strong> Nic se neodesílá a nečerpá se ostrá řada variabilních
-  symbolů ani limit pěti týmů. Tým dostane symbol <code>TEST-001</code> a dál. Když zadáte e-mail kapitána z minulých
-  ročníků, uvidíte i jeho historii.
+  symbolů ani limit pěti týmů. Tým dostane symbol <code>TEST-001</code> a dál. Když zadáš e-mail kapitána z minulých
+  ročníků, uvidíš i jeho historii.
 </p>
 
 <form id="zk-form" class="zk-form" novalidate>
@@ -48,7 +48,7 @@ eleventyExcludeFromCollections: true
       <label class="pole">Příjmení *<input name="prijmeni" required></label>
       <label class="pole">E-mail *<input name="email" type="email" required></label>
       <label class="pole">Telefon<input name="telefon" type="tel"></label>
-      <label class="zk-volba" style="grid-column:1/-1"><input type="checkbox" name="bezim" checked><span>Poběžím také – zapište mě rovnou na soupisku (pak je telefon povinný)</span></label>
+      <label class="zk-volba" style="grid-column:1/-1"><input type="checkbox" name="bezim" checked><span>Poběžím také – zapiš mě rovnou na soupisku (pak je telefon povinný)</span></label>
       <label class="pole">Kraj *<select name="kraj" id="zk-kraj" required>
         <option value="">Načítám…</option></select></label>
       <label class="pole">Kategorie týmu *<select name="kategorie" id="zk-kategorie" required>
@@ -94,7 +94,7 @@ eleventyExcludeFromCollections: true
 <div id="zk-vysledek" class="zk-vysledek zk-skryte"></div>
 
 <h2 style="margin-top:36px">Fronta ke schválení (jen zkušební přihlášky)</h2>
-<p class="zk-sub">Takhle to uvidíte v administraci do 10. 1. 2027. Tlačítka simulují vaše rozhodnutí.
+<p class="zk-sub">Takhle to uvidíš v administraci do 10. 1. 2027. Tlačítka simulují tvoje rozhodnutí.
   Zbývá míst na variantu 1 před 1. 1. 2027: <strong id="zk-zbyva">–</strong> z 5.</p>
 <div style="overflow-x:auto"><table class="zk-tab" id="zk-fronta">
   <thead><tr><th>Tým</th><th>Skupina</th><th>Ročníky</th><th>Návrh</th><th>Stav</th><th>Rozhodnutí</th></tr></thead>
@@ -143,7 +143,7 @@ eleventyExcludeFromCollections: true
 
   cist("web_kraj?select=kod,nazev,zeme&aktivni=eq.true&order=poradi").then(function (r) {
     var sel = el("zk-kraj"), zeme = null, cil = sel;
-    sel.innerHTML = '<option value="">— vyberte —</option>';
+    sel.innerHTML = '<option value="">— vyber —</option>';
     r.forEach(function (k) {
       if (k.zeme !== zeme) {
         zeme = k.zeme;
@@ -159,7 +159,7 @@ eleventyExcludeFromCollections: true
 
   cist("web_kategorie?select=kod,nazev,popis&aktivni=eq.true&order=poradi").then(function (r) {
     var sel = el("zk-kategorie");
-    sel.innerHTML = '<option value="">— vyberte —</option>';
+    sel.innerHTML = '<option value="">— vyber —</option>';
     r.forEach(function (k) {
       POPIS_KATEGORII[k.kod] = k.popis || "";
       var o = document.createElement("option");
@@ -203,7 +203,7 @@ eleventyExcludeFromCollections: true
         "<dt>Faktura</dt><dd>" + (v.fakturovat ? "ano – " + esc(v.odberatel) + ", plnění " + esc(v.duzp_rok) + ", datum faktury " + datum(v.datum_faktury) : "ne") + "</dd>" +
         "<dt>Pokyny k platbě</dt><dd>" + (v.pokyny_nejdriv ? "nejdřív " + datum(v.pokyny_nejdriv) : "hned po schválení") + "</dd>" +
         "<dt>Počítá se do limitu 5</dt><dd>" + (v.pocita_se_do_limitu && v.varianta === "zakladni" ? "ano" : "ne") + "</dd>" +
-        "<dt>Jde do fronty</dt><dd>" + (v.do_fronty ? "ano, čeká na vaše schválení" : "ne, odešel by hned") + "</dd>" +
+        "<dt>Jde do fronty</dt><dd>" + (v.do_fronty ? "ano, čeká na tvoje schválení" : "ne, odešel by hned") + "</dd>" +
         "<dt>Běželi v ročnících</dt><dd>" + esc(roky) + "</dd>" +
         (v.upozorneni ? "<dt>Upozornění</dt><dd>" + esc(v.upozorneni) + "</dd>" : "") +
         "</dl>";
