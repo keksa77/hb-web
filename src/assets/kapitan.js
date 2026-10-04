@@ -125,6 +125,15 @@
     el.className = "k-hlaska" + (text ? (chyba ? " k-hlaska-chyba" : " k-hlaska-ok") : "");
   }
 
+  // Krátká hláška dole na obrazovce, když se po uložení stránka překreslí (Keksa 4. 10. 2026).
+  var toastCasovac = null;
+  function toast(text) {
+    var el = document.getElementById("k-toast");
+    if (!el) { el = document.createElement("div"); el.id = "k-toast"; el.className = "k-toast"; el.setAttribute("role", "status"); document.body.appendChild(el); }
+    el.textContent = text; el.hidden = false;
+    clearTimeout(toastCasovac); toastCasovac = setTimeout(function () { el.hidden = true; }, 4000);
+  }
+
   // Stránky sekce zavolají HBK.vyzadovat(): ověří přihlášení, propojí účet s osobou a vrátí přehled týmu.
   async function vyzadovat() {
     var obsah = document.getElementById("k-obsah");
@@ -164,5 +173,5 @@
 
   window.HBK = { poslatOdkaz: poslatOdkaz, prevezmiZOdkazu: prevezmiZOdkazu, platnyToken: platnyToken,
                  odhlasit: odhlasit, db: db, rpc: rpc, esc: esc, datum: datum, cas: cas, kc: kc,
-                 vykonnost: vykonnost, hlaska: hlaska, vyzadovat: vyzadovat };
+                 vykonnost: vykonnost, hlaska: hlaska, toast: toast, vyzadovat: vyzadovat };
 })();

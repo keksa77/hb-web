@@ -34,7 +34,7 @@
 .k-stitek-ok { color: #2c5c3a; } .k-stitek-ne { color: #7a1f1f; }
 .k-tabulka-obal { overflow-x: auto; }
 .k-tabulka { border-collapse: collapse; width: 100%; font-size: .93rem; background: #fff; }
-.k-tabulka th { background: var(--hb); color: #fff; text-align: left; padding: 7px 9px; font-weight: 600; white-space: nowrap; }
+.k-tabulka th { background: var(--hb); color: #fff; text-align: left; padding: 7px 9px; font-weight: 600; vertical-align: bottom; line-height: 1.25; }
 .k-tabulka td { border-bottom: 1px solid var(--ram); padding: 7px 9px; vertical-align: top; }
 .k-tabulka td.k-cislo { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .k-tabulka tr.k-spatne td { background: #fbecec; }
@@ -43,3 +43,18 @@
 .k-tretiny span { display: inline-block; min-width: 3.4em; text-align: center; font-size: .8rem; border-radius: 4px; padding: 0 4px; margin-right: 3px; }
 .k-tretina-ano { background: #e3f0e6; color: #2c5c3a; }
 .k-tretina-ne { background: #fbecec; color: #7a1f1f; }
+
+/* Hláška po uložení a zvýraznění změněného řádku */
+.k-toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  background: #2c5c3a; color: #fff; padding: 10px 18px; border-radius: 6px; font-weight: 600; box-shadow: 0 4px 14px rgba(0,0,0,.2);
+  max-width: calc(100% - 32px); z-index: 50; }
+.k-tabulka tr.k-zmeneno td { background: #e3f0e6; transition: background 1.5s; }
+/* QR platba v přehledu */
+.k-qr { display: grid; justify-items: start; gap: 6px; margin-top: 12px; }
+.k-qr canvas, .k-qr img { width: 180px; height: 180px; image-rendering: pixelated; background: #fff; padding: 8px; border: 1px solid var(--ram); border-radius: 6px; }
+.k-qr small { color: var(--seda); font-size: .85rem; line-height: 1.4; }
+/* Historie běžců nad formulářem */
+.k-historie ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.k-historie li { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--ram); padding: 6px 0; }
+.k-historie li span { min-width: 0; }
+.k-tabulka tfoot td { font-weight: 700; border-top: 2px solid var(--ram); }
