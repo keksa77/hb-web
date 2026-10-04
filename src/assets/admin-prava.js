@@ -56,7 +56,7 @@
       historie: function (r) { return [{ tabulka: "web_osoba_pravo", id: r.id }]; },
       info: async function () {
         var prava = await HBA.db("web_pravo?select=kod,nazev&order=poradi");
-        return "Právo <b>Všechno</b> zahrnuje všechna ostatní. <b>Jen čtení</b> = databáze dovolí data vidět, ne měnit; <b>úpravy</b> = číst i měnit. Změnu rozsahu uděláte přidáním stejného práva s jiným rozsahem. " +
+        return "Právo <b>Všechno</b> zahrnuje všechna ostatní. <b>Jen čtení</b> = databáze dovolí data vidět, ne měnit; <b>úpravy</b> = číst i měnit. Změnu rozsahu uděláš přidáním stejného práva s jiným rozsahem. " +
           '<form id="prava-pridat" style="display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center;margin-left:8px">' +
           '<input name="email" type="email" required placeholder="e-mail osoby" style="width:200px">' +
           '<select name="pravo">' + prava.map(function (p) { return '<option value="' + e(p.kod) + '">' + e(p.nazev) + '</option>'; }).join("") + '</select>' +

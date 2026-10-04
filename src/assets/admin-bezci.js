@@ -8,7 +8,7 @@
   function s(sloupec, x) { return Object.assign({ sloupec: sloupec }, S, x || {}); }
   async function patch(r, telo) {
     var x = await HBA.db("web_soupiska?id=eq." + r.id, { metoda: "PATCH", telo: telo, vratit: true });
-    if (!x || !x.length) throw new Error("Změna se neuložila — nejspíš na ni nemáte práva.");
+    if (!x || !x.length) throw new Error("Změna se neuložila — nejspíš na ni nemáš práva.");
   }
   var POHLAVI = { "žena": "zena", "zena": "zena", "muž": "muz", "muz": "muz", "jiné": "jine", "jine": "jine" };
   var KRAJE = [];
@@ -20,7 +20,7 @@
     if (/^\d{1,3}$/.test(v)) return "00:" + v + ":00";
     if (/^\d{1,2}:\d{2}$/.test(v)) return "00:" + v;
     if (/^\d{1,2}:\d{2}:\d{2}$/.test(v)) return v;
-    throw new Error("Čas na 10 km zadejte jako minuty:sekundy, např. 52:30.");
+    throw new Error("Čas na 10 km zadej jako minuty:sekundy, např. 52:30.");
   }
 
   document.addEventListener("DOMContentLoaded", async function () {
@@ -42,7 +42,7 @@
       popisRadku: function (r) { return (r.startovni_cislo || "") + " " + r.jmeno + " " + r.prijmeni + " – " + r.tym; },
       pridat: {
         nazev: "Přidat běžce",
-        napoveda: "E-mail a telefon jsou povinné. Když e-mail už v databázi je, řádek se napojí na tu osobu kvůli historii — její dřívější údaje se nepřebírají ani nemění. Ostatní údaje doplníte v tabulce.",
+        napoveda: "E-mail a telefon jsou povinné. Když e-mail už v databázi je, řádek se napojí na tu osobu kvůli historii — její dřívější údaje se nepřebírají ani nemění. Ostatní údaje doplníš v tabulce.",
         pole: [
           { pole: "tym", nazev: "Tým", povinne: true, hodnoty: async function () {
               var t = await HBA.db("web_tym?select=id,rok,cislo,nazev,testovaci&order=rok.desc,cislo.asc.nullslast,nazev.asc");
@@ -77,7 +77,7 @@
         { pole: "pohlavi_text", nazev: "Pohlaví", typ: "vycet", sirka: 80, napoveda: "žena, muž, nebo jiné",
           uprava: s("pohlavi", { ulozit: function (r, v) {
             var t = String(v || "").trim().toLowerCase();
-            if (t && !POHLAVI[t]) throw new Error("Pohlaví napište jako žena, muž, nebo jiné.");
+            if (t && !POHLAVI[t]) throw new Error("Pohlaví napiš jako žena, muž, nebo jiné.");
             return patch(r, { pohlavi: t ? POHLAVI[t] : null });
           } }) },
         { pole: "rok_narozeni", nazev: "Rok narození", typ: "cislo", sirka: 90, uprava: s("rok_narozeni") },
@@ -86,7 +86,7 @@
             var t = String(v || "").trim();
             if (!t) return patch(r, { velikost_rada: null, velikost: null });
             var m = t.match(/^(dámská|damska|pánská|panska|unisex)\s+(.+)$/i);
-            if (!m) throw new Error("Velikost napište jako řadu a velikost, např. „pánská M“.");
+            if (!m) throw new Error("Velikost napiš jako řadu a velikost, např. „pánská M“.");
             var rada = m[1].toLowerCase().replace("damska", "dámská").replace("panska", "pánská");
             return patch(r, { velikost_rada: rada, velikost: m[2].trim().toUpperCase() === "JEDNA VELIKOST" ? "jedna velikost" : m[2].trim().toUpperCase() });
           } }) },
@@ -115,7 +115,7 @@
       },
       historie: function (r) { return [{ tabulka: "web_soupiska", id: r.id }]; },
       info: async function () {
-        return "Dvojklik upraví buňku. Etapy pište jako „3, 17, 28“ – etapu, kterou měl jiný běžec týmu, převezme tento. Odebraný běžec zůstane v historii a jeho etapy se uvolní. Víc běžců, než je v Nastavení (Nejvíc běžců na soupisce), databáze na soupisku nepustí.";
+        return "Dvojklik upraví buňku. Etapy piš jako „3, 17, 28“ – etapu, kterou měl jiný běžec týmu, převezme tento. Odebraný běžec zůstane v historii a jeho etapy se uvolní. Víc běžců, než je v Nastavení (Nejvíc běžců na soupisce), databáze na soupisku nepustí.";
       }
     });
   });

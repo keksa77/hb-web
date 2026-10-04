@@ -62,7 +62,7 @@
   async function db(cesta, volby) {
     volby = volby || {};
     var t = await platnyToken();
-    if (!t) throw new Error("Nejste přihlášen.");
+    if (!t) throw new Error("Přihlášení chybí nebo vypršelo. Přihlas se znovu.");
     var hlavicky = { apikey: HB.klic, Authorization: "Bearer " + t, "Content-Type": "application/json" };
     var prefer = [];
     if (volby.vratit) prefer.push("return=representation");
@@ -118,7 +118,7 @@
     if (!j || !j.osoba_id) { location.href = HB.zaklad + "/admin/?zpet=" + encodeURIComponent(location.pathname + location.hash); return null; }
     var hl = document.querySelector(".adm-hlavni");
     if (!maPristup(j)) {
-      hl.innerHTML = '<p class="adm-chyba">Váš účet zatím nemá žádné právo v administraci. Požádejte správce o přidělení práva.</p>';
+      hl.innerHTML = '<p class="adm-chyba">Tvůj účet zatím nemá žádné právo v administraci. Požádej správce o přidělení práva.</p>';
       zobrazKdo(j); return null;
     }
     zobrazKdo(j);
@@ -128,14 +128,14 @@
       var p = mojePrava(j), rozsah = p.vse || p[kod];
       if (p.vse === "cteni" && p[kod] === "uprava") rozsah = "uprava";
       if (!rozsah) {
-        hl.innerHTML = '<p class="adm-chyba">Na tuto stránku nemáte právo („' + esc(tady.textContent.trim()) + '“). Požádejte správce o přidělení.</p>';
+        hl.innerHTML = '<p class="adm-chyba">Na tuhle stránku nemáš právo („' + esc(tady.textContent.trim()) + '“). Požádej správce o přidělení.</p>';
         return null;
       }
       if (rozsah === "cteni") {
         var b = document.createElement("p");
         b.className = "adm-jen-cteni";
         b.style.cssText = "margin:8px 16px 0;padding:6px 10px;background:#F6EEDC;border-left:3px solid #78212E;font-size:13px";
-        b.textContent = "Máte tu jen čtení — změny databáze neuloží.";
+        b.textContent = "Máš tu jen čtení — změny databáze neuloží.";
         hl.insertBefore(b, hl.firstChild);
       }
     }

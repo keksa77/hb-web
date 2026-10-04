@@ -79,7 +79,7 @@
       sloupce: sloupce,
       historie: function (r) { return [{ tabulka: "parametr_hodnota", id: r.id }]; },
       info: async function () {
-        return rocni ? "Otevírá se aktivní ročník, ostatní vyberte ve filtru Ročník. Dvojklik na hodnotu ji upraví; typ a rozsah hlídá databáze."
+        return rocni ? "Otevírá se aktivní ročník, ostatní vyber ve filtru Ročník. Dvojklik na hodnotu ji upraví; typ a rozsah hlídá databáze."
                      : "Trvalá nastavení bez vazby na ročník.";
       }
     });

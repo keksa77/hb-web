@@ -27,7 +27,7 @@
     var j = await r.json().catch(function () { return {}; });
     if (!r.ok) {
       var zprava = j.error_description || j.msg || j.message || ("Chyba " + r.status);
-      if (/rate limit|security purposes/i.test(zprava)) zprava = "Odkaz jsme posílali před chvílí. Zkuste to prosím za minutu znovu.";
+      if (/rate limit|security purposes/i.test(zprava)) zprava = "Odkaz jsme posílali před chvílí. Zkus to prosím za minutu znovu.";
       throw new Error(zprava);
     }
     return j;
@@ -46,7 +46,7 @@
     if (p.get("error_description") || p.get("error")) {
       history.replaceState(null, "", location.pathname + location.search);
       var chyba = p.get("error_description") || p.get("error");
-      if (/expired|invalid/i.test(chyba)) chyba = "Odkaz už neplatí. Nechte si poslat nový.";
+      if (/expired|invalid/i.test(chyba)) chyba = "Odkaz už neplatí. Nech si poslat nový.";
       return { chyba: chyba };
     }
     if (!p.get("access_token")) return null;
@@ -145,8 +145,8 @@
     var lista = document.getElementById("k-lista");
     if (!p) {
       if (lista) lista.hidden = false;
-      if (obsah) obsah.innerHTML = '<div class="k-karta"><h2>Tým jsme nenašli</h2><p>K e-mailu, kterým jste se přihlásili, nemáme v letošním ročníku tým ani místo na soupisce. ' +
-        'Kapitán vás na soupisku přidá pod e-mailem, který vám pak přijde i s odkazem. Když si myslíte, že jde o chybu, napište na ' +
+      if (obsah) obsah.innerHTML = '<div class="k-karta"><h2>Tým jsme nenašli</h2><p>K tomuhle e-mailu nemáme v letošním ročníku tým ani místo na soupisce. ' +
+        'Kapitán tě na soupisku přidá pod e-mailem, na který ti pak přijde i odkaz. Když si myslíš, že jde o chybu, napiš na ' +
         '<a href="mailto:info@horybory.cz">info@horybory.cz</a>.</p></div>';
       return null;
     }

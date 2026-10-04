@@ -485,7 +485,7 @@
       el("t-tabulka").querySelectorAll(".adm-af").forEach(function (b) {
         var a = !!aktivni[b.dataset.pole];
         if (b.classList.contains("aktivni") !== a) { b.classList.toggle("aktivni", a); b.innerHTML = a ? IKONA_TRYCHTYR : IKONA_SIPKA; }
-        b.title = a ? "Filtr je zapnutý – klikněte pro změnu" : "Řadit a filtrovat";
+        b.title = a ? "Filtr je zapnutý – klikni pro změnu" : "Řadit a filtrovat";
       });
     }
     tab.on("dataFiltered", function () { setTimeout(obnovIkony, 0); });
@@ -516,7 +516,7 @@
       return "HB_" + N.sekce + "_" + d.getFullYear() + dvoj(d.getMonth() + 1) + dvoj(d.getDate()) + "_" + dvoj(d.getHours()) + dvoj(d.getMinutes()) + "." + pripona;
     }
     el("t-xlsx").addEventListener("click", function () {
-      if (!window.XLSX) { chyba(new Error("Knihovna pro Excel se nenačetla. Zkuste CSV.")); return; }
+      if (!window.XLSX) { chyba(new Error("Knihovna pro Excel se nenačetla. Zkus CSV.")); return; }
       tab.download("xlsx", nazevSouboru("xlsx"), { sheetName: N.nazev.slice(0, 31), documentProcessing: excelCasy }, "active");
     });
     // Časové sloupce v Excelu jako skutečné datum/čas a doba, se kterými jde počítat.
@@ -585,7 +585,7 @@
     });
     el("t-pohled-smazat").addEventListener("click", async function () {
       var b = this, id = el("t-pohled").value; if (!id) return;
-      if (!b.dataset.potvrd) { b.dataset.potvrd = "1"; b.textContent = "Opravdu smazat? Klikněte znovu"; return; }
+      if (!b.dataset.potvrd) { b.dataset.potvrd = "1"; b.textContent = "Opravdu smazat? Klikni znovu"; return; }
       try {
         await HBA.db("web_admin_pohled?id=eq." + id, { metoda: "DELETE" });
         el("t-pohled").value = ""; await nactiPohledy(); el("t-pohled-form").hidden = true;
@@ -615,7 +615,7 @@
       for (var k in skupiny) {
         var g = skupiny[k];
         var r = await HBA.db(g.tabulka + "?" + g.sloupecKlice + "=eq." + encodeURIComponent(g.klic), { metoda: "PATCH", telo: g.telo, vratit: true });
-        if (!r || !r.length) throw new Error("Změna se neuložila — nejspíš na ni nemáte práva.");
+        if (!r || !r.length) throw new Error("Změna se neuložila — nejspíš na ni nemáš práva.");
       }
     }
     tab.on("cellEdited", async function (cell) {
@@ -801,7 +801,7 @@
         var data = {}, chybi = [];
         p.querySelectorAll("[data-nove]").forEach(function (i) { data[i.dataset.nove] = i.value.trim(); });
         N.pridat.pole.forEach(function (f) { if (f.povinne && !data[f.pole]) chybi.push(f.nazev); });
-        if (chybi.length) { chyba(new Error("Vyplňte: " + chybi.join(", ") + ".")); return; }
+        if (chybi.length) { chyba(new Error("Vyplň: " + chybi.join(", ") + ".")); return; }
         this.disabled = true; hlaska();
         try {
           await N.pridat.ulozit(data);

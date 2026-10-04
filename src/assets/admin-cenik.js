@@ -11,7 +11,7 @@
     var iso = t.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?$/);
     if (iso) return iso[1] + "-" + iso[2] + "-" + iso[3] + " " + d2(iso[4]) + ":" + iso[5] + ":" + (iso[6] || "00");
     var m = t.match(/^(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
-    if (!m) throw new Error("Zadejte datum a čas jako 24. 11. 2026 10:00:00.");
+    if (!m) throw new Error("Zadej datum a čas jako 24. 11. 2026 10:00:00.");
     return m[3] + "-" + d2(m[2]) + "-" + d2(m[1]) + " " + d2(m[4]) + ":" + m[5] + ":" + (m[6] || "00");
   }
   async function uloz(r, telo) {
@@ -69,7 +69,7 @@
             chyby.push("poslední vlna končí dřív než registrace (" + e(HBT.ceskeDatum(reg.registrace_do)) + ")");
         } catch (err) {}
         h.push(chyby.length ? '<b style="color:#A3302B">Pozor: ' + chyby.join("; ") + ".</b>" : "Vlny navazují bez mezer a pokrývají celou registraci.");
-        h.push('Úpravy: dvojklik na buňku, nebo klikněte na řádek a upravte vpravo. Datum a čas pište jako 24. 11. 2026 10:00:00.');
+        h.push('Úpravy: dvojklik na buňku, nebo klikni na řádek a uprav vpravo. Datum a čas piš jako 24. 11. 2026 10:00:00.');
         return h.join(" · ");
       }
     });

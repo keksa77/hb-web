@@ -29,6 +29,8 @@
         r.vytvoreno_m = HBT.mistniCas(r.vytvoreno);
         r.upraveno_m = HBT.mistniCas(r.upraveno);
         r.start_cas_m = HBT.mistniCas(r.start_cas);
+        r.pocet_potvrzen_m = HBT.mistniCas(r.pocet_potvrzen);
+        r.soupiska_potvrzena_m = HBT.mistniCas(r.soupiska_potvrzena);
         return r;
       },
       popisRadku: function (r) { return r.nazev + (r.vs ? " (" + r.vs + ")" : ""); },
@@ -58,6 +60,10 @@
         { pole: "fakturovat_upozorneni", nazev: "Upozornění", sirka: 200 },
         { pole: "ucasti", nazev: "Účasti", sirka: 120 },
         { pole: "pocet_ucasti", nazev: "Počet účastí", typ: "cislo", sirka: 90 },
+        { pole: "bezcu_na_soupisce", nazev: "Na soupisce", typ: "cislo", sirka: 95 },
+        { pole: "pocet_bezcu_konecny", nazev: "Konečný počet", typ: "cislo", sirka: 105, napoveda: "Počet běžců, který potvrdil kapitán nebo zástupce" },
+        { pole: "pocet_potvrzen_m", nazev: "Počet potvrzen", typ: "cas", sirka: 130, napoveda: "Kdy kapitán potvrdil konečný počet; každá změna je v historii týmu" },
+        { pole: "soupiska_potvrzena_m", nazev: "Soupiska a etapy potvrzeny", typ: "cas", sirka: 150 },
         { pole: "kraj", nazev: "Kraj", typ: "vycet", sirka: 110, uprava: t("kraj") },
         { pole: "na_startu_t", nazev: "Na startu", typ: "bool", sirka: 85, uprava: t("na_startu"), skryty: true },
         { pole: "start_cas_m", nazev: "Start", typ: "cas", sirka: 120, skryty: true },

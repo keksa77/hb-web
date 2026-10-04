@@ -11,7 +11,7 @@
   }
   function nahled(r) {
     var w = window.open("", "_blank");
-    if (!w) throw new Error("Prohlížeč zablokoval nové okno — povolte vyskakovací okna pro tuto stránku.");
+    if (!w) throw new Error("Prohlížeč zablokoval nové okno — povol vyskakovací okna pro tuto stránku.");
     w.document.write('<!doctype html><meta charset="utf-8"><title>' + e(r.nazev) + '</title>' +
       '<body style="font:15px/1.6 Arial,sans-serif;max-width:680px;margin:24px auto;padding:0 16px;color:#2A2621">' +
       '<p style="color:#6E665B;font-size:13px"><b>' + e(r.nazev) + '</b> (' + e(r.kod) + ', ' + e(VAR[r.varianta] || r.varianta) + ')<br><b>Předmět:</b> ' + e(r.predmet) + '</p>' +
@@ -62,8 +62,8 @@
       historie: function (r) { return [{ tabulka: "web_mail_sablony", id: r.id }]; },
       info: function () {
         return Promise.resolve("<b>Zapnuto</b> = mail se posílá. Mail 1 „Žádost o registraci přijata“ po zapnutí odchází <b>sám hned</b> po registraci; " +
-          "ostatní se připraví do <a href=\"" + HB.zaklad + "/admin/odchozi/\">Odchozích mailů</a> a odesíláte je ručně. " +
-          "Značky ve {složených závorkách} doplní databáze za každý tým — nemažte je.");
+          "ostatní se připraví do <a href=\"" + HB.zaklad + "/admin/odchozi/\">Odchozích mailů</a> a odesíláš je ručně. " +
+          "Značky ve {složených závorkách} doplní databáze za každý tým — nemaž je.");
       }
     });
   });

@@ -54,7 +54,7 @@
         { pole: "plan_cas_t", nazev: "Plán čas etapy", sirka: 95, razeni: "plan_cas_s", zarovnat: "right", trvani: true, napoveda: "Plánovaný doběh − plánovaný start" },
         { pole: "start_m", nazev: "Start", typ: "cas", sirka: 140, napoveda: "Skutečný start = doběh předchozí etapy + pauza (u 1. etapy start týmu)" },
         { pole: "dobeh_m", nazev: "Doběh", typ: "cas", sirka: 140, uprava: zapis("dobeh"),
-          napoveda: "Zadejte 14:32 nebo 14:32:10 (den se dopočítá ze startu etapy), případně s datem 4. 9. 14:32. Prázdná hodnota čas zruší." },
+          napoveda: "Zadej 14:32 nebo 14:32:10 (den se dopočítá ze startu etapy), případně s datem 4. 9. 14:32. Prázdná hodnota čas zruší." },
         { pole: "cas_etapy_t", nazev: "Čas etapy", sirka: 85, razeni: "cas_etapy_s", zarovnat: "right", trvani: true },
         { pole: "prubezny_t", nazev: "Čas týmu průběžně", sirka: 110, razeni: "prubezny_s", zarovnat: "right", trvani: true,
           napoveda: "Součet časů etap 1 až tato. Prázdné, dokud některé dřívější etapě chybí čas." },

@@ -27,6 +27,8 @@
 
     h.push('<div class="k-karta"><h2>Soupiska a etapy</h2><dl class="k-dl">' +
       "<dt>Běžci</dt><dd>" + e(p.bezcu) + " z nejvýš " + e(p.max_bezcu) + ' · <a href="' + HB.zaklad + '/kapitan/soupiska/">soupiska</a></dd>' +
+      "<dt>Konečný počet</dt><dd>" + (p.pocet_potvrzen ? '<span class="k-stitek k-stitek-ok">' + e(p.pocet_konecny) + ", potvrzeno " + e(HBK.cas(p.pocet_potvrzen)) + "</span>"
+                                    : '<span class="k-stitek k-stitek-ne">nepotvrzený</span> · <a href="' + HB.zaklad + '/kapitan/soupiska/">potvrdit</a>') + "</dd>" +
       "<dt>Obsazené etapy</dt><dd>" + e(p.obsazenych_etap) + ' z 30 · <a href="' + HB.zaklad + '/kapitan/etapy/">rozdělení</a></dd>' +
       "<dt>Změny do</dt><dd>" + (p.soupiska_do ? e(HBK.cas(p.soupiska_do)) : "termín ještě oznámíme") +
         (p.soupiska_otevrena ? "" : " · <b>uzavřeno</b>") + "</dd>" +
@@ -44,7 +46,7 @@
         ">Potvrdit soupisku a etapy</button>" +
         '<span class="pocet">' + (p.soupiska_potvrzena ? "Potvrzeno. Každá další změna potvrzení zruší."
           : blok.length ? "Potvrdit půjde, až budou obsazené všechny etapy a každý běžec bude mít etapu z 1–10, 11–20 i 21–30."
-          : "Potvrzením nám dáte vědět, že soupisku a etapy máte hotové.") + "</span></div>" +
+          : "Potvrzením nám dáš vědět, že soupisku a etapy máš hotové.") + "</span></div>" +
         '<p class="k-hlaska" id="k-hlaska" role="status"></p>');
     }
     h.push("</div>");

@@ -12,7 +12,7 @@
 
   async function zmen(r, telo) {
     var v = await HBA.db("web_maily_ke_schvaleni?id=eq." + r.id, { metoda: "PATCH", telo: telo, vratit: true });
-    if (!v || !v.length) throw new Error("Změna se neuložila — nejspíš na ni nemáte práva.");
+    if (!v || !v.length) throw new Error("Změna se neuložila — nejspíš na ni nemáš práva.");
   }
 
   document.addEventListener("DOMContentLoaded", async function () {
@@ -98,7 +98,7 @@
         var vse = await HBA.db("web_v_fronta_mailu?select=stav,testovaci");
         var ostre = vse.filter(function (r) { return !r.testovaci; }).length;
         var test = vse.length - ostre;
-        if (!ostre) h.push("Ostrá fronta je prázdná — registrace HB27 ještě nezačala." + (test ? " Zkušební přihlášky (" + test + ") uvidíte po zrušení filtru Zkušební." : ""));
+        if (!ostre) h.push("Ostrá fronta je prázdná — registrace HB27 ještě nezačala." + (test ? " Zkušební přihlášky (" + test + ") uvidíš po zrušení filtru Zkušební." : ""));
         h.push("Odeslání: schválený mail odejde do 5 minut, pokud je jeho šablona zapnutá.");
         return h.join(" · ");
       }

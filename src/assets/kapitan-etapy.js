@@ -38,7 +38,7 @@
     h.push('<p class="pocet">Každou etapu běží jeden běžec. Nikdo nesmí běžet dvě etapy za sebou a každý musí mít aspoň jednu etapu z 1–10, 11–20 i 21–30. ' +
       (P.soupiska_otevrena ? (P.soupiska_do ? "Změny jdou do " + e(HBK.cas(P.soupiska_do)) + "." : "")
                            : "<b>Rozdělení je uzavřené.</b> Změny řeší pořadatel na info@horybory.cz.") + "</p>");
-    if (!BEZCI.length) h.push('<p class="k-chyba">Nejdřív přidejte běžce na <a href="' + HB.zaklad + '/kapitan/soupiska/">soupisku</a>.</p>');
+    if (!BEZCI.length) h.push('<p class="k-chyba">Nejdřív přidej běžce na <a href="' + HB.zaklad + '/kapitan/soupiska/">soupisku</a>.</p>');
     h.push('<div class="k-tabulka-obal"><table class="k-tabulka"><thead><tr><th>Etapa</th><th>Odkud</th><th>Km</th><th>Běžec</th></tr></thead><tbody>' +
       ETAPY.map(function (x) {
         var sel = lze ? '<select data-etapa="' + x.etapa + '" aria-label="Běžec etapy ' + x.etapa + '"><option value="">— nikdo —</option>' +
@@ -60,7 +60,7 @@
             return '<span class="' + (b._tretiny[idx] ? "k-tretina-ano" : "k-tretina-ne") + '">' + t + "</span>"; }).join("") + "</td></tr>";
       }).join("") + "</tbody></table></div>" +
       (k.upoz.length ? '<h3>Co ještě nesedí</h3><ul class="k-upozorneni">' + k.upoz.map(function (x) { return "<li>" + e(x) + "</li>"; }).join("") + "</ul>"
-                     : '<p class="k-ok">Rozdělení splňuje pravidla. Potvrdit ho můžete na <a href="' + HB.zaklad + '/kapitan/">přehledu</a>.</p>') + "</div>");
+                     : '<p class="k-ok">Rozdělení splňuje pravidla. Potvrdit ho můžeš na <a href="' + HB.zaklad + '/kapitan/">přehledu</a>.</p>') + "</div>");
     document.getElementById("k-obsah").innerHTML = h.join("");
     if (hlaska) HBK.hlaska("k-stav", hlaska, chyba);
   }
@@ -74,7 +74,7 @@
     var v = t.value ? Number(t.value) : null;
     if (v) VYBER[Number(t.dataset.etapa)] = v; else delete VYBER[Number(t.dataset.etapa)];
     var y = window.scrollY; vykresli(); window.scrollTo(0, y);
-    var z = document.getElementById("k-zmeny"); if (z) z.textContent = zmeneno() ? "Máte neuložené změny." : "";
+    var z = document.getElementById("k-zmeny"); if (z) z.textContent = zmeneno() ? "Máš neuložené změny." : "";
   });
 
   document.addEventListener("click", async function (ev) {

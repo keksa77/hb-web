@@ -9,7 +9,7 @@
 
   async function odeslat(ids) {
     var t = await HBA.token();
-    if (!t) throw new Error("Nejste přihlášen.");
+    if (!t) throw new Error("Přihlášení chybí nebo vypršelo. Přihlas se znovu.");
     var r = await fetch(HB.url + "/functions/v1/poslat-maily", {
       method: "POST",
       headers: { apikey: HB.klic, Authorization: "Bearer " + t, "Content-Type": "application/json" },
@@ -24,7 +24,7 @@
 
   function nahled(r) {
     var w = window.open("", "_blank");
-    if (!w) throw new Error("Prohlížeč zablokoval nové okno — povolte vyskakovací okna pro tuto stránku.");
+    if (!w) throw new Error("Prohlížeč zablokoval nové okno — povol vyskakovací okna pro tuto stránku.");
     var telo = String(r.telo || "").replace(/\[\[QR:[^\]]*\]\]/g, "[zde bude QR kód pro platbu]");
     w.document.write('<!doctype html><meta charset="utf-8"><title>' + e(r.predmet) + '</title>' +
       '<body style="font:15px/1.6 Arial,sans-serif;max-width:680px;margin:24px auto;padding:0 16px;color:#2A2621">' +
@@ -90,7 +90,7 @@
       info: async function () {
         var vse = await HBA.db("web_v_odchozi_maily?select=stav");
         var ceka = vse.filter(function (r) { return r.stav === "ceka"; }).length;
-        return "Nic se neposílá samo: mail odejde, až ho tady odešlete. Čeká na odeslání: <b>" + ceka + "</b>. " +
+        return "Nic se neposílá samo: mail odejde, až ho tady odešleš. Čeká na odeslání: <b>" + ceka + "</b>. " +
           "Registrační maily sem přijdou po schválení ve Frontě mailů.";
       }
     });
