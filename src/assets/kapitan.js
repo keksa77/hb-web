@@ -223,6 +223,8 @@
     }
     vykresliKroky(p);
     if (!(window.HB && HB.vlastniNavigace)) navigace(p);
+    // krátké potvrzení z předchozí stránky (třeba „Rozdělení je uložené.“ po přechodu z etap)
+    try { var t = sessionStorage.getItem("hb_k_toast"); if (t) { sessionStorage.removeItem("hb_k_toast"); setTimeout(function () { toast(t); }, 300); } } catch (e) {}
     return p;
   }
 

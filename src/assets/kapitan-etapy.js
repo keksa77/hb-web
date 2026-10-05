@@ -91,21 +91,52 @@
     var v = t.value ? Number(t.value) : null;
     if (v) VYBER[Number(t.dataset.etapa)] = v; else delete VYBER[Number(t.dataset.etapa)];
     var y = window.scrollY; vykresli(); window.scrollTo(0, y);
-    var z = document.getElementById("k-zmeny"); if (z) z.textContent = zmeneno() ? "Máš neuložené změny." : "";
+    var z = document.getElementById("k-zmeny"); if (z) z.textContent = zmeneno() ? "Máš neuložené změny. Uloží je i tlačítko Dál." : "";
+    hintDal();
   });
 
   document.addEventListener("click", async function (ev) {
     if (!ev.target || ev.target.id !== "k-ulozit") return;
     ev.target.disabled = true;
-    var data = []; for (var i = 1; i <= 30; i++) data.push({ etapa: i, soupiska_id: VYBER[i] || null });
     try {
-      await HBK.rpc("web_k_uloz_etapy", { p_rozdeleni: data });
+      await ulozit();
       await nacti();
-      vykresli("Rozdělení je uložené."); HBK.toast("Rozdělení je uložené.");
+      vykresli("Rozdělení je uložené."); hintDal(); HBK.toast("Rozdělení je uložené.");
     } catch (err) { HBK.hlaska("k-stav", err.message, true); ev.target.disabled = false; window.scrollTo(0, 0); }
   });
 
-  window.addEventListener("beforeunload", function (ev) { if (P && P.role !== "bezec" && zmeneno()) { ev.preventDefault(); ev.returnValue = ""; } });
+  // Neuložené rozdělení: tlačítka Zpět/Dál a ukazatel kroků ho uloží sama, ať se kapitán nemusí vracet
+  // k tlačítku „Uložit rozdělení“ a prohlížeč neukazuje hlášku „Změny možná nebudou uloženy“ (Keksa 5. 10. 2026).
+  function lzeUkladat() { return P && P.role !== "bezec" && P.soupiska_otevrena; }
+  async function ulozit() {
+    var data = []; for (var i = 1; i <= 30; i++) data.push({ etapa: i, soupiska_id: VYBER[i] || null });
+    await HBK.rpc("web_k_uloz_etapy", { p_rozdeleni: data });
+    ULOZENO = otisk();
+  }
+  function hintDal() {
+    var s = document.querySelector("#k-navigace .k-nav-dal small"); if (!s) return;
+    if (!s.dataset.puvodni) s.dataset.puvodni = s.textContent;
+    s.textContent = lzeUkladat() && zmeneno() ? "Uloží rozdělení etap a pokračuje." : s.dataset.puvodni;
+  }
+  document.addEventListener("click", async function (ev) {
+    var a = ev.target && ev.target.closest && ev.target.closest("#k-navigace a, #k-kroky a");
+    if (!a || !lzeUkladat() || !zmeneno()) return;
+    ev.preventDefault();
+    if (kontrola().chyby.length) {
+      HBK.hlaska("k-stav", "Rozdělení nejde uložit: " + kontrola().chyby.join(" ") + " Oprav to, nebo odejdi bez uložení.", true);
+      window.scrollTo(0, 0);
+      if (confirm("Rozdělení má chybu a nejde uložit. Odejít bez uložení změn?")) { ULOZENO = otisk(); location.href = a.href; }
+      return;
+    }
+    a.classList.add("k-nav-uklada");
+    try {
+      await ulozit();
+      try { sessionStorage.setItem("hb_k_toast", "Rozdělení etap je uložené."); } catch (e) {}
+      location.href = a.href;
+    } catch (err) { a.classList.remove("k-nav-uklada"); HBK.hlaska("k-stav", err.message, true); window.scrollTo(0, 0); }
+  }, true);
+
+  window.addEventListener("beforeunload", function (ev) { if (lzeUkladat() && zmeneno()) { ev.preventDefault(); ev.returnValue = ""; } });
 
   async function nacti() {
     var v = await Promise.all([HBK.rpc("web_k_prehled"), HBK.rpc("web_k_etapy"), HBK.rpc("web_k_soupiska")]);

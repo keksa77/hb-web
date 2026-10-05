@@ -129,3 +129,4 @@ a.k-vedlejsi.k-tlacitko-s-napovedou, a.k-tlacitko.k-tlacitko-s-napovedou { displ
   .k-nav-dal { order: -1; }
 }
 .k-nezalom { white-space: nowrap; }
+.k-navigace a.k-nav-uklada { opacity: .6; pointer-events: none; }
