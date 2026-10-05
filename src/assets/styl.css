@@ -299,3 +299,45 @@ a { color: var(--hb); }
   /* druhý list: mapa */
   .karta-mapa { display: block; width: 194.3mm; height: auto; max-height: 247mm; margin: 2.5mm 0 0 7.6mm; }
 }
+
+/* Online výsledky (stránka Výsledky) */
+.vysledky-online { margin-top: 8px; }
+.v-ukazka { background: var(--hb-svetla); border-radius: 8px; padding: 10px 14px; margin: 0 0 16px; }
+.v-ukazka p { margin: 0 0 6px; }
+.v-cas-posuvnik { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.v-cas-posuvnik input { flex: 1 1 220px; accent-color: var(--hb); }
+.v-tlacitka button, .v-pohledy button, #v-odkaz {
+  font: inherit; border: 1px solid var(--hb); background: #fff; color: var(--hb);
+  border-radius: 6px; padding: 7px 12px; cursor: pointer; }
+.v-stav { font-weight: 600; margin: 0 0 12px; }
+.v-aktualizace { font-weight: 400; color: var(--seda); font-size: .9rem; }
+.v-pohledy { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 16px; border-bottom: 2px solid var(--ram); padding-bottom: 10px; }
+.v-pohledy button.v-aktivni { background: var(--hb); color: #fff; }
+.v-filtry { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0 0 12px; }
+.v-filtry label { display: flex; flex-direction: column; font-size: .85rem; color: var(--seda); gap: 3px; }
+.v-filtry select, .v-filtry input { font: inherit; font-size: 1rem; padding: 6px 8px; border: 1px solid var(--ram); border-radius: 6px; max-width: 100%; }
+.v-tabulka { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+.v-tabulka th { text-align: left; font-size: .85rem; color: var(--seda); border-bottom: 2px solid var(--ram); padding: 6px 8px; }
+.v-tabulka td { border-bottom: 1px solid var(--ram); padding: 7px 8px; vertical-align: top; }
+.v-cislo { color: var(--seda); font-size: .85rem; }
+.v-cislo::before { content: "č. "; }
+.v-kde, .v-misto { display: block; color: var(--seda); font-size: .8rem; }
+.v-nahoru { color: #2e7d32; } .v-dolu { color: #b3261e; }
+.v-odhad { font-style: italic; color: var(--seda); }
+.v-chybi { color: #b3261e; font-size: .9rem; }
+.v-zpozdeni { color: #8a5a00; font-size: .8rem; }
+.v-bezi td { background: var(--hb-svetla); }
+.v-bezi-znacka { background: var(--hb); color: #fff; border-radius: 4px; padding: 1px 6px; font-size: .75rem; }
+.v-budouci td { color: var(--seda); }
+.v-legenda, .v-poznamka { color: var(--seda); font-size: .85rem; }
+.v-zbyva { padding-left: 1.2em; }
+.v-seznam-tymu { columns: 2 14rem; padding-left: 1.2em; }
+.v-tym-nazev { margin-bottom: 4px; }
+.v-ok { color: #2e7d32; }
+.v-predavka { border-bottom: 1px solid var(--ram); padding: 8px 2px; }
+.v-predavka summary { cursor: pointer; }
+.v-predavka summary span { color: var(--seda); font-size: .9rem; }
+@media (max-width: 600px) {
+  .v-mimo-mobil { display: none; }
+  .v-tabulka td, .v-tabulka th { padding: 6px 5px; }
+}
