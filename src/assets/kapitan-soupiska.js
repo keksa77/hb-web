@@ -35,6 +35,10 @@
     h.push('<p class="pocet">Na soupisce ' + RADKY.length + " z nejvýš " + e(P.max_bezcu) + " běžců. " +
       (P.soupiska_otevrena ? (P.soupiska_do ? "Změny jdou do " + e(HBK.cas(P.soupiska_do)) + "." : "")
                            : "<b>Soupiska je uzavřená.</b> Změny řeší pořadatel na info@horybory.cz.") + "</p>");
+    var rozepsane = HBK.koncepty(P.tym_id);
+    if (rozepsane.length) h.push('<p class="k-koncept">Rozepsané a neuložené údaje: ' + rozepsane.map(function (k) {
+      return '<a href="' + HB.zaklad + "/kapitan/bezec/udaje/?" + (k.id ? "id=" + k.id : "novy=1") + '">' + e(k.jmeno || "nový běžec") + (k.id ? "" : " (nový)") + "</a>";
+    }).join(", ") + ". Dokonči je, ať se uloží na soupisku.</p>");
     h.push(tabulka());
     if (vede && P.soupiska_otevrena) {
       if (P.pocet_potvrzen) h.push('<p class="k-pozn">Konečný počet máš potvrzený, takže běžce nepřidáš ani neodebereš. Změníš ho v kroku ' +

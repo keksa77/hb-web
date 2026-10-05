@@ -15,7 +15,9 @@
     var ja = r && r.jsem_to_ja && P.role === "bezec";
     r = r || {};
     return (ZDROJ ? '<p class="k-zdroj">Vyplněno z ročníku ' + e(ZDROJ.rocnik) + ": <b>" + e(ZDROJ.jmeno) + "</b>. Zkontroluj údaje" +
-        (ZDROJ.vykonnost_skutecna ? ", čas na 10 km je skutečný z " + e(ZDROJ.skutecna_rocnik) + " (hlášeno bylo " + e(HBK.vykonnost(ZDROJ.vykonnost_10km)) + ")" : "") + ".</p>" : "") +
+        (ZDROJ.vykonnost_skutecna ? ", čas na 10 km je skutečný z " + e(ZDROJ.skutecna_rocnik) : "") + "." +
+        (ZDROJ.roky && ZDROJ.roky.length ? '<span class="k-roky"><span class="k-roky-titulek">Čas na 10 km v minulých ročnících:</span>' +
+          HBK.rokyVykonnosti(ZDROJ.roky).map(function (t) { return "<span>" + t + "</span>"; }).join("") + "</span>" : "") + "</p>" : "") +
       '<form class="k-karta" id="k-form" novalidate><div class="k-formular">' +
       '<label class="k-pole" for="f-jmeno">Jméno *<input id="f-jmeno" value="' + e(r.jmeno || "") + '" required></label>' +
       '<label class="k-pole" for="f-prijmeni">Příjmení *<input id="f-prijmeni" value="' + e(r.prijmeni || "") + '" required></label>' +
@@ -33,7 +35,7 @@
       '<label class="k-pole" for="f-poznamka">Poznámka<input id="f-poznamka" value="' + e(r.poznamka || "") + '"></label>' +
       "</div>" +
       '<details class="k-proc" id="k-proc" hidden><summary>Proč zadat čas na 10 km co nejpřesněji</summary><div class="k-text" id="k-proc-text"></div></details>' +
-      '<p class="pocet">Pole s hvězdičkou jsou povinná.</p>' +
+      '<p class="pocet">Pole s hvězdičkou jsou povinná. Rozepsané údaje si tenhle prohlížeč pamatuje, dokud běžce neuložíš.</p>' +
       '<div class="k-akce k-akce-hlavni"><button type="submit" class="k-tlacitko k-tlacitko-s-napovedou">' +
         (UPRAVUJI ? "Uložit změny" : "Přidat na soupisku") + "<small>Uloží běžce a vrátí tě na soupisku.</small></button></div>" +
       '<p class="k-hlaska" id="k-hlaska" role="status"></p></form>';
@@ -84,6 +86,37 @@
   document.addEventListener("input", opravPole);
   document.addEventListener("change", opravPole);
 
+  // Rozepsané údaje: ukládají se průběžně do prohlížeče, po návratu se vrátí do formuláře (Keksa 5. 10. 2026).
+  var POLE = ["f-jmeno", "f-prijmeni", "f-email", "f-telefon", "f-rok", "f-pohlavi", "f-kraj", "f-mesto", "f-velikost", "f-vykonnost", "f-poznamka"];
+  var KLIC = null, VYCHOZI = "", ODESLANO = false;
+  function hodnoty() { var o = {}; POLE.forEach(function (id) { var el = document.getElementById(id); if (el) o[id] = el.value; }); return o; }
+  function rozepsano() { return !!document.getElementById("k-form") && !ODESLANO && JSON.stringify(hodnoty()) !== VYCHOZI; }
+  function ulozKoncept() {
+    if (!KLIC || ODESLANO) return;
+    if (!rozepsano()) { HBK.konceptZahod(KLIC); return; }
+    var h = hodnoty();
+    HBK.konceptUloz(KLIC, { cas: Date.now(), id: UPRAVUJI, jmeno: (h["f-jmeno"] + " " + h["f-prijmeni"]).trim(), h: h, zdroj: ZDROJ });
+  }
+  function onZmena(ev) { if (ev.target && ev.target.closest && ev.target.closest("#k-form")) ulozKoncept(); }
+  document.addEventListener("input", onZmena);
+  document.addEventListener("change", onZmena);
+  document.addEventListener("click", function (ev) {
+    if (ev.target && ev.target.id === "k-koncept-zahodit") {
+      HBK.konceptZahod(KLIC); ODESLANO = true;
+      location.replace(location.pathname + (UPRAVUJI ? "?id=" + UPRAVUJI : "?novy=1"));
+    }
+  });
+  // Odchod z rozepsaného formuláře (odkaz, krok, Zpět, Odhlásit): zeptá se; koncept zůstane uložený.
+  document.addEventListener("click", function (ev) {
+    var a = ev.target && ev.target.closest && ev.target.closest("a[href], #k-odhlasit");
+    if (!a || a.target === "_blank" || ev.ctrlKey || ev.metaKey || ev.shiftKey || !rozepsano()) return;
+    if (a.id !== "k-odhlasit" && (a.getAttribute("href") || "").charAt(0) === "#") return;
+    ulozKoncept();
+    if (!confirm("Běžec ještě není uložený na soupisce. Rozepsané údaje si tenhle prohlížeč zapamatuje a najdeš je tu, až se vrátíš. Odejít?")) {
+      ev.preventDefault(); ev.stopPropagation();
+    }
+  }, true);
+
   document.addEventListener("submit", async function (ev) {
     if (ev.target.id !== "k-form") return;
     ev.preventDefault();
@@ -101,6 +134,7 @@
       if (UPRAVUJI) { data.p_soupiska = UPRAVUJI; await HBK.rpc("web_k_uprav_bezce", data); id = UPRAVUJI; HBK.hlaskaDal("Uloženo: " + data.p_jmeno + " " + data.p_prijmeni, id); }
       else { var novy = await HBK.rpc("web_k_pridej_bezce", data); id = novy && novy.soupiska_id; HBK.hlaskaDal(data.p_jmeno + " " + data.p_prijmeni + " je na soupisce.", id); }
       try { sessionStorage.removeItem("hb_k_vybrany"); } catch (err) {}
+      ODESLANO = true; HBK.konceptZahod(KLIC);
       location.href = HB.zaklad + "/kapitan/soupiska/";
     } catch (err) { HBK.hlaska("k-hlaska", err.message, true); b.disabled = false; }
   });
@@ -125,11 +159,24 @@
         try { ZDROJ = JSON.parse(sessionStorage.getItem("hb_k_vybrany") || "null"); } catch (err) { ZDROJ = null; }
         if (ZDROJ) r = zHistorie(ZDROJ);
       }
+      KLIC = HBK.konceptKlic(P.tym_id, UPRAVUJI);
+      var koncept = HBK.konceptNacti(KLIC);
+      // u výběru z historie vrátit koncept jen ke stejnému člověku; jinak by přepsal právě vybraného
+      if (koncept && param.get("z") === "historie" && String((koncept.zdroj || {}).email || "") !== String((ZDROJ || {}).email || "")) koncept = null;
+      if (koncept && !UPRAVUJI && !ZDROJ && koncept.zdroj) ZDROJ = koncept.zdroj;
       HBK.navigace(P, UPRAVUJI ? { zpet: { n: "Soupiska", url: "/kapitan/soupiska/", hint: "Bez uložení změn." } }
                                : { zpet: { n: "Kdo poběží?", url: "/kapitan/bezec/", hint: "Vybrat někoho jiného." } });
       if (!P.soupiska_otevrena) { obsah.innerHTML = '<p class="k-pozn">Soupiska je uzavřená. Změny řeší pořadatel na info@horybory.cz.</p>'; return; }
       obsah.innerHTML = formular(r);
-      if (r) zkontroluj(true);   // co v historii nebo u běžce chybí, je hned vidět
+      VYCHOZI = JSON.stringify(hodnoty());
+      if (koncept) {
+        POLE.forEach(function (id) { var el = document.getElementById(id); if (el && !el.disabled && koncept.h[id] != null) el.value = koncept.h[id]; });
+        var pozn = document.createElement("p"); pozn.className = "k-koncept"; pozn.setAttribute("role", "status");
+        pozn.innerHTML = "Vrátili jsme sem rozepsané údaje z " + e(HBK.cas(new Date(koncept.cas).toISOString())) + ". Běžec zatím není uložený, dokonči to tlačítkem dole. " +
+          '<button type="button" class="k-odkaz" id="k-koncept-zahodit">Zahodit rozepsané a začít znovu</button>';
+        obsah.insertBefore(pozn, obsah.firstChild);
+      }
+      if (r || koncept) zkontroluj(true);   // co v historii nebo u běžce chybí, je hned vidět
       nactiText();
     } catch (err) { obsah.innerHTML = '<p class="k-chyba">' + e(err.message) + "</p>"; }
   });

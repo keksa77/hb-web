@@ -232,8 +232,42 @@
     if (e.target && e.target.id === "k-odhlasit") odhlasit();
   });
 
+  // Rozepsané údaje běžce (koncept) v tomhle prohlížeči: klíč hb_k_koncept_<tým>_<id běžce | novy>, platí 7 dní.
+  // Uloží se při každé změně formuláře a smaže po uložení běžce (Keksa 5. 10. 2026).
+  var KONCEPT = "hb_k_koncept_", KONCEPT_DNI = 7;
+  function konceptKlic(tym, id) { return KONCEPT + tym + "_" + (id || "novy"); }
+  function konceptNacti(klic) {
+    try {
+      var k = JSON.parse(localStorage.getItem(klic) || "null");
+      if (k && Date.now() - k.cas < KONCEPT_DNI * 864e5) return k;
+      localStorage.removeItem(klic);
+    } catch (e) {}
+    return null;
+  }
+  function konceptUloz(klic, data) { try { localStorage.setItem(klic, JSON.stringify(data)); } catch (e) {} }
+  function konceptZahod(klic) { try { localStorage.removeItem(klic); } catch (e) {} }
+  function koncepty(tym) {
+    var v = [];
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var kl = localStorage.key(i);
+        if (kl && kl.indexOf(KONCEPT + tym + "_") === 0) { var k = konceptNacti(kl); if (k) v.push({ klic: kl, id: k.id || null, jmeno: k.jmeno || "", cas: k.cas }); }
+      }
+    } catch (e) {}
+    return v;
+  }
+
+  // Výkonnost běžce po ročnících z historie: „HB26: hlášeno 51:00 · skutečně 49:40“ (Keksa 5. 10. 2026).
+  function rokyVykonnosti(roky) {
+    return (roky || []).map(function (r) {
+      return esc(r.rocnik) + ": hlášeno " + (r.hlaseno ? esc(vykonnost(r.hlaseno)) : "—") +
+        " · skutečně " + (r.skutecne ? esc(vykonnost(r.skutecne)) : "nevíme");
+    });
+  }
+
   window.HBK = { poslatOdkaz: poslatOdkaz, prevezmiZOdkazu: prevezmiZOdkazu, platnyToken: platnyToken,
                  odhlasit: odhlasit, db: db, rpc: rpc, esc: esc, datum: datum, cas: cas, kc: kc,
                  vykonnost: vykonnost, hlaska: hlaska, toast: toast, vyzadovat: vyzadovat,
-                 kroky: vykresliKroky, navigace: navigace, krok: krok, hotovo: hotovo, hlaskaDal: hlaskaDal, prevezmiHlasku: prevezmiHlasku };
+                 kroky: vykresliKroky, navigace: navigace, krok: krok, hotovo: hotovo, hlaskaDal: hlaskaDal, prevezmiHlasku: prevezmiHlasku,
+                 konceptKlic: konceptKlic, konceptNacti: konceptNacti, konceptUloz: konceptUloz, konceptZahod: konceptZahod, koncepty: koncepty, rokyVykonnosti: rokyVykonnosti };
 })();

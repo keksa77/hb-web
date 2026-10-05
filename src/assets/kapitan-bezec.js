@@ -13,17 +13,20 @@
       if (!k || videno[k] || na[String(h.email || "").toLowerCase()] || na[String(h.jmeno || "").toLowerCase()]) return false;
       videno[k] = 1; return true;
     });
-    var h = [];
+    var h = [], k = HBK.konceptNacti(HBK.konceptKlic(P.tym_id, null));
+    if (k) h.push('<p class="k-koncept">Máš rozepsaného běžce' + (k.jmeno ? " <b>" + e(k.jmeno) + "</b>" : "") + ", zatím není na soupisce. " +
+      '<a href="' + HB.zaklad + '/kapitan/bezec/udaje/?novy=1">Pokračovat v údajích →</a></p>');
     if (NABIDKA.length) {
       h.push('<p class="k-uvod">Tyhle lidi z minulých ročníků tvého týmu databáze zná. Vyber, koho chceš přidat, údaje se vyplní samy a jen je zkontroluješ. ' +
         "Když na seznamu není, přidej nového běžce.</p>");
       if (NABIDKA.length > 8) h.push('<label class="k-pole k-hledat" for="k-hledat">Hledat jméno<input id="k-hledat" type="search" autocomplete="off" placeholder="např. Nováková"></label>');
       h.push('<ul class="k-vyber">' + NABIDKA.map(function (x, i) {
         return '<li data-jmeno="' + e(String(x.jmeno || "").toLowerCase()) + '"><button type="button" class="k-vyber-polozka" data-vybrat="' + i + '">' +
-          "<b>" + e(x.jmeno) + "</b><span>" + e(x.rocniky || x.rocnik) +
-          (x.vykonnost_skutecna ? " · skutečně " + e(HBK.vykonnost(x.vykonnost_skutecna)) + " na 10 km (" + e(x.skutecna_rocnik) + ")"
-            : x.vykonnost_10km ? " · hlášeno " + e(HBK.vykonnost(x.vykonnost_10km)) + " na 10 km" : "") +
-          (x.mesto ? " · " + e(x.mesto) : "") + "</span><small>Vybrat a zkontrolovat údaje →</small></button></li>";
+          "<b>" + e(x.jmeno) + "</b><span>" + e(x.rocniky || x.rocnik) + (x.mesto ? " · " + e(x.mesto) : "") + "</span>" +
+          (x.roky && x.roky.length
+            ? '<span class="k-roky"><span class="k-roky-titulek">Čas na 10 km:</span>' + HBK.rokyVykonnosti(x.roky).map(function (t) { return "<span>" + t + "</span>"; }).join("") + "</span>"
+            : x.vykonnost_10km ? "<span>hlášeno " + e(HBK.vykonnost(x.vykonnost_10km)) + " na 10 km</span>" : "") +
+          "<small>Vybrat a zkontrolovat údaje →</small></button></li>";
       }).join("") + "</ul>");
     } else {
       h.push('<p class="k-uvod">Z minulých ročníků tvého týmu nikoho dalšího neznáme. Přidej nového běžce a vyplň jeho údaje.</p>');

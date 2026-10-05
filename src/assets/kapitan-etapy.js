@@ -118,21 +118,26 @@
     if (!s.dataset.puvodni) s.dataset.puvodni = s.textContent;
     s.textContent = lzeUkladat() && zmeneno() ? "Uloží rozdělení etap a pokračuje." : s.dataset.puvodni;
   }
+  // Platí pro každý odkaz na stránce (Zpět/Dál, kroky, horní menu webu) i pro Odhlásit; odkazy do nového okna
+  // (stránky etap) stránku neopouštějí, ty se neřeší (Keksa 5. 10. 2026).
   document.addEventListener("click", async function (ev) {
-    var a = ev.target && ev.target.closest && ev.target.closest("#k-navigace a, #k-kroky a");
-    if (!a || !lzeUkladat() || !zmeneno()) return;
-    ev.preventDefault();
+    var a = ev.target && ev.target.closest && ev.target.closest("a[href], #k-odhlasit");
+    if (!a || a.target === "_blank" || ev.ctrlKey || ev.metaKey || ev.shiftKey || !lzeUkladat() || !zmeneno()) return;
+    var odhlasit = a.id === "k-odhlasit";
+    if (!odhlasit && (a.getAttribute("href") || "").charAt(0) === "#") return;
+    ev.preventDefault(); ev.stopPropagation();
+    function pokracuj() { if (odhlasit) HBK.odhlasit(); else location.href = a.href; }
     if (kontrola().chyby.length) {
       HBK.hlaska("k-stav", "Rozdělení nejde uložit: " + kontrola().chyby.join(" ") + " Oprav to, nebo odejdi bez uložení.", true);
       window.scrollTo(0, 0);
-      if (confirm("Rozdělení má chybu a nejde uložit. Odejít bez uložení změn?")) { ULOZENO = otisk(); location.href = a.href; }
+      if (confirm("Rozdělení má chybu a nejde uložit. Odejít bez uložení změn?")) { ULOZENO = otisk(); pokracuj(); }
       return;
     }
     a.classList.add("k-nav-uklada");
     try {
       await ulozit();
-      try { sessionStorage.setItem("hb_k_toast", "Rozdělení etap je uložené."); } catch (e) {}
-      location.href = a.href;
+      if (!odhlasit) try { sessionStorage.setItem("hb_k_toast", "Rozdělení etap je uložené."); } catch (e) {}
+      pokracuj();
     } catch (err) { a.classList.remove("k-nav-uklada"); HBK.hlaska("k-stav", err.message, true); window.scrollTo(0, 0); }
   }, true);
 

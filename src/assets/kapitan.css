@@ -129,4 +129,8 @@ a.k-vedlejsi.k-tlacitko-s-napovedou, a.k-tlacitko.k-tlacitko-s-napovedou { displ
   .k-nav-dal { order: -1; }
 }
 .k-nezalom { white-space: nowrap; }
-.k-navigace a.k-nav-uklada { opacity: .6; pointer-events: none; }
+.k-navigace a.k-nav-uklada, .k-nav-uklada { opacity: .6; pointer-events: none; }
+.k-koncept { background: #fff4d6; border: 1px solid #e8c766; border-radius: 6px; padding: 10px 14px; }
+.k-koncept .k-odkaz { margin-left: 4px; }
+.k-roky { display: grid; gap: 1px; margin: 4px 0 2px; font-size: .88rem; font-variant-numeric: tabular-nums; }
+.k-roky .k-roky-titulek { font-weight: 600; }
