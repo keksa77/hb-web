@@ -1,4 +1,5 @@
-// Zápis časů na předávce (telefon časoměřiče). Přihlášení kódem předávky, bez účtu (rozhodnutí 5. 10. 2026).
+// Zápis časů na předávce (telefon časoměřiče). Přihlášení kódem předávky z formuláře (predavky.kod_predavky,
+// 8 číslic), bez účtu (rozhodnutí 5. a 6. 10. 2026).
 // Klepnutí na tým = doběh v tu chvíli. Bez signálu se zápis uloží v telefonu s původním časem
 // a odešle se sám, až se signál vrátí (každý zápis má vlastní klient_id, takže se nikdy nezapíše dvakrát).
 // Už zapsaný čas se nepřepíše bez potvrzení; Zpět funguje 15 minut. Seznam „Dobíhají“ řadí
@@ -116,8 +117,8 @@
   // ---------- vykreslení ----------
   function prihlaseni() {
     return '<form id="p-prihlaseni" class="p-prihlaseni"><label for="p-kod">Kód předávky</label>' +
-      '<p class="p-napoveda">Najdeš ho v pokynech pro předávku (6 znaků, např. K7M2QX).</p>' +
-      '<input id="p-kod" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" required>' +
+      '<p class="p-napoveda">8 číslic z formuláře předávky. Nebo naskenuj QR kód z pokynů.</p>' +
+      '<input id="p-kod" inputmode="numeric" autocomplete="off" spellcheck="false" maxlength="12" required>' +
       '<button type="submit">Přihlásit</button>' + (chyba ? '<p class="p-chyba">' + esc(chyba) + "</p>" : "") + "</form>";
   }
   function vykresli() {
@@ -188,7 +189,7 @@
   koren.addEventListener("submit", async function (ev) {
     ev.preventDefault();
     if (ev.target.id === "p-prihlaseni") {
-      var k = document.getElementById("p-kod").value.trim();
+      var k = document.getElementById("p-kod").value.replace(/\s/g, "");
       try { await prihlas(k); odesli(); } catch (e) { chyba = e.server ? e.message : "Bez signálu se nejde přihlásit. Zkus to za chvíli."; }
       vykresli();
     } else if (ev.target.id === "p-jiny") {
