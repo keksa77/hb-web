@@ -8,7 +8,7 @@ eleventyExcludeFromCollections: true
 <link rel="stylesheet" href="{{ web.zaklad }}/assets/kapitan.css">
 <h1>Kapitánská sekce</h1>
 <div class="k-karta k-uzka" id="k-prihlaseni">
-  <p>Zadej e-mail z registrace týmu (nebo ten, pod kterým tě kapitán přidal na soupisku). Pošleme ti na něj odkaz, kterým se přihlásíš. Heslo není potřeba.</p>
+  <p>Zadej e-mail z registrace týmu (nebo e-mail, pod kterým jsi na soupisce týmu). Pošleme ti na něj odkaz, kterým se přihlásíš. Heslo není potřeba.</p>
   <form id="k-form" novalidate>
     <label class="k-pole" for="k-email">E-mail
       <input id="k-email" name="email" type="email" autocomplete="email" required>
@@ -37,7 +37,14 @@ eleventyExcludeFromCollections: true
     var b = document.getElementById("k-poslat"); b.disabled = true;
     try {
       await HBK.poslatOdkaz(email);
-      HBK.hlaska(stav, "Odkaz jsme poslali na " + email + ". Otevři ho v tomhle prohlížeči. Platí hodinu. Když nepřijde do pár minut, podívej se do spamu.");
+      HBK.hlaska(stav, "Odkaz jsme poslali na " + email + ". Klepni na něj v e-mailu, přihlásí tě. Platí hodinu. Když nepřijde do pár minut, podívej se do spamu.");
+      // další odkaz jde poslat až za minutu (omezení počtu e-mailů), tlačítko odpočítává
+      var zbyva = 60;
+      (function tik() {
+        if (zbyva <= 0) { b.disabled = false; b.textContent = "Poslat odkaz znovu"; return; }
+        b.textContent = "Poslat znovu za " + zbyva + " s"; zbyva--; setTimeout(tik, 1000);
+      })();
+      return;
     } catch (err) { HBK.hlaska(stav, err.message, true); }
     b.disabled = false;
   });
