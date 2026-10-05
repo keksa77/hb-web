@@ -68,6 +68,12 @@ eleventyComputed:
   <p class="pocet">Otázek celkem: {{ obsah.otazky.length }}.</p>
 {% endif %}
 
-{% if not stranka.text and stranka.bloky.length == 0 and stranka.kod != "casto-se-ptate" %}
+{% if stranka.kod == "vysledky" %}
+  <div id="vysledky-online" class="vysledky-online"></div>
+  <script>window.HB = { url: "{{ web.supabaseUrl }}", klic: "{{ web.supabaseKlic }}", zaklad: "{{ web.zaklad }}" };</script>
+  <script src="{{ web.zaklad }}/assets/vysledky.js" defer></script>
+{% endif %}
+
+{% if not stranka.text and stranka.bloky.length == 0 and stranka.kod != "casto-se-ptate" and stranka.kod != "vysledky" %}
   <p class="prazdno">Obsah téhle stránky se teprve připravuje.</p>
 {% endif %}
