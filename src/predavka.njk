@@ -1,0 +1,12 @@
+---
+permalink: "predavka/index.html"
+layout: zaklad.njk
+titulek: "Zápis časů na předávce"
+metaPopis: "Zápis doběhů na předávce Hory Bory – jen pro pořadatele předávek."
+---
+<h1>Zápis časů na předávce</h1>
+<div id="predavka-zapis" class="predavka-zapis"><p>Načítám…</p></div>
+<noscript><p class="upozorneni">Zápis časů potřebuje zapnutý JavaScript.</p></noscript>
+<script>window.HB = { url: "{{ web.supabaseUrl }}", klic: "{{ web.supabaseKlic }}", zaklad: "{{ web.zaklad }}" };</script>
+<script src="{{ web.zaklad }}/assets/vysledky-model.js"></script>
+<script src="{{ web.zaklad }}/assets/predavka.js"></script>

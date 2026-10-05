@@ -71,6 +71,7 @@ eleventyComputed:
 {% if stranka.kod == "vysledky" %}
   <div id="vysledky-online" class="vysledky-online"></div>
   <script>window.HB = { url: "{{ web.supabaseUrl }}", klic: "{{ web.supabaseKlic }}", zaklad: "{{ web.zaklad }}" };</script>
+  <script src="{{ web.zaklad }}/assets/vysledky-model.js" defer></script>
   <script src="{{ web.zaklad }}/assets/vysledky.js" defer></script>
 {% endif %}
 
