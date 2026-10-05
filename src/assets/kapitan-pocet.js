@@ -14,7 +14,7 @@
         (vede && P.soupiska_otevrena ? '<div class="k-akce"><button type="button" class="k-vedlejsi k-tlacitko-s-napovedou" id="k-zmenit-pocet">Změnit počet' +
           "<small>Zruší potvrzení, pak můžeš běžce přidat nebo odebrat.</small></button></div>" : "") + "</div>");
     } else if (!vede) {
-      h.push('<div class="k-karta"><p>Kapitán konečný počet zatím nepotvrdil.</p></div>');
+      h.push('<div class="k-karta"><p>Konečný počet běžců zatím není potvrzený.</p></div>');
     } else if (!P.soupiska_otevrena) {
       h.push('<div class="k-karta"><p>Počet nebyl potvrzený a soupiska je uzavřená. Napiš nám na info@horybory.cz.</p></div>');
     } else if (!n) {

@@ -1,7 +1,7 @@
 // Kapitánská sekce – krok 5: kontrola a potvrzení. Seznam pravidel s fajfkou nebo křížkem a odkazem, kde to opravit,
 // ostatní upozornění a tlačítko „Potvrdit soupisku a etapy“ (Keksa 4. 10. 2026).
 (function () {
-  var e = HBK.esc, P = null;
+  var e = HBK.esc, P = null, BEZCI = [];
 
   function vykresli() {
     var u = P.upozorneni || [], vede = P.role !== "bezec";
@@ -10,7 +10,7 @@
       { ok: P.bezcu > 0, n: "Na soupisce je aspoň jeden běžec", url: "/kapitan/soupiska/" },
       { ok: !ma(["neuplne"]).length, n: "Všichni běžci mají vyplněné povinné údaje", url: "/kapitan/soupiska/", detail: ma(["neuplne"]) },
       { ok: Number(P.obsazenych_etap) === 30 && !ma(["etapy_chybi"]).length, n: "Všech 30 etap má běžce (" + e(P.obsazenych_etap) + " z 30)", url: "/kapitan/etapy/", detail: ma(["etapy_chybi"]) },
-      { ok: !ma(["tretiny", "bez_etapy"]).length, n: "Každý běžec má etapu z úseků 1–10, 11–20 i 21–30", url: "/kapitan/etapy/", detail: ma(["tretiny", "bez_etapy"]) }
+      { ok: !ma(["tretiny", "bez_etapy"]).length, n: "Každý běžec má etapu z každé třetiny trati (1–10, 11–20, 21–30)", url: "/kapitan/etapy/", detail: ma(["tretiny", "bez_etapy"]) }
     ];
     var lzePotvrdit = body.every(function (b) { return b.ok; });
     var ostatni = u.filter(function (x) { return ["neuplne", "etapy_chybi", "tretiny", "bez_etapy"].indexOf(x.druh) < 0; });
@@ -22,6 +22,10 @@
     }).join("") + "</ul></div>");
     if (ostatni.length) h.push('<div class="k-karta"><h2>Zkontroluj ještě</h2><p class="pocet">Tohle potvrzení nebrání, ale podívej se na to.</p><ul class="k-upozorneni">' +
       ostatni.map(function (x) { return "<li>" + e(x.text) + "</li>"; }).join("") + "</ul></div>");
+    // co se potvrzuje: běžci a jejich etapy (UX revize 5. 10. 2026)
+    if (BEZCI.length) h.push('<div class="k-karta"><h2>Co potvrzuješ</h2><div class="k-tabulka-obal"><table class="k-tabulka"><thead><tr><th>Běžec</th><th>Etapy</th></tr></thead><tbody>' +
+      BEZCI.map(function (b) { return "<tr><td>" + e(b.jmeno + " " + b.prijmeni) + "</td><td>" + e((b.etapy || []).join(", ") || "—") + "</td></tr>"; }).join("") +
+      "</tbody></table></div></div>");
     if (P.soupiska_potvrzena) {
       h.push('<div class="k-karta"><p class="k-velky"><span class="k-stitek k-stitek-ok">potvrzeno</span> ' + e(HBK.cas(P.soupiska_potvrzena)) + "</p>" +
         '<p class="pocet">Soupisku i etapy máš potvrzené, díky. Každá další změna potvrzení zruší a bude potřeba potvrdit znovu.</p></div>');
@@ -45,6 +49,7 @@
 
   document.addEventListener("DOMContentLoaded", async function () {
     P = await HBK.vyzadovat(); if (!P) return;
+    try { BEZCI = (await HBK.rpc("web_k_soupiska")) || []; } catch (err) { BEZCI = []; }
     vykresli();
   });
 })();

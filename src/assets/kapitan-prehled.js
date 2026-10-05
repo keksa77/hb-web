@@ -3,6 +3,24 @@
 (function () {
   var e = HBK.esc;
 
+  // Údaje k platbě: každý řádek jde zkopírovat jedním klepnutím (na telefonu QR naskenovat nejde). UX revize 5. 10. 2026.
+  function radekKopie(nazev, hodnota, kopie) {
+    return "<dt>" + nazev + '</dt><dd class="k-kopie"><span>' + e(hodnota || "–") + "</span>" +
+      (hodnota ? '<button type="button" class="k-odkaz" data-kopie="' + e(kopie || hodnota) + '" aria-label="Zkopírovat ' + nazev.toLowerCase() + '">Zkopírovat</button>' : "") + "</dd>";
+  }
+  function platba(p) {
+    return '<div class="k-platba"><dl class="k-dl k-dl-platba">' +
+      radekKopie("Účet", p.ucet) + radekKopie("Variabilní symbol", p.vs) +
+      radekKopie("Částka", HBK.kc(p.castka_kc), String(p.castka_kc || "")) + "</dl>" +
+      (p.qr_spayd ? '<div class="k-qr"><div id="k-qr-obr" aria-label="QR kód pro platbu startovného"></div><small>Na počítači naskenuj QR kód v bankovní aplikaci.</small></div>' : "") +
+      "</div>";
+  }
+  document.addEventListener("click", function (ev) {
+    var b = ev.target && ev.target.closest && ev.target.closest("[data-kopie]"); if (!b) return;
+    var hotovo = function () { var t = b.textContent; b.textContent = "Zkopírováno"; setTimeout(function () { b.textContent = t; }, 1500); };
+    try { navigator.clipboard.writeText(b.dataset.kopie).then(hotovo, function () {}); } catch (err) {}
+  });
+
   function vykresli(p) {
     var h = [];
     h.push('<div class="k-mrizka">');
@@ -19,12 +37,9 @@
     h.push('<div class="k-karta"><h2>Startovné</h2><dl class="k-dl">' +
       "<dt>Stav</dt><dd>" + (p.zaplaceno ? '<span class="k-stitek k-stitek-ok">zaplaceno ' + e(HBK.datum(p.zaplaceno_dne)) + "</span>"
                                          : '<span class="k-stitek k-stitek-ne">zatím nezaplaceno</span>') + "</dd>" +
-      "<dt>Částka</dt><dd>" + e(HBK.kc(p.castka_kc)) + "</dd>" +
+      (p.zaplaceno ? "<dt>Částka</dt><dd>" + e(HBK.kc(p.castka_kc)) + "</dd>" : "") +
       "</dl>" +
-      (!p.zaplaceno && p.qr_spayd
-        ? '<div class="k-qr"><div id="k-qr-obr" aria-label="QR kód pro platbu startovného"></div>' +
-          "<small>Naskenuj v bankovní aplikaci.<br>Účet " + e(p.ucet || "–") + " · VS " + e(p.vs || "–") + " · " + e(HBK.kc(p.castka_kc)) + "</small></div>"
-        : !p.zaplaceno ? '<p class="k-qr"><small>Účet ' + e(p.ucet || "–") + " · VS " + e(p.vs || "–") + "</small></p>" : "") +
+      (!p.zaplaceno ? platba(p) : "") +
       "</div>");
     h.push("</div>");
     document.getElementById("k-obsah").innerHTML = h.join("");

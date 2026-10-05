@@ -6,26 +6,31 @@
   var POHLAVI = { zena: "žena", muz: "muž", jine: "jiné" };
 
   function kraj(kod) { var k = KRAJE.filter(function (x) { return x.kod === kod; })[0]; return k ? k.nazev : (kod || ""); }
+  function chybi(r) {
+    return [[r.rok_narozeni, "rok narození"], [r.pohlavi, "pohlaví"], [r.kraj, "kraj"], [r.mesto, "město"], [r.velikost, "tričko"], [r.vykonnost_10km, "čas na 10 km"]]
+      .filter(function (x) { return !x[0]; }).map(function (x) { return x[1]; });
+  }
   function neuplny(r) { return !r.rok_narozeni || !r.pohlavi || !r.kraj || !r.mesto || !r.velikost || !r.vykonnost_10km; }
 
   function tabulka() {
     var vede = P.role !== "bezec", otevreno = P.soupiska_otevrena;
     if (!RADKY.length) return '<p class="prazdno">Na soupisce zatím nikdo není.</p>';
-    return '<div class="k-tabulka-obal"><table class="k-tabulka"><thead><tr>' +
+    return '<div class="k-tabulka-obal"><table class="k-tabulka k-karty-mobil"><thead><tr>' +
       "<th>Číslo</th><th>Jméno</th>" + (vede ? "<th>Kontakt</th>" : "") +
       "<th>Rok narození</th><th>Pohlaví</th><th>Kraj, město</th><th>Velikost trička</th><th>Čas na 10 km</th><th>Etapy</th><th></th></tr></thead><tbody>" +
       RADKY.map(function (r) {
         var akce = "";
-        if (otevreno && r.muzu_upravit) akce += '<a class="k-vedlejsi" href="' + HB.zaklad + "/kapitan/bezec/udaje/?id=" + r.soupiska_id + '">' + (neuplny(r) ? "Doplnit" : "Upravit") + "</a>";
-        if (otevreno && vede && !P.pocet_potvrzen) akce += '<button type="button" class="k-vedlejsi" data-odebrat="' + r.soupiska_id + '">Odebrat</button>';
-        return '<tr data-radek="' + r.soupiska_id + '"' + (neuplny(r) ? ' class="k-neuplny" title="Chybí povinné údaje, doplň je"' : "") + '><td class="k-cislo">' + e(r.startovni_cislo) + "</td><td>" +
-          e(r.jmeno + " " + r.prijmeni) + (r.jsem_to_ja ? " <small>(ty)</small>" : "") + "</td>" +
-          (vede ? '<td class="k-zalom">' + e(r.email || "") + (r.telefon ? '<br><span class="k-nezalom">' + e(r.telefon) + "</span>" : "") + "</td>" : "") +
-          "<td>" + e(r.rok_narozeni || "") + "</td><td>" + e(POHLAVI[r.pohlavi] || "") + "</td>" +
-          "<td>" + e([kraj(r.kraj), r.mesto].filter(Boolean).join(", ")) + "</td>" +
-          "<td>" + e(r.velikost ? r.velikost_rada + " " + r.velikost : "") + "</td>" +
-          '<td class="k-cislo">' + e(HBK.vykonnost(r.vykonnost_10km)) + "</td>" +
-          "<td>" + e((r.etapy || []).join(", ")) + '</td><td class="k-akce-bunka">' + akce + "</td></tr>";
+        if (otevreno && r.muzu_upravit) akce += '<a class="k-vedlejsi' + (neuplny(r) ? " k-doplnit" : "") + '" href="' + HB.zaklad + "/kapitan/bezec/udaje/?id=" + r.soupiska_id + '">' + (neuplny(r) ? "Doplnit" : "Upravit") + "</a>";
+        if (otevreno && vede && !P.pocet_potvrzen) akce += '<button type="button" class="k-vedlejsi k-odebrat" data-odebrat="' + r.soupiska_id + '">Odebrat</button>';
+        return '<tr data-radek="' + r.soupiska_id + '"' + (neuplny(r) ? ' class="k-neuplny" title="Chybí povinné údaje, doplň je"' : "") + '><td class="k-cislo" data-popis="Číslo">' + e(r.startovni_cislo) + '</td><td class="k-jmeno-bunka">' +
+          e(r.jmeno + " " + r.prijmeni) + (r.jsem_to_ja ? " <small>(ty)</small>" : "") +
+          (neuplny(r) ? '<small class="k-chybi-udaje">Chybí: ' + e(chybi(r).join(", ")) + "</small>" : "") + "</td>" +
+          (vede ? '<td class="k-zalom" data-popis="Kontakt">' + e(r.email || "") + (r.telefon ? '<br><span class="k-nezalom">' + e(r.telefon) + "</span>" : "") + "</td>" : "") +
+          '<td data-popis="Rok narození">' + e(r.rok_narozeni || "") + '</td><td data-popis="Pohlaví">' + e(POHLAVI[r.pohlavi] || "") + "</td>" +
+          '<td data-popis="Kraj, město">' + e([kraj(r.kraj), r.mesto].filter(Boolean).join(", ")) + "</td>" +
+          '<td data-popis="Tričko">' + e(r.velikost ? r.velikost_rada + " " + r.velikost : "") + "</td>" +
+          '<td class="k-cislo" data-popis="Čas na 10 km">' + e(HBK.vykonnost(r.vykonnost_10km)) + "</td>" +
+          '<td data-popis="Etapy">' + e((r.etapy || []).join(", ")) + '</td><td class="k-akce-bunka">' + akce + "</td></tr>";
       }).join("") + "</tbody></table></div>";
   }
 
@@ -69,7 +74,7 @@
   document.addEventListener("click", async function (ev) {
     var t = ev.target; if (!t || !t.dataset || !t.dataset.odebrat) return;
     var r = RADKY.filter(function (x) { return x.soupiska_id === Number(t.dataset.odebrat); })[0];
-    if (!r || !confirm("Odebrat " + r.jmeno + " " + r.prijmeni + " ze soupisky? Jeho etapy se uvolní.")) return;
+    if (!r || !confirm("Odebrat " + r.jmeno + " " + r.prijmeni + " ze soupisky? Etapy tohoto běžce se uvolní.")) return;
     try {
       var v = await HBK.rpc("web_k_odeber_bezce", { p_soupiska: r.soupiska_id });
       await obnov(r.jmeno + " " + r.prijmeni + " už na soupisce není." + (v.uvolnene_etapy && v.uvolnene_etapy.length

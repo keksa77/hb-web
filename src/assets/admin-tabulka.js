@@ -632,6 +632,9 @@
 
     // --- akce (jednotlivě i hromadně) s protokolem ---
     async function provedAkci(tlacitko, radky, akce, arg, hromadne) {
+      // nevratné akce (odeslání, zamítnutí, zrušení mailu) se potvrzují s počtem řádků
+      var otazka = N.potvrdit && N.potvrdit[akce];
+      if (otazka && !confirm(typeof otazka === "function" ? otazka(radky.length) : otazka)) return;
       if (tlacitko) tlacitko.disabled = true;
       hlaska();
       var ok = 0, chyby = [];

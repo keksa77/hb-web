@@ -152,7 +152,12 @@
     if (k === "potvrzeni") return !!p.soupiska_potvrzena;
     return false;
   }
-  function viditelneKroky(p) { return KROKY.filter(function (x) { return !x.vede || p.role !== "bezec"; }); }
+  function viditelneKroky(p) {
+    return KROKY.filter(function (x) { return !x.vede || p.role !== "bezec"; }).map(function (x) {
+      // běžec soupisku jen prohlíží a upravuje své údaje (UX revize 5. 10. 2026)
+      return p.role === "bezec" && x.k === "soupiska" ? Object.assign({}, x, { hint: "Tvoje údaje a tým na soupisce." }) : x;
+    });
+  }
   function vykresliKroky(p) {
     var ol = document.getElementById("k-kroky"); if (!ol) return;
     var ted = (window.HB && HB.krok) || "";
@@ -163,6 +168,12 @@
         '<span class="k-krok-nazev">' + esc(x.n) + "</span>" + (h ? '<span class="k-skryte"> (hotovo)</span>' : "") + "</a></li>";
     }).join("");
     ol.hidden = false;
+    // na mobilu se místo pěti rámečků ukáže „Krok 3 z 5: Konečný počet“ a pod tím tečky
+    var kroky = viditelneKroky(p), i = kroky.map(function (x) { return x.k; }).indexOf(ted);
+    var m = document.getElementById("k-krok-mobil");
+    if (!m) { m = document.createElement("p"); m.id = "k-krok-mobil"; m.className = "k-krok-mobil"; m.setAttribute("aria-hidden", "true"); ol.parentNode.insertBefore(m, ol); }
+    m.textContent = i >= 0 ? "Krok " + (i + 1) + " z " + kroky.length + ": " + kroky[i].n : "";
+    m.hidden = i < 0;
   }
   // Tlačítko kroku: šipka, název kroku a nápověda pod ním. Volby: { zpet: {...}, dal: {...} }, kde položka má n, url, hint.
   function tlacitkoKroku(x, smer) {

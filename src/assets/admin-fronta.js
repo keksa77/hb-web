@@ -70,7 +70,7 @@
         if (r.stav !== "ceka") return '<button type="button" class="adm-mini" data-akce="vratit">Vrátit do fronty</button>';
         var h = '<button type="button" class="adm-mini' + (r.varianta_navrh === "zakladni" ? " adm-mini-hlavni" : "") + '" data-akce="schvalit" data-arg="zakladni" title="Schválit – varianta 1">✓ V1</button>';
         if (!r.fakturovat) h += '<button type="button" class="adm-mini' + (r.varianta_navrh === "zvlastni" ? " adm-mini-hlavni" : "") + '" data-akce="schvalit" data-arg="zvlastni" title="Schválit – varianta 2">✓ V2</button>';
-        h += '<button type="button" class="adm-mini adm-mini-cervene" data-akce="zamitnout" title="Zamítnout">✗</button>';
+        h += '<button type="button" class="adm-mini adm-mini-cervene" data-akce="zamitnout" title="Zamítnout registraci">Zamítnout</button>';
         return h + (r.odklad_platby
           ? '<button type="button" class="adm-mini adm-mini-hlavni" data-akce="odklad" data-arg="ne" title="Zrušit odklad platby na leden">Leden ✓</button>'
           : '<button type="button" class="adm-mini" data-akce="odklad" data-arg="ano" title="Přidat do mailu prosbu o platbu v lednu 2027 se zachováním ceny první vlny">Leden</button>');
@@ -80,6 +80,9 @@
         zamitnout: function (r) { return zmen(r, { stav: "zamitnuto" }); },
         vratit: function (r) { return zmen(r, { stav: "ceka", varianta_schvalena: null }); },
         odklad: function (r, arg) { return HBA.rpc("web_fronta_odklad", { p_id: r.id, p_odklad: arg === "ano" }); }
+      },
+      potvrdit: {
+        zamitnout: function (n) { return n === 1 ? "Zamítnout tuto registraci? Mail kapitánovi neodejde." : "Zamítnout " + n + " registrací? Maily kapitánům neodejdou."; }
       },
       hromadne: [
         { nazev: "Schválit navrženou variantu", akce: "schvalit", jen: function (r) { return r.stav === "ceka"; } },

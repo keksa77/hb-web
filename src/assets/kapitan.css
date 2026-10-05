@@ -134,3 +134,60 @@ a.k-vedlejsi.k-tlacitko-s-napovedou, a.k-tlacitko.k-tlacitko-s-napovedou { displ
 .k-koncept .k-odkaz { margin-left: 4px; }
 .k-roky { display: grid; gap: 1px; margin: 4px 0 2px; font-size: .88rem; font-variant-numeric: tabular-nums; }
 .k-roky .k-roky-titulek { font-weight: 600; }
+
+/* --- UX revize 5. 10. 2026: platba, mobilní karty, lišta etap, drobnosti --- */
+.k-kopie { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.k-kopie .k-odkaz { font-size: .85rem; font-weight: 400; }
+.k-platba { display: grid; gap: 10px; margin-top: 12px; }
+.k-dl-platba { margin: 0; }
+.k-krok-mobil { display: none; margin: 0 0 6px; font-weight: 700; }
+.k-chybi-udaje { display: block; color: #b3261e; font-size: .82rem; }
+.k-odebrat { color: #9b1c1c; border-color: #e3b9b9; }
+.k-doplnit { border-color: #b3261e; font-weight: 700; }
+.k-chyba-radek { display: block; color: #b3261e; font-size: .8rem; margin-top: 3px; }
+.k-ulozit-lista { position: sticky; bottom: 0; z-index: 5; background: #fff; border-top: 1px solid var(--ram); padding: 10px 0;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; box-shadow: 0 -6px 12px -10px rgba(0,0,0,.25); }
+.k-lista-stav { font-weight: 600; }
+.k-chyba-text { color: #b3261e; }
+.k-cela-sirka { grid-column: 1 / -1; }
+.k-pole small { display: block; }
+
+@media (max-width: 600px) {
+  /* ukazatel kroků: „Krok 3 z 5: …“ a pod tím pět čísel v jedné řadě */
+  .k-krok-mobil { display: block; }
+  .k-kroky { flex-wrap: nowrap; gap: 4px; }
+  .k-kroky li, .k-kroky li.k-krok-ted { flex: 1 1 0; }
+  .k-kroky a { justify-content: center; padding: 6px 4px; }
+  .k-kroky .k-krok-nazev { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  /* soupiska jako karty: jméno nahoře, údaje pod sebou, tlačítka hned pod tím */
+  .k-karty-mobil, .k-karty-mobil tbody, .k-karty-mobil tr, .k-karty-mobil td { display: block; width: auto; }
+  .k-karty-mobil thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .k-karty-mobil tr { border: 1px solid var(--ram); border-radius: 8px; margin-bottom: 10px; padding: 8px 10px; background: #fff; }
+  .k-karty-mobil td { border: 0; padding: 2px 0; text-align: left !important; white-space: normal; }
+  .k-karty-mobil td[data-popis]::before { content: attr(data-popis) ": "; color: var(--seda); }
+  .k-karty-mobil td:empty { display: none; }
+  .k-karty-mobil .k-jmeno-bunka { font-weight: 700; font-size: 1.05rem; order: -1; }
+  .k-karty-mobil td.k-cislo[data-popis="Číslo"] { float: right; color: var(--seda); }
+  .k-karty-mobil .k-akce-bunka { display: flex; gap: 8px; width: auto; margin-top: 6px; }
+  .k-karty-mobil .k-akce-bunka > * { width: auto; flex: 1 1 0; margin: 0; }
+  .k-tabulka.k-karty-mobil tr.k-neuplny td:first-child { box-shadow: none; }
+  .k-karty-mobil tr.k-neuplny { border-left: 4px solid #b3261e; }
+
+  /* rozdělení etap jako karty: číslo a úsek, pod tím km a převýšení, výběr běžce přes celou šířku */
+  .k-etapy-mobil thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .k-etapy-mobil, .k-etapy-mobil tbody { display: block; }
+  .k-etapy-mobil tr { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; border-bottom: 1px solid var(--ram); padding: 8px 0; }
+  .k-etapy-mobil td { border: 0; padding: 0; }
+  .k-etapy-mobil .k-etapa-cislo { font-weight: 700; font-size: 1.05rem; }
+  .k-etapy-mobil .k-etapa-nazev { flex: 1 1 60%; font-weight: 600; }
+  .k-etapy-mobil td.k-cislo[data-popis] { font-size: .85rem; color: var(--seda); }
+  .k-etapy-mobil td.k-cislo[data-popis="km"]::after { content: " km"; }
+  .k-etapy-mobil td.k-cislo[data-popis="↑"]::before { content: "↑ "; }
+  .k-etapy-mobil td.k-cislo[data-popis="↓"]::before { content: "↓ "; }
+  .k-etapy-mobil .k-etapa-povrch { display: none; }
+  .k-etapy-mobil .k-etapa-bezec { flex: 1 1 100%; margin-top: 6px; }
+  .k-etapy-mobil .k-etapa-bezec select { width: 100%; font-size: 1rem; padding: 8px; }
+  .k-etapy-mobil tfoot { display: none; }
+}
+.k-kopie span { white-space: nowrap; }

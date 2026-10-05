@@ -23,18 +23,18 @@
       '<label class="k-pole" for="f-prijmeni">Příjmení *<input id="f-prijmeni" value="' + e(r.prijmeni || "") + '" required></label>' +
       '<label class="k-pole" for="f-email">E-mail *<input id="f-email" type="email" value="' + e(r.email || "") + '"' + (ja ? " disabled" : "") + " required>" +
         (ja ? "<small>E-mail změní kapitán.</small>" : "<small>Na něj přijde běžci odkaz do sekce.</small>") + "</label>" +
-      '<label class="k-pole" for="f-telefon">Telefon *<input id="f-telefon" type="tel" value="' + e(r.telefon || "") + '" placeholder="777 123 456" required></label>' +
-      '<label class="k-pole" for="f-rok">Rok narození *<input id="f-rok" inputmode="numeric" maxlength="4" value="' + e(r.rok_narozeni || "") + '" placeholder="1990" required></label>' +
+      '<label class="k-pole" for="f-telefon">Telefon *<input id="f-telefon" type="tel" value="' + e(r.telefon || "") + '" required><small>Např. 777 123 456.</small></label>' +
+      '<label class="k-pole" for="f-rok">Rok narození *<input id="f-rok" inputmode="numeric" maxlength="4" value="' + e(r.rok_narozeni || "") + '" required><small>Např. 1990.</small></label>' +
       '<label class="k-pole" for="f-pohlavi">Pohlaví *' + vyber("f-pohlavi", [["zena", "žena"], ["muz", "muž"], ["jine", "jiné"]], r.pohlavi) + "</label>" +
       '<label class="k-pole" for="f-kraj">Kraj *' + vyber("f-kraj", KRAJE.map(function (k) { return [k.kod, k.nazev]; }), r.kraj) + "</label>" +
       '<label class="k-pole" for="f-mesto">Město *<input id="f-mesto" value="' + e(r.mesto || "") + '" required></label>' +
       '<label class="k-pole" for="f-velikost">Velikost trička *' + vyber("f-velikost", VELIKOSTI.map(function (v) { return [v.rada + "|" + v.kod, v.rada + " " + v.kod]; }),
         r.velikost ? r.velikost_rada + "|" + r.velikost : "") + "</label>" +
-      '<label class="k-pole" for="f-vykonnost">Čas na 10 km *<input id="f-vykonnost" value="' + e(HBK.vykonnost(r.vykonnost_10km)) + '" placeholder="52:30" required>' +
-        "<small>Minuty:sekundy, např. 52:30, nebo 1:02:30. Čas na rovině v závodním tempu.</small></label>" +
+      '<label class="k-pole" for="f-vykonnost">Čas na 10 km *<input id="f-vykonnost" value="' + e(HBK.vykonnost(r.vykonnost_10km)) + '" inputmode="decimal" required>' +
+        "<small>Napiš 52:30 (minuty:sekundy), nebo 1:02:30, když ti 10 km trvá přes hodinu. Jde i 52.30. Čas na rovině v závodním tempu.</small></label>" +
+      '<details class="k-proc k-cela-sirka" id="k-proc" hidden><summary>Proč zadat čas na 10 km co nejpřesněji</summary><div class="k-text" id="k-proc-text"></div></details>' +
       '<label class="k-pole" for="f-poznamka">Poznámka<input id="f-poznamka" value="' + e(r.poznamka || "") + '"></label>' +
       "</div>" +
-      '<details class="k-proc" id="k-proc" hidden><summary>Proč zadat čas na 10 km co nejpřesněji</summary><div class="k-text" id="k-proc-text"></div></details>' +
       '<p class="pocet">Pole s hvězdičkou jsou povinná. Rozepsané údaje si tenhle prohlížeč pamatuje, dokud běžce neuložíš.</p>' +
       '<div class="k-akce k-akce-hlavni"><button type="submit" class="k-tlacitko k-tlacitko-s-napovedou">' +
         (UPRAVUJI ? "Uložit změny" : "Přidat na soupisku") + "<small>Uloží běžce a vrátí tě na soupisku.</small></button></div>" +
@@ -59,6 +59,11 @@
       velikost_rada: vel ? vel.rada : null, velikost: vel ? vel.kod : null, vykonnost_10km: h.vykonnost_skutecna || h.vykonnost_10km };
   }
 
+  // čas na 10 km: tečka, čárka i mezera jako oddělovač, samotné číslo = celé minuty (52 → 52:00)
+  function normCas(v) {
+    v = String(v || "").trim().replace(/[.,\s]+/g, ":");
+    return /^\d{1,3}$/.test(v) ? v + ":00" : v;
+  }
   function hodnota(id) { var el = document.getElementById(id); return el && !el.disabled ? el.value.trim() : null; }
   var POVINNE = [["f-jmeno", "Vyplň jméno."], ["f-prijmeni", "Vyplň příjmení."], ["f-email", "Vyplň e-mail."], ["f-telefon", "Vyplň telefon."],
     ["f-rok", "Vyplň rok narození."], ["f-pohlavi", "Vyber pohlaví."], ["f-kraj", "Vyber kraj."], ["f-mesto", "Vyplň město."],
@@ -76,8 +81,9 @@
       var el = document.getElementById(p[0]), t = el && !el.disabled && !el.value.trim() ? (tise ? "Chybí, doplň." : p[1]) : "";
       oznac(p[0], t); if (t) chyby.push(p[0]);
     });
-    if (rok && !(/^\d{4}$/.test(rok) && Number(rok) >= 1930 && Number(rok) <= letos - 10)) { oznac("f-rok", "Rok narození napiš čtyřmi číslicemi, např. 1990."); chyby.push("f-rok"); }
-    if (v && !/^(\d{1,2}:)?\d{1,3}(:\d{2})?$/.test(v)) { oznac("f-vykonnost", "Čas napiš jako minuty:sekundy, např. 52:30."); chyby.push("f-vykonnost"); }
+    if (rok && !/^\d{4}$/.test(rok)) { oznac("f-rok", "Rok narození napiš čtyřmi číslicemi, např. 1990."); chyby.push("f-rok"); }
+    else if (rok && (Number(rok) < 1930 || Number(rok) > letos - 10)) { oznac("f-rok", "Zkontroluj rok, běžci musí být aspoň 10 let."); chyby.push("f-rok"); }
+    if (v && !/^(\d{1,2}:)?\d{1,3}:\d{2}$/.test(normCas(v))) { oznac("f-vykonnost", "Napiš čas jako minuty:sekundy, např. 52:30."); chyby.push("f-vykonnost"); }
     if (em && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { oznac("f-email", "E-mail napiš ve tvaru jmeno@domena.cz."); chyby.push("f-email"); }
     if (chyby.length && !tise) { var prvni = document.getElementById(chyby[0]); prvni.focus(); prvni.scrollIntoView({ behavior: "smooth", block: "center" }); }
     return !chyby.length;
@@ -127,7 +133,7 @@
       p_jmeno: hodnota("f-jmeno"), p_prijmeni: hodnota("f-prijmeni"), p_email: hodnota("f-email"), p_telefon: hodnota("f-telefon"),
       p_rok_narozeni: rok ? Number(rok) : null, p_pohlavi: hodnota("f-pohlavi"), p_kraj: hodnota("f-kraj"), p_mesto: hodnota("f-mesto"),
       p_velikost_rada: vel ? vel.split("|")[0] : "", p_velikost: vel ? vel.split("|")[1] : "",
-      p_vykonnost: hodnota("f-vykonnost"), p_poznamka: hodnota("f-poznamka")
+      p_vykonnost: normCas(hodnota("f-vykonnost")), p_poznamka: hodnota("f-poznamka")
     };
     try {
       var id;

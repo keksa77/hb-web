@@ -71,7 +71,7 @@
         var h = '<button type="button" class="adm-mini" data-akce="nahled" title="Zobrazit celý text mailu">Náhled</button>';
         if (r.stav === "ceka") {
           h += '<button type="button" class="adm-mini adm-mini-hlavni" data-akce="odeslat" title="Odeslat tento mail">Odeslat</button>';
-          h += '<button type="button" class="adm-mini adm-mini-cervene" data-akce="zrusit" title="Neodesílat">✗</button>';
+          h += '<button type="button" class="adm-mini adm-mini-cervene" data-akce="zrusit" title="Neodesílat">Zrušit</button>';
         }
         return h;
       },
@@ -82,6 +82,10 @@
           var v = await HBA.db("web_mail_fronta?id=eq." + r.id + "&stav=eq.ceka", { metoda: "PATCH", telo: { stav: "zruseno" }, vratit: true });
           if (!v || !v.length) throw new Error("Mail už nečeká — nejspíš ho mezitím někdo odeslal nebo zrušil.");
         }
+      },
+      potvrdit: {
+        odeslat: function (n) { return n === 1 ? "Odeslat tento mail? Odeslání nejde vrátit." : "Odeslat " + n + " mailů? Odeslání nejde vrátit."; },
+        zrusit: function (n) { return n === 1 ? "Zrušit tento mail? Neodejde." : "Zrušit " + n + " mailů? Neodejdou."; }
       },
       hromadne: [
         { nazev: "Odeslat vybrané", akce: "odeslat", jen: function (r) { return r.stav === "ceka"; } },

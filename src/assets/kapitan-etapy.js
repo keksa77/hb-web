@@ -26,7 +26,7 @@
       for (var k = 1; k <= 30; k++) if (VYBER[k] === b.soupiska_id) { t[Math.floor((k - 1) / 10)] = true; n++; }
       b._tretiny = t; b._pocet = n;
       if (!n) upoz.push(b.jmeno + " " + b.prijmeni + " nemá žádnou etapu.");
-      else if (!(t[0] && t[1] && t[2])) upoz.push(b.jmeno + " " + b.prijmeni + " nemá etapu z úseku " +
+      else if (!(t[0] && t[1] && t[2])) upoz.push(b.jmeno + " " + b.prijmeni + " nemá etapu z třetiny trati " +
         ["1–10", "11–20", "21–30"].filter(function (x, idx) { return !t[idx]; }).join(", ") + ".");
     });
     return { zaSebou: zaSebou, chyby: chyby, upoz: upoz };
@@ -47,25 +47,30 @@
       (P.soupiska_otevrena ? (P.soupiska_do ? "Změny jdou do " + e(HBK.cas(P.soupiska_do)) + "." : "")
                            : "<b>Rozdělení je uzavřené.</b> Změny řeší pořadatel na info@horybory.cz.") + "</p>");
     if (!BEZCI.length) h.push('<p class="k-chyba">Nejdřív přidej běžce na <a href="' + HB.zaklad + '/kapitan/soupiska/">soupisku</a>.</p>');
-    h.push('<div class="k-tabulka-obal"><table class="k-tabulka"><thead><tr><th>Etapa</th><th>Odkud – kam</th><th>Km</th><th>Stoupání</th><th>Klesání</th><th>Povrch</th><th>Běžec</th></tr></thead><tbody>' +
+    h.push('<div class="k-tabulka-obal"><table class="k-tabulka k-etapy-mobil"><thead><tr><th>Etapa</th><th>Odkud – kam</th><th>Km</th><th>Stoupání</th><th>Klesání</th><th>Povrch</th><th>Běžec</th></tr></thead><tbody>' +
       ETAPY.map(function (x) {
         var sel = lze ? '<select data-etapa="' + x.etapa + '" aria-label="Běžec etapy ' + x.etapa + '"><option value="">— nikdo —</option>' +
           BEZCI.map(function (b) { return '<option value="' + b.soupiska_id + '"' + (VYBER[x.etapa] === b.soupiska_id ? " selected" : "") + ">" +
             e(b.startovni_cislo + " " + b.jmeno + " " + b.prijmeni) + "</option>"; }).join("") + "</select>"
           : e(jmeno(VYBER[x.etapa]) || "—");
         var i = info(x), useka = i.start_nazev && i.cil_nazev ? i.start_nazev + " – " + i.cil_nazev : (i.nazev || x.nazev || "");
-        return '<tr' + (k.zaSebou[x.etapa] ? ' class="k-spatne"' : "") + '><td class="k-cislo"><a href="' + HB.zaklad + "/trasa/etapa-" + String(x.etapa).padStart(2, "0") +
-          '/" target="_blank" rel="noopener" title="Stránka etapy ' + x.etapa + '">' + x.etapa + "</a></td><td>" + e(useka) +
-          '</td><td class="k-cislo">' + cislo(i.delka_km != null ? i.delka_km : x.delka_km) + '</td><td class="k-cislo">' + (i.prevyseni_m != null ? cislo(i.prevyseni_m) + " m" : "") +
-          '</td><td class="k-cislo">' + (i.klesani_m != null ? cislo(i.klesani_m) + " m" : "") + "</td><td>" + e(i.povrch || "") + "</td><td>" + sel + "</td></tr>";
+        return '<tr' + (k.zaSebou[x.etapa] ? ' class="k-spatne"' : "") + '><td class="k-cislo k-etapa-cislo"><a href="' + HB.zaklad + "/trasa/etapa-" + String(x.etapa).padStart(2, "0") +
+          '/" target="_blank" rel="noopener" title="Stránka etapy ' + x.etapa + '">' + x.etapa + '</a></td><td class="k-etapa-nazev">' + e(useka) +
+          '</td><td class="k-cislo" data-popis="km">' + cislo(i.delka_km != null ? i.delka_km : x.delka_km) + '</td><td class="k-cislo" data-popis="↑">' + (i.prevyseni_m != null ? cislo(i.prevyseni_m) + " m" : "") +
+          '</td><td class="k-cislo" data-popis="↓">' + (i.klesani_m != null ? cislo(i.klesani_m) + " m" : "") + '</td><td class="k-etapa-povrch">' + e(i.povrch || "") + '</td><td class="k-etapa-bezec">' + sel +
+          (k.zaSebou[x.etapa] ? '<small class="k-chyba-radek">Dvě etapy hned za sebou</small>' : "") + "</td></tr>";
       }).join("") + "</tbody></table></div>");
-    if (lze) h.push('<div class="k-akce"><button type="button" class="k-tlacitko" id="k-ulozit"' + (k.chyby.length ? " disabled" : "") + ">Uložit rozdělení</button>" +
+    // lišta dole na obrazovce: stav rozdělení a Uložit, ať se nemusí rolovat pod 30 řádků (UX revize 5. 10. 2026)
+    var obsazeno = 0; for (var o = 1; o <= 30; o++) if (VYBER[o]) obsazeno++;
+    if (lze) h.push('<div class="k-akce k-ulozit-lista"><span class="k-lista-stav">Obsazeno ' + obsazeno + " z 30" +
+      (k.chyby.length ? ' · <b class="k-chyba-text">' + k.chyby.length + (k.chyby.length === 1 ? " chyba" : k.chyby.length < 5 ? " chyby" : " chyb") + "</b>" : "") + "</span>" +
+      '<button type="button" class="k-tlacitko" id="k-ulozit"' + (k.chyby.length ? " disabled" : "") + ">Uložit rozdělení</button>" +
       '<span class="pocet" id="k-zmeny"></span></div>');
     if (k.chyby.length) h.push('<div class="k-chyba"><ul class="k-upozorneni">' + k.chyby.map(function (x) { return "<li>" + e(x) + "</li>"; }).join("") + "</ul></div>");
     var celkem = {km: 0, nahoru: 0, dolu: 0, etap: 0};
     BEZCI.forEach(function (b) { celkem.km += km[b.soupiska_id] || 0; celkem.nahoru += nahoru[b.soupiska_id] || 0; celkem.dolu += dolu[b.soupiska_id] || 0; });
     for (var c = 1; c <= 30; c++) if (VYBER[c]) celkem.etap++;
-    h.push('<div class="k-karta"><h2>Běžci a jejich etapy</h2><div class="k-tabulka-obal"><table class="k-tabulka"><thead><tr><th>Běžec</th><th>Etapy</th><th>Km</th><th>Stoupání</th><th>Klesání</th><th>Přidělena etapa z úseku</th></tr></thead><tbody>' +
+    h.push('<div class="k-karta"><h2>Běžci a jejich etapy</h2><div class="k-tabulka-obal"><table class="k-tabulka"><thead><tr><th>Běžec</th><th>Etapy</th><th>Km</th><th>Stoupání</th><th>Klesání</th><th>Třetiny trati</th></tr></thead><tbody>' +
       BEZCI.map(function (b) {
         var et = []; for (var i = 1; i <= 30; i++) if (VYBER[i] === b.soupiska_id) et.push(i);
         return "<tr><td>" + e(b.startovni_cislo + " " + b.jmeno + " " + b.prijmeni) + "</td><td>" + e(et.join(", ") || "—") +
