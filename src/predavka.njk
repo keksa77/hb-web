@@ -1,12 +1,27 @@
 ---
 permalink: "predavka/index.html"
-layout: zaklad.njk
-titulek: "Zápis časů na předávce"
-metaPopis: "Zápis doběhů na předávce Hory Bory – jen pro pořadatele předávek."
+eleventyExcludeFromCollections: true
 ---
-<h1>Zápis časů na předávce</h1>
-<div id="predavka-zapis" class="predavka-zapis"><p>Načítám…</p></div>
-<noscript><p class="upozorneni">Zápis časů potřebuje zapnutý JavaScript.</p></noscript>
+{#- Neveřejná stránka pro pořadatele předávek (Keksa 6. 10. 2026): bez menu, bez odkazů na web,
+    vyhledávače ji neindexují a nikde na webu na ni nevede odkaz. Vstup jen kódem / QR z formuláře. -#}
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<title>Zápis časů na předávce</title>
+<link rel="stylesheet" href="{{ web.zaklad }}/assets/styl.css">
+</head>
+<body class="predavka-stranka">
+<header class="hlavicka"><div class="obal hlavicka-obal"><span class="znacka">Zápis časů</span></div></header>
+<main class="obal">
+  <div id="predavka-zapis" class="predavka-zapis"><p>Načítám…</p></div>
+  <noscript><p class="upozorneni">Zápis časů potřebuje zapnutý JavaScript.</p></noscript>
+</main>
 <script>window.HB = { url: "{{ web.supabaseUrl }}", klic: "{{ web.supabaseKlic }}", zaklad: "{{ web.zaklad }}" };</script>
 <script src="{{ web.zaklad }}/assets/vysledky-model.js"></script>
 <script src="{{ web.zaklad }}/assets/predavka.js"></script>
+</body>
+</html>
