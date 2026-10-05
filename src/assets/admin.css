@@ -156,3 +156,16 @@
 .adm-af-seznam label[hidden] { display: none; }
 .adm-af-tlacitka { display: flex; justify-content: flex-end; gap: 6px; padding: 6px 12px 3px; }
 .adm-af-ok { min-width: 60px; }
+/* Hlídání závodu (6. 10. 2026) */
+.hl-stranka { padding: 12px 16px 40px; max-width: 1100px; }
+.hl-stranka h1 { margin: 4px 0 0; font-size: 1.4rem; }
+.hl-souhrn { background: #f6f3ef; padding: 8px 12px; border-radius: 6px; font-size: .92rem; }
+.hl-blok { border: 1px solid #e3dcd0; border-radius: 8px; padding: 10px 14px; margin: 14px 0; background: #fff; }
+.hl-blok h2 { font-size: 1.05rem; margin: 2px 0 2px; }
+.hl-pozor { border-color: #c96a1a; border-left-width: 5px; background: #fff8f0; }
+.hl-pozor-text { color: #8a3b00; }
+.hl-tab { border-collapse: collapse; width: 100%; font-size: .9rem; font-variant-numeric: tabular-nums; }
+.hl-tab th { text-align: left; color: #666; font-weight: 600; border-bottom: 2px solid #e3dcd0; padding: 5px 6px; }
+.hl-tab td { border-bottom: 1px solid #eee; padding: 5px 6px; vertical-align: top; }
+.hl-cislo { font-weight: 700; color: #8a3b00; white-space: nowrap; }
+.hl-neplati td { color: #999; text-decoration: line-through; }
