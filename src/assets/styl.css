@@ -365,3 +365,21 @@ a { color: var(--hb); }
 .p-akce button { font: inherit; font-size: .9rem; background: #fff; border: 1px solid var(--hb); color: var(--hb); border-radius: 6px; padding: 5px 10px; margin-right: 6px; cursor: pointer; }
 .p-ok { color: #2e7d32; } .p-ceka { color: #8a5a00; } .p-chyba { color: #b3261e; }
 .p-signal { background: #fff4e0; border-left: 4px solid #8a5a00; padding: 8px 12px; }
+/* Zápis na předávce – dva kroky, potvrzení, oprava (6. 10. 2026) */
+.p-dobehl { display: block; width: 100%; font: inherit; font-size: 1.6rem; font-weight: 700; letter-spacing: .04em; background: var(--hb); color: #fff; border: 0; border-radius: 12px; padding: 18px 12px; margin: 8px 0 16px; cursor: pointer; }
+.p-dobehl small { display: block; font-size: .85rem; font-weight: 400; letter-spacing: 0; opacity: .85; }
+.p-dobehl:active { background: var(--hb-tmava); }
+.p-rozprac { border: 2px solid var(--hb); border-radius: 10px; padding: 10px 12px; margin: 0 0 12px; background: #fff; }
+.p-cas { font-weight: 700; font-size: 1.1rem; margin: 0 0 6px; }
+.p-vyber label { display: block; font-weight: 600; }
+.p-vyber div { display: flex; gap: 8px; align-items: center; }
+.p-vyber input { flex: 1; font: inherit; font-size: 1.4rem; padding: 8px 10px; border: 1px solid var(--ram); border-radius: 8px; min-width: 0; }
+.p-vyber button[type=submit] { font: inherit; background: var(--hb); color: #fff; border: 0; border-radius: 8px; padding: 10px 14px; }
+.p-navrhy { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.p-navrhy button { font: inherit; font-size: .95rem; background: #fff; border: 1px solid var(--hb); border-radius: 8px; padding: 8px 10px; cursor: pointer; }
+.p-potvrzeni { padding: 4px 0; }
+.p-potvrzeni.p-pozor { background: #fff4e0; border-radius: 8px; padding: 8px 10px; }
+.p-velke { font-size: 3rem; font-weight: 800; color: var(--hb); margin: 0; line-height: 1.1; }
+.p-bylo { margin: 0 0 4px; color: var(--seda); }
+.p-varovani { color: #8a3b00; padding-left: 1.2em; margin: 6px 0; }
+.p-akce .p-hlavni { background: var(--hb); color: #fff; font-weight: 600; }
