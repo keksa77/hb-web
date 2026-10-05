@@ -129,8 +129,8 @@
     var dobihaji = tymy.filter(function (t) { return t.E[e - 1].dobeh == null && !lokalne[t.id]; })
       .sort(function (a, b) { return (a.E[e - 1].odhad || Infinity) - (b.E[e - 1].odhad || Infinity) || (a.c || 0) - (b.c || 0); });
     var cekajici = f.filter(function (z) { return z.stav === "ceka"; }).length;
-    var h = '<div class="p-hlavicka"><p class="p-misto"><strong>Předávka ' + info.predavka + " · " + esc(info.misto || "") + "</strong><br>" +
-      "Zapisuješ doběh etapy " + e + ". Prošlo " + prosli + " z " + tymy.length + " týmů.</p>" +
+    var h = '<div class="p-hlavicka"><p class="p-misto"><strong>Předávka P' + info.predavka + " · " + esc(info.misto || "") + "</strong><br>" +
+      "Zapisuješ příchod týmů na P" + info.predavka + " (doběh etapy " + e + "). Prošlo " + prosli + " z " + tymy.length + " týmů.</p>" +
       '<button type="button" id="p-odhlasit" class="p-male">Odhlásit</button></div>';
     if (info.rezim === "test") h += '<p class="upozorneni">Zkušební režim: mimo závod se zapisují jen zkušební týmy.</p>';
     if (cekajici) h += '<p class="p-signal">Čeká na odeslání: ' + cekajici + ". Odešle se samo, až bude signál.</p>";
@@ -156,7 +156,7 @@
         var akce = "";
         if (z.stav === "konflikt") akce = '<button type="button" data-nahradit="' + z.id + '">Platí můj čas</button> <button type="button" data-zpet="' + z.id + '">Nechat původní</button>';
         else if (Date.now() - z.vytvoreno < 15 * 60000) akce = '<button type="button" data-zpet="' + z.id + '">Zpět</button>';
-        return "<li><strong>" + hms(z.cas) + "</strong> č. " + esc(z.c) + " " + esc(z.n) + " · " + stav + (akce ? '<span class="p-akce">' + akce + "</span>" : "") + "</li>";
+        return "<li><strong>" + hms(z.cas) + "</strong> " + (z.c ? "č. " + esc(z.c) + " " : "") + esc(z.n) + " · " + stav + (akce ? '<span class="p-akce">' + akce + "</span>" : "") + "</li>";
       }).join("") + "</ul>";
     }
     var fokus = document.activeElement && document.activeElement.id;

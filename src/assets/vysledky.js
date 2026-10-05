@@ -51,6 +51,9 @@
   }
   function omez(x, a, b) { return Math.max(a, Math.min(b, x)); }
   function misto(c) { var m = (data.mista || [])[c - 1]; return m ? m[1] : "předávka " + c; }
+  // Místa se značí číslem předávky (Keksa 5. 10. 2026): P1 Dolní Lomná = start, P2 Horní Lomná … P31 Mikulov = cíl.
+  // Etapa n vede z Pn na Pn+1, doběh etapy n = příchod na Pn+1.
+  function P(c) { return "P" + c + " " + misto(c) + (c === 1 ? " (start)" : c === 31 ? " (cíl)" : ""); }
   function km(etapa) { var m = (data.mista || [])[etapa - 1]; return m && m[2] ? Number(m[2]) : null; }
 
   function spocitej() { model = HBVysl.spocitej(data, ted); }
@@ -86,11 +89,11 @@
       "</select></label>";
   }
   function vyberEtapy(id, hodnota, jenProbehle) {
-    var h = '<label>Po etapě <select id="' + id + '">';
+    var h = '<label>Na předávce <select id="' + id + '">';
     for (var e = 1; e <= 30; e++) {
       var n = model.poradi[e].length;
       if (jenProbehle && !n) continue;
-      h += '<option value="' + e + '"' + (hodnota === e ? " selected" : "") + ">" + e + " → " + esc(misto(e + 1)) + " (" + n + " týmů)</option>";
+      h += '<option value="' + e + '"' + (hodnota === e ? " selected" : "") + ">" + esc(P(e + 1)) + " (" + n + " týmů)</option>";
     }
     return h + "</select></label>";
   }
@@ -99,7 +102,7 @@
     if (t.s == null) return "start neurčen";
     if (ted < t.s) return "start " + hm(t.s);
     var e = t.E[t.bezi - 1];
-    return "běží " + t.bezi + ". etapu" + (e && e.zpozdeni ? ' <span class="v-zpozdeni">déle, než se čekalo</span>' : "");
+    return "běží na " + esc(P(t.bezi + 1)) + (e && e.zpozdeni ? ' <span class="v-zpozdeni">déle, než se čekalo</span>' : "");
   }
 
   function pohledPoradi() {
@@ -120,10 +123,10 @@
     h += "</tbody></table></div>";
     var zbyva = model.tymy.filter(function (t) { return t.E[e - 1].casTymu == null && (!st.kat || t.k === st.kat); });
     if (zbyva.length) {
-      h += "<h3>Etapou " + e + " zatím neproběhli (" + zbyva.length + ")</h3><ul class=\"v-zbyva\">" + zbyva.map(function (t) {
+      h += "<h3>Na " + esc(P(e + 1)) + " zatím nedorazili (" + zbyva.length + ")</h3><ul class=\"v-zbyva\">" + zbyva.map(function (t) {
         var x = t.E[e - 1];
         return '<li><a href="#pohled=tym&tym=' + t.id + '" data-tym="' + t.id + '">' + esc(t.n) + "</a> – " + kdeJe(t) +
-          (x.odhad ? ", na předávce " + (e + 1) + " " + odhadText(x.odhad) : x.dobeh == null && t.posledni > e ? ", čas etapy chybí" : "") + "</li>";
+          (x.odhad ? ", na P" + (e + 1) + " " + odhadText(x.odhad) : x.dobeh == null && t.posledni > e ? ", čas na P" + (e + 1) + " chybí" : "") + "</li>";
       }).join("") + "</ul>";
     }
     return h;
@@ -155,10 +158,10 @@
     var posl = t.posledni ? t.E[t.posledni - 1] : null;
     h += '<h2 class="v-tym-nazev">' + esc(t.n) + ' <span class="v-cislo">' + esc(t.c) + "</span></h2>";
     h += '<p class="v-tym-stav">' + esc(KAT[t.k] || "") + " · " + kdeJe(t) +
-      (posl && posl.poradi ? " · po " + t.posledni + ". etapě " + posl.poradi + ". celkově, " + posl.poradiKat + ". v kategorii" +
-        (model.poradi[t.posledni].length < model.tymy.length ? " (z " + model.poradi[t.posledni].length + " týmů, které ji už proběhly)" : "") : "") + "</p>";
+      (posl && posl.poradi ? " · na " + esc(P(t.posledni + 1)) + " " + posl.poradi + ". celkově, " + posl.poradiKat + ". v kategorii" +
+        (model.poradi[t.posledni].length < model.tymy.length ? " (z " + model.poradi[t.posledni].length + " týmů, které tam už dorazily)" : "") : "") + "</p>";
     h += '<p><button type="button" id="v-odkaz">Zkopírovat odkaz na tým</button> <span id="v-odkaz-ok" class="v-ok" hidden>Zkopírováno.</span></p>';
-    h += '<div class="table-responsive"><table class="v-tabulka v-detail"><thead><tr><th>Etapa</th><th>Běžec</th><th>Na předávce</th><th>Čas etapy</th><th class="v-mimo-mobil">Proti plánu</th></tr></thead><tbody>';
+    h += '<div class="table-responsive"><table class="v-tabulka v-detail"><thead><tr><th>Úsek</th><th>Běžec</th><th>Příchod na předávku</th><th>Čas etapy</th><th class="v-mimo-mobil">Proti plánu</th></tr></thead><tbody>';
     t.E.forEach(function (e) {
       var tr = e.dobeh != null ? "" : e.i === t.bezi ? ' class="v-bezi"' : e.odhad ? ' class="v-budouci"' : "";
       var naPred, casE = "", proti = "";
@@ -171,7 +174,7 @@
       } else if (t.posledni > e.i) {
         naPred = '<span class="v-chybi">chybí</span>';
       } else naPred = "";
-      h += "<tr" + tr + "><td>" + e.i + ' <small class="v-misto">' + esc(misto(e.i)) + " → " + esc(misto(e.i + 1)) + "</small></td><td>" + esc(e.jm) +
+      h += "<tr" + tr + "><td>P" + e.i + " → P" + (e.i + 1) + ' <small class="v-misto">' + esc(misto(e.i)) + " → " + esc(misto(e.i + 1)) + " · etapa " + e.i + "</small></td><td>" + esc(e.jm) +
         (e.i === t.bezi ? ' <small class="v-bezi-znacka">běží</small>' : "") + "</td><td>" + naPred + "</td><td>" + casE + '</td><td class="v-mimo-mobil">' + proti + "</td></tr>";
     });
     return h + "</tbody></table></div>" + legenda();
@@ -183,7 +186,7 @@
     for (var m0 = 2; m0 <= 31; m0++) {
       if (model.tymy.every(function (t) { return t.E[m0 - 2].dobeh != null || t.posledni > m0 - 1; })) hotove = m0; else break;
     }
-    if (hotove >= 2) h += '<p class="v-predavka">' + (hotove > 2 ? "Předávkami 2–" + hotove : "Předávkou 2") + " už prošly všechny týmy.</p>";
+    if (hotove >= 2) h += '<p class="v-predavka">' + (hotove > 2 ? "Předávkami P2–P" + hotove : "Předávkou P2") + " už prošly všechny týmy.</p>";
     for (var m = Math.max(2, hotove + 1); m <= 31; m++) {
       var e = m - 1, pros = [], ceka = [];
       model.tymy.forEach(function (t) {
@@ -195,7 +198,7 @@
       var brzy = ceka.filter(function (c) { return c.p <= ted + 1800; });
       pros.sort(function (a, b) { return a - b; });
       var souhrn = "prošlo " + pros.length + " z " + model.tymy.length + (ceka.length ? " · další " + odhadText(ceka[0].p) : pros.length === model.tymy.length ? " · všichni prošli" : "");
-      h += '<details class="v-predavka"' + (brzy.length ? " open" : "") + "><summary><strong>" + m + " " + esc(misto(m)) + "</strong> <span>" + souhrn + "</span></summary>";
+      h += '<details class="v-predavka"' + (brzy.length ? " open" : "") + "><summary><strong>" + esc(P(m)) + "</strong> <span>" + souhrn + "</span></summary>";
       h += "<p>" + (pros.length ? "První prošel " + hm(pros[0]) + ", zatím poslední " + hm(pros[pros.length - 1]) + ". " : "") +
         (ceka.length ? "Ze zbývajících se první čeká " + odhadText(ceka[0].p) + ", poslední " + odhadText(ceka[ceka.length - 1].p) + "." : "") + "</p>";
       if (brzy.length) h += "<p>Do 30 minut:</p><ul>" + brzy.map(function (c) {
@@ -210,10 +213,10 @@
     var e = st.etapaCasy || model.vychozi || 1;
     var r = model.tymy.filter(function (t) { return t.E[e - 1].cas != null && (!st.kat || t.k === st.kat); })
       .sort(function (a, b) { return a.E[e - 1].cas - b.E[e - 1].cas; });
-    var h = '<div class="v-filtry"><label>Etapa <select id="v-etapa-casy">';
-    for (var i = 1; i <= 30; i++) h += '<option value="' + i + '"' + (i === e ? " selected" : "") + ">" + i + " " + esc(misto(i)) + " → " + esc(misto(i + 1)) + "</option>";
+    var h = '<div class="v-filtry"><label>Úsek <select id="v-etapa-casy">';
+    for (var i = 1; i <= 30; i++) h += '<option value="' + i + '"' + (i === e ? " selected" : "") + ">P" + i + " " + esc(misto(i)) + " → P" + (i + 1) + " " + esc(misto(i + 1)) + " (etapa " + i + ")</option>";
     h += "</select></label>" + vyberKat() + "</div>";
-    if (!r.length) return h + "<p>Na této etapě zatím nejsou změřené časy.</p>";
+    if (!r.length) return h + "<p>Na tomto úseku zatím nejsou změřené časy.</p>";
     h += '<p class="v-poznamka">' + (km(e) ? km(e) + " km · " : "") + "změřeno " + r.length + " běžců.</p>";
     h += '<div class="table-responsive"><table class="v-tabulka"><thead><tr><th>Poř.</th><th>Běžec</th><th>Tým</th><th>Čas</th><th class="v-mimo-mobil">Tempo</th><th class="v-mimo-mobil">Proti plánu</th></tr></thead><tbody>';
     r.forEach(function (t, j) {
