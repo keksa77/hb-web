@@ -341,3 +341,27 @@ a { color: var(--hb); }
   .v-mimo-mobil { display: none; }
   .v-tabulka td, .v-tabulka th { padding: 6px 5px; }
 }
+
+/* Zápis časů na předávce */
+.predavka-zapis { max-width: 34rem; }
+.p-prihlaseni label, .p-jiny label { display: block; font-weight: 600; margin-top: 8px; }
+.p-prihlaseni input, .p-jiny input { font: inherit; font-size: 1.4rem; letter-spacing: .08em; padding: 10px 12px; border: 1px solid var(--ram); border-radius: 8px; width: 100%; box-sizing: border-box; margin: 6px 0; }
+.p-prihlaseni button, .p-jiny button { font: inherit; font-size: 1.1rem; background: var(--hb); color: #fff; border: 0; border-radius: 8px; padding: 12px 18px; cursor: pointer; }
+.p-jiny div { display: flex; gap: 8px; align-items: center; }
+.p-jiny input { flex: 1; }
+.p-napoveda { color: var(--seda); font-size: .9rem; margin: 2px 0; }
+.p-hlavicka { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.p-misto { margin: 0 0 12px; }
+.p-male { font: inherit; font-size: .85rem; background: none; border: 1px solid var(--ram); border-radius: 6px; padding: 5px 9px; cursor: pointer; }
+.p-tymy { display: grid; gap: 8px; }
+.p-tym { display: flex; gap: 12px; align-items: center; text-align: left; font: inherit; background: #fff; border: 2px solid var(--hb); border-radius: 10px; padding: 12px 14px; min-height: 64px; cursor: pointer; }
+.p-tym:active { background: var(--hb-svetla); }
+.p-tym-cislo { font-size: 1.6rem; font-weight: 700; color: var(--hb); min-width: 2.4em; text-align: center; }
+.p-tym-text strong { display: block; }
+.p-tym-text small { color: var(--seda); }
+.p-zapsano { list-style: none; padding: 0; }
+.p-zapsano li { border-bottom: 1px solid var(--ram); padding: 8px 0; }
+.p-akce { display: block; margin-top: 4px; }
+.p-akce button { font: inherit; font-size: .9rem; background: #fff; border: 1px solid var(--hb); color: var(--hb); border-radius: 6px; padding: 5px 10px; margin-right: 6px; cursor: pointer; }
+.p-ok { color: #2e7d32; } .p-ceka { color: #8a5a00; } .p-chyba { color: #b3261e; }
+.p-signal { background: #fff4e0; border-left: 4px solid #8a5a00; padding: 8px 12px; }
