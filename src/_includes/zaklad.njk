@@ -29,8 +29,9 @@
           <li><a href="{{ web.zaklad }}{{ s.adresa }}"{% if s.adresa == adresa %} aria-current="page"{% endif %}>{{ s.titulek }}</a></li>
           {% endif %}
         {% endfor %}
+        <li><a href="{{ web.zaklad }}/kapitan/"{% if page.url and page.url.indexOf("/kapitan/") == 0 %} aria-current="page"{% endif %}>Pro kapitány</a></li>
       </ul>
-      {% if obsah.jazyky.length > 1 %}
+      {% if false and obsah.jazyky.length > 1 %}{# přepínač jazyků až s anglickou verzí (UX revize 5. 10. 2026) #}
       <div class="jazyky" aria-label="Jazyk">
         {% for j in obsah.jazyky %}
           <span class="jazyk{% if j.kod == web.jazyk %} jazyk-aktivni{% endif %}">{{ j.kod | upper }}</span>
@@ -53,6 +54,7 @@
     <p><strong>Hory Bory</strong> — štafetový běh z Beskyd na Pálavu.</p>
     <p>
       <a href="mailto:info@horybory.cz">info@horybory.cz</a> ·
+      <a href="{{ web.zaklad }}/kapitan/prihlaseni/">Přihlášení do kapitánské sekce</a> ·
       {% for s in obsah.stranky %}{% if s.kod == "gdpr" %}<a href="{{ web.zaklad }}{{ s.adresa }}">{{ s.titulek }}</a>{% endif %}{% endfor %}
     </p>
     <p class="verze" title="{{ web.commit }}">verze {{ web.verze }} · {{ web.sestaveno }}</p>
