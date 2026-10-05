@@ -257,11 +257,11 @@
     return v;
   }
 
-  // Výkonnost běžce po ročnících z historie: „HB26: hlášeno 51:00 · skutečně 49:40“ (Keksa 5. 10. 2026).
+  // Výkonnost běžce po ročnících z historie: „HB26: hlášená výkonnost 51:00 · skutečná výkonnost 49:40“ (Keksa 5. 10. 2026).
   function rokyVykonnosti(roky) {
     return (roky || []).map(function (r) {
-      return esc(r.rocnik) + ": hlášeno " + (r.hlaseno ? esc(vykonnost(r.hlaseno)) : "—") +
-        " · skutečně " + (r.skutecne ? esc(vykonnost(r.skutecne)) : "nevíme");
+      return esc(r.rocnik) + ": hlášená výkonnost " + (r.hlaseno ? esc(vykonnost(r.hlaseno)) : "—") +
+        " · skutečná výkonnost " + (r.skutecne ? esc(vykonnost(r.skutecne)) : "neznámá");
     });
   }
 

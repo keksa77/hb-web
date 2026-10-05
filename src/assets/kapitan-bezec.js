@@ -24,8 +24,8 @@
         return '<li data-jmeno="' + e(String(x.jmeno || "").toLowerCase()) + '"><button type="button" class="k-vyber-polozka" data-vybrat="' + i + '">' +
           "<b>" + e(x.jmeno) + "</b><span>" + e(x.rocniky || x.rocnik) + (x.mesto ? " · " + e(x.mesto) : "") + "</span>" +
           (x.roky && x.roky.length
-            ? '<span class="k-roky"><span class="k-roky-titulek">Čas na 10 km:</span>' + HBK.rokyVykonnosti(x.roky).map(function (t) { return "<span>" + t + "</span>"; }).join("") + "</span>"
-            : x.vykonnost_10km ? "<span>hlášeno " + e(HBK.vykonnost(x.vykonnost_10km)) + " na 10 km</span>" : "") +
+            ? '<span class="k-roky"><span class="k-roky-titulek">Výkonnost na 10 km:</span>' + HBK.rokyVykonnosti(x.roky).map(function (t) { return "<span>" + t + "</span>"; }).join("") + "</span>"
+            : x.vykonnost_10km ? "<span>hlášená výkonnost " + e(HBK.vykonnost(x.vykonnost_10km)) + " na 10 km</span>" : "") +
           "<small>Vybrat a zkontrolovat údaje →</small></button></li>";
       }).join("") + "</ul>");
     } else {

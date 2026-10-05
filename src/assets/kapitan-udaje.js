@@ -15,8 +15,8 @@
     var ja = r && r.jsem_to_ja && P.role === "bezec";
     r = r || {};
     return (ZDROJ ? '<p class="k-zdroj">Vyplněno z ročníku ' + e(ZDROJ.rocnik) + ": <b>" + e(ZDROJ.jmeno) + "</b>. Zkontroluj údaje" +
-        (ZDROJ.vykonnost_skutecna ? ", čas na 10 km je skutečný z " + e(ZDROJ.skutecna_rocnik) : "") + "." +
-        (ZDROJ.roky && ZDROJ.roky.length ? '<span class="k-roky"><span class="k-roky-titulek">Čas na 10 km v minulých ročnících:</span>' +
+        (ZDROJ.vykonnost_skutecna ? ", do času na 10 km jsme dali skutečnou výkonnost z " + e(ZDROJ.skutecna_rocnik) : "") + "." +
+        (ZDROJ.roky && ZDROJ.roky.length ? '<span class="k-roky"><span class="k-roky-titulek">Výkonnost na 10 km v minulých ročnících:</span>' +
           HBK.rokyVykonnosti(ZDROJ.roky).map(function (t) { return "<span>" + t + "</span>"; }).join("") + "</span>" : "") + "</p>" : "") +
       '<form class="k-karta" id="k-form" novalidate><div class="k-formular">' +
       '<label class="k-pole" for="f-jmeno">Jméno *<input id="f-jmeno" value="' + e(r.jmeno || "") + '" required></label>' +
