@@ -77,7 +77,7 @@
       }).join("") + '</tbody><tfoot><tr><td>Celkem</td><td>' + celkem.etap + ' z 30 etap</td><td class="k-cislo">' + cislo(celkem.km) +
       '</td><td class="k-cislo">' + cislo(celkem.nahoru) + ' m</td><td class="k-cislo">' + cislo(celkem.dolu) + " m</td><td></td></tr></tfoot></table></div>" +
       (k.upoz.length ? '<h3>Co ještě nesedí</h3><ul class="k-upozorneni">' + k.upoz.map(function (x) { return "<li>" + e(x) + "</li>"; }).join("") + "</ul>"
-                     : '<p class="k-ok">Rozdělení splňuje pravidla. Potvrdit ho můžeš na <a href="' + HB.zaklad + '/kapitan/">přehledu</a>.</p>') + "</div>");
+                     : '<p class="k-ok">Rozdělení splňuje pravidla. Potvrdíš ho v posledním kroku <a href="' + HB.zaklad + '/kapitan/potvrzeni/">Kontrola a potvrzení</a>.</p>') + "</div>");
     document.getElementById("k-obsah").innerHTML = h.join("");
     if (hlaska) HBK.hlaska("k-stav", hlaska, chyba);
   }

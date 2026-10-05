@@ -63,3 +63,69 @@
 .k-pole .k-chybi { border-color: #b3261e; outline: 2px solid #f2b8b5; }
 .k-pole small.k-chyba-pole { color: #7a1f1f; font-weight: 600; }
 .k-tabulka tr.k-neuplny td:first-child { box-shadow: inset 4px 0 0 #b3261e; }
+
+/* Přidat běžce: nabídka z minulých ročníků uvnitř karty */
+.k-historie { border: 1px solid var(--ram); border-radius: 6px; padding: 10px 14px; margin: 0 0 14px; background: var(--hb-svetla); }
+.k-historie h3, .k-oddil { margin: 0 0 6px; font-size: 1.05rem; }
+.k-oddil { margin-top: 4px; }
+.k-oddil .pocet { font-weight: 400; font-size: .9rem; margin-left: 6px; }
+.k-historie-prazdna p { margin: 0; }
+.k-historie li.k-vybrany { background: #e3f0e6; border-radius: 4px; padding-left: 6px; }
+.k-hledat { max-width: 20rem; margin-bottom: 6px; }
+.k-historie li span { flex: 1 1 18rem; }
+
+/* Kroky kapitánské sekce (Keksa 4. 10. 2026): ukazatel nahoře, tlačítka Zpět / Dál s nápovědou dole */
+.k-skryte { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.k-kroky { list-style: none; margin: 0 0 18px; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; counter-reset: krok; }
+.k-kroky li { flex: 1 1 9rem; min-width: 0; }
+.k-kroky a { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--ram); border-radius: 8px; background: #fff;
+  text-decoration: none; color: var(--text); font-size: .9rem; line-height: 1.25; height: 100%; }
+.k-krok-cislo { flex: 0 0 auto; width: 1.7em; height: 1.7em; border-radius: 50%; display: grid; place-items: center; font-weight: 700;
+  border: 2px solid var(--ram); color: var(--seda); font-size: .85rem; }
+.k-krok-hotovo .k-krok-cislo { background: #2c5c3a; border-color: #2c5c3a; color: #fff; }
+.k-krok-ted a { border-color: var(--hb); box-shadow: inset 0 -3px 0 var(--hb); font-weight: 700; }
+.k-krok-ted .k-krok-cislo { border-color: var(--hb); color: var(--hb); }
+.k-krok-ted.k-krok-hotovo .k-krok-cislo { color: #fff; }
+.k-navigace { display: flex; justify-content: space-between; gap: 12px; margin: 28px 0 8px; padding-top: 16px; border-top: 1px solid var(--ram); flex-wrap: wrap; }
+.k-navigace a { display: grid; gap: 2px; text-decoration: none; padding: 10px 16px; border-radius: 8px; min-width: 0; max-width: 100%; flex: 0 1 22rem; }
+.k-nav-zpet { border: 1px solid var(--ram); color: var(--text); background: #fff; }
+.k-nav-dal { background: var(--hb); color: #fff; margin-left: auto; text-align: right; }
+.k-nav-dal:hover { background: var(--hb-tmava); }
+.k-nav-sipka { font-size: .85rem; opacity: .85; }
+.k-navigace b { font-size: 1.05rem; }
+.k-navigace small { font-size: .85rem; opacity: .85; line-height: 1.3; }
+.k-tlacitko-s-napovedou { display: inline-grid; gap: 2px; text-align: left; text-decoration: none; }
+.k-tlacitko-s-napovedou small { font-weight: 400; font-size: .85rem; opacity: .9; }
+a.k-tlacitko { color: #fff; }
+a.k-vedlejsi { text-decoration: none; display: inline-block; }
+a.k-vedlejsi.k-tlacitko-s-napovedou, a.k-tlacitko.k-tlacitko-s-napovedou { display: inline-grid; }
+.k-akce-hlavni { margin: 16px 0; }
+.k-pozn { background: var(--hb-svetla); border-radius: 6px; padding: 10px 14px; }
+.k-uvod { max-width: 44rem; }
+.k-velky { font-size: 1.2rem; margin: 0 0 6px; }
+.k-zdroj { background: #e3f0e6; border-radius: 6px; padding: 10px 14px; }
+.k-akce-bunka { white-space: nowrap; width: 1%; }
+.k-akce-bunka > * { display: block; width: 100%; box-sizing: border-box; text-align: center; margin: 0 0 4px; }
+.k-tabulka td.k-zalom { overflow-wrap: anywhere; }
+.k-proc { margin: 4px 0 10px; }
+.k-proc summary { cursor: pointer; color: var(--hb); font-weight: 600; }
+/* Kdo poběží? */
+.k-vyber { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.k-vyber-polozka { width: 100%; display: grid; gap: 2px; text-align: left; font: inherit; background: #fff; border: 1px solid var(--ram);
+  border-radius: 8px; padding: 10px 14px; cursor: pointer; color: var(--text); }
+.k-vyber-polozka:hover, .k-vyber-polozka:focus-visible { border-color: var(--hb); box-shadow: inset 4px 0 0 var(--hb); }
+.k-vyber-polozka span { color: var(--seda); font-size: .93rem; }
+.k-vyber-polozka small { color: var(--hb); font-weight: 600; }
+/* Kontrola a potvrzení */
+.k-kontrola { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.k-kontrola li { display: flex; gap: 10px; align-items: flex-start; }
+.k-kontrola li > span { flex: 0 0 auto; width: 1.6em; height: 1.6em; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: #fff; }
+.k-ok-bod > span { background: #2c5c3a; } .k-chyba-bod > span { background: #b3261e; }
+.k-kontrola small { display: block; color: var(--seda); }
+@media (max-width: 600px) {
+  .k-kroky li { flex: 1 1 auto; }
+  .k-kroky li:not(.k-krok-ted) .k-krok-nazev { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .k-navigace a { flex: 1 1 100%; }
+  .k-nav-dal { order: -1; }
+}
+.k-nezalom { white-space: nowrap; }

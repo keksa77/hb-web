@@ -134,6 +134,63 @@
     clearTimeout(toastCasovac); toastCasovac = setTimeout(function () { el.hidden = true; }, 4000);
   }
 
+  // Kroky kapitánské sekce (Keksa 4. 10. 2026): na stránce jedna věc, nahoře ukazatel kroků,
+  // dole tlačítka „Zpět“ a „Dál“ s krátkou nápovědou pod sebou. Běžec vidí jen kroky, které se ho týkají.
+  var KROKY = [
+    { k: "prehled", n: "Přehled a startovné", url: "/kapitan/", hint: "Tvůj tým a platba startovného." },
+    { k: "soupiska", n: "Soupiska", url: "/kapitan/soupiska/", hint: "Přidej běžce a doplň jejich údaje." },
+    { k: "pocet", n: "Konečný počet", url: "/kapitan/pocet/", hint: "Potvrdíš, kolik běžců tvůj tým bude mít.", vede: true },
+    { k: "etapy", n: "Rozdělení etap", url: "/kapitan/etapy/", hint: "Přiřadíš běžce ke 30 etapám." },
+    { k: "potvrzeni", n: "Kontrola a potvrzení", url: "/kapitan/potvrzeni/", hint: "Zkontrolujeme pravidla a potvrdíš všechno najednou.", vede: true }
+  ];
+  function maDruh(p, druhy) { return (p.upozorneni || []).some(function (x) { return druhy.indexOf(x.druh) >= 0; }); }
+  function hotovo(k, p) {
+    if (k === "prehled") return !!p.zaplaceno;
+    if (k === "soupiska") return p.bezcu > 0 && !maDruh(p, ["neuplne"]);
+    if (k === "pocet") return !!p.pocet_potvrzen;
+    if (k === "etapy") return Number(p.obsazenych_etap) === 30 && !maDruh(p, ["etapy_chybi", "tretiny", "bez_etapy"]);
+    if (k === "potvrzeni") return !!p.soupiska_potvrzena;
+    return false;
+  }
+  function viditelneKroky(p) { return KROKY.filter(function (x) { return !x.vede || p.role !== "bezec"; }); }
+  function vykresliKroky(p) {
+    var ol = document.getElementById("k-kroky"); if (!ol) return;
+    var ted = (window.HB && HB.krok) || "";
+    ol.innerHTML = viditelneKroky(p).map(function (x, i) {
+      var h = hotovo(x.k, p), aktualni = x.k === ted;
+      return '<li class="' + (aktualni ? "k-krok-ted" : "") + (h ? " k-krok-hotovo" : "") + '"><a href="' + HB.zaklad + x.url + '"' +
+        (aktualni ? ' aria-current="step"' : "") + '><span class="k-krok-cislo" aria-hidden="true">' + (h ? "✓" : i + 1) + "</span>" +
+        '<span class="k-krok-nazev">' + esc(x.n) + "</span>" + (h ? '<span class="k-skryte"> (hotovo)</span>' : "") + "</a></li>";
+    }).join("");
+    ol.hidden = false;
+  }
+  // Tlačítko kroku: šipka, název kroku a nápověda pod ním. Volby: { zpet: {...}, dal: {...} }, kde položka má n, url, hint.
+  function tlacitkoKroku(x, smer) {
+    if (!x) return "<span></span>";
+    return '<a class="k-nav-' + smer + '" href="' + (x.url.indexOf("http") === 0 ? x.url : HB.zaklad + x.url) + '">' +
+      '<span class="k-nav-sipka">' + (smer === "dal" ? (x.popisek || "Dál") + " →" : "← " + (x.popisek || "Zpět")) + "</span>" +
+      "<b>" + esc(x.n) + "</b><small>" + esc(x.hint || "") + "</small></a>";
+  }
+  function navigace(p, vlastni) {
+    var nav = document.getElementById("k-navigace"); if (!nav) return;
+    var zpet = null, dal = null;
+    if (vlastni) { zpet = vlastni.zpet || null; dal = vlastni.dal || null; }
+    else {
+      var kroky = viditelneKroky(p), i = kroky.map(function (x) { return x.k; }).indexOf((window.HB && HB.krok) || "");
+      if (i < 0) { nav.hidden = true; return; }
+      zpet = kroky[i - 1] || null; dal = kroky[i + 1] || null;
+    }
+    nav.innerHTML = tlacitkoKroku(zpet, "zpet") + tlacitkoKroku(dal, "dal");
+    nav.hidden = !zpet && !dal;
+  }
+  function krok(k) { return KROKY.filter(function (x) { return x.k === k; })[0]; }
+
+  // Hláška pro další stránku (po uložení se přejde jinam a hláška se ukáže tam).
+  function hlaskaDal(text, id) { try { sessionStorage.setItem("hb_k_hlaska", JSON.stringify({ text: text, id: id || null })); } catch (e) {} }
+  function prevezmiHlasku() {
+    try { var x = JSON.parse(sessionStorage.getItem("hb_k_hlaska") || "null"); sessionStorage.removeItem("hb_k_hlaska"); return x; } catch (e) { return null; }
+  }
+
   // Stránky sekce zavolají HBK.vyzadovat(): ověří přihlášení, propojí účet s osobou a vrátí přehled týmu.
   async function vyzadovat() {
     var obsah = document.getElementById("k-obsah");
@@ -164,6 +221,8 @@
       var role = { kapitan: "kapitán", zastupce: "zástupce kapitána", bezec: "běžec" }[p.role] || p.role;
       document.getElementById("k-tym").textContent = (p.cislo ? p.cislo + " · " : "") + p.nazev + " · " + role;
     }
+    vykresliKroky(p);
+    if (!(window.HB && HB.vlastniNavigace)) navigace(p);
     return p;
   }
 
@@ -173,5 +232,6 @@
 
   window.HBK = { poslatOdkaz: poslatOdkaz, prevezmiZOdkazu: prevezmiZOdkazu, platnyToken: platnyToken,
                  odhlasit: odhlasit, db: db, rpc: rpc, esc: esc, datum: datum, cas: cas, kc: kc,
-                 vykonnost: vykonnost, hlaska: hlaska, toast: toast, vyzadovat: vyzadovat };
+                 vykonnost: vykonnost, hlaska: hlaska, toast: toast, vyzadovat: vyzadovat,
+                 kroky: vykresliKroky, navigace: navigace, krok: krok, hotovo: hotovo, hlaskaDal: hlaskaDal, prevezmiHlasku: prevezmiHlasku };
 })();

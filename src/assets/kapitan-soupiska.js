@@ -1,89 +1,32 @@
-// Kapitánská sekce – soupiska. Kapitán a zástupce přidávají, upravují a odebírají běžce,
-// běžec upravuje jen své údaje (e-mail ne). Kontroly a hlášky jsou v databázi (web_k_*).
+// Kapitánská sekce – krok 2: soupiska. Jen tabulka běžců, tlačítko „Přidat běžce“ a upozornění na chybějící údaje.
+// Přidání a úprava běžce mají vlastní stránky (Kdo poběží? → Údaje běžce), Keksa 4. 10. 2026.
 (function () {
   var e = HBK.esc;
-  var P = null, RADKY = [], KRAJE = [], VELIKOSTI = [], UPRAVUJI = null, HISTORIE = [];
+  var P = null, RADKY = [], KRAJE = [];
   var POHLAVI = { zena: "žena", muz: "muž", jine: "jiné" };
 
   function kraj(kod) { var k = KRAJE.filter(function (x) { return x.kod === kod; })[0]; return k ? k.nazev : (kod || ""); }
+  function neuplny(r) { return !r.rok_narozeni || !r.pohlavi || !r.kraj || !r.mesto || !r.velikost || !r.vykonnost_10km; }
 
   function tabulka() {
     var vede = P.role !== "bezec", otevreno = P.soupiska_otevrena;
     if (!RADKY.length) return '<p class="prazdno">Na soupisce zatím nikdo není.</p>';
     return '<div class="k-tabulka-obal"><table class="k-tabulka"><thead><tr>' +
-      "<th>Číslo</th><th>Jméno</th>" + (vede ? "<th>E-mail</th><th>Telefon</th>" : "") +
+      "<th>Číslo</th><th>Jméno</th>" + (vede ? "<th>Kontakt</th>" : "") +
       "<th>Rok narození</th><th>Pohlaví</th><th>Kraj, město</th><th>Velikost trička</th><th>Čas na 10 km</th><th>Etapy</th><th></th></tr></thead><tbody>" +
       RADKY.map(function (r) {
         var akce = "";
-        if (otevreno && r.muzu_upravit) akce += '<button type="button" class="k-vedlejsi" data-upravit="' + r.soupiska_id + '">Upravit</button> ';
+        if (otevreno && r.muzu_upravit) akce += '<a class="k-vedlejsi" href="' + HB.zaklad + "/kapitan/bezec/udaje/?id=" + r.soupiska_id + '">' + (neuplny(r) ? "Doplnit" : "Upravit") + "</a>";
         if (otevreno && vede && !P.pocet_potvrzen) akce += '<button type="button" class="k-vedlejsi" data-odebrat="' + r.soupiska_id + '">Odebrat</button>';
-        var neuplny = !r.rok_narozeni || !r.pohlavi || !r.kraj || !r.mesto || !r.velikost || !r.vykonnost_10km;
-        return "<tr data-radek=\"" + r.soupiska_id + "\"" + (neuplny ? ' class="k-neuplny" title="Chybí povinné údaje, doplň přes Upravit"' : "") + "><td class=\"k-cislo\">" + e(r.startovni_cislo) + "</td><td>" + e(r.jmeno + " " + r.prijmeni) + (r.jsem_to_ja ? " <small>(ty)</small>" : "") + "</td>" +
-          (vede ? "<td>" + e(r.email || "") + "</td><td>" + e(r.telefon || "") + "</td>" : "") +
+        return '<tr data-radek="' + r.soupiska_id + '"' + (neuplny(r) ? ' class="k-neuplny" title="Chybí povinné údaje, doplň je"' : "") + '><td class="k-cislo">' + e(r.startovni_cislo) + "</td><td>" +
+          e(r.jmeno + " " + r.prijmeni) + (r.jsem_to_ja ? " <small>(ty)</small>" : "") + "</td>" +
+          (vede ? '<td class="k-zalom">' + e(r.email || "") + (r.telefon ? '<br><span class="k-nezalom">' + e(r.telefon) + "</span>" : "") + "</td>" : "") +
           "<td>" + e(r.rok_narozeni || "") + "</td><td>" + e(POHLAVI[r.pohlavi] || "") + "</td>" +
           "<td>" + e([kraj(r.kraj), r.mesto].filter(Boolean).join(", ")) + "</td>" +
           "<td>" + e(r.velikost ? r.velikost_rada + " " + r.velikost : "") + "</td>" +
           '<td class="k-cislo">' + e(HBK.vykonnost(r.vykonnost_10km)) + "</td>" +
-          "<td>" + e((r.etapy || []).join(", ")) + "</td><td>" + akce + "</td></tr>";
+          "<td>" + e((r.etapy || []).join(", ")) + '</td><td class="k-akce-bunka">' + akce + "</td></tr>";
       }).join("") + "</tbody></table></div>";
-  }
-
-  function formular(r) {
-    var nova = !r, ja = r && r.jsem_to_ja && P.role === "bezec";
-    r = r || {};
-    function vyber(id, moznosti, hodnota) {
-      return '<select id="' + id + '"><option value="">— vyber —</option>' + moznosti.map(function (m) {
-        return '<option value="' + e(m[0]) + '"' + (m[0] === hodnota ? " selected" : "") + ">" + e(m[1]) + "</option>"; }).join("") + "</select>";
-    }
-    return '<form class="k-karta" id="k-form" novalidate><h2>' + (nova ? "Přidat běžce" : "Upravit: " + e(r.jmeno + " " + r.prijmeni)) + "</h2>" +
-      '<div class="k-formular">' +
-      '<label class="k-pole" for="f-jmeno">Jméno *<input id="f-jmeno" value="' + e(r.jmeno || "") + '" required></label>' +
-      '<label class="k-pole" for="f-prijmeni">Příjmení *<input id="f-prijmeni" value="' + e(r.prijmeni || "") + '" required></label>' +
-      '<label class="k-pole" for="f-email">E-mail *<input id="f-email" type="email" value="' + e(r.email || "") + '"' + (ja ? " disabled" : "") + ' required>' +
-        (ja ? "<small>E-mail změní kapitán.</small>" : "<small>Na něj přijde běžci odkaz do sekce.</small>") + "</label>" +
-      '<label class="k-pole" for="f-telefon">Telefon *<input id="f-telefon" type="tel" value="' + e(r.telefon || "") + '" placeholder="777 123 456" required></label>' +
-      '<label class="k-pole" for="f-rok">Rok narození *<input id="f-rok" inputmode="numeric" maxlength="4" value="' + e(r.rok_narozeni || "") + '" placeholder="1990" required></label>' +
-      '<label class="k-pole" for="f-pohlavi">Pohlaví *' + vyber("f-pohlavi", [["zena", "žena"], ["muz", "muž"], ["jine", "jiné"]], r.pohlavi) + "</label>" +
-      '<label class="k-pole" for="f-kraj">Kraj *' + vyber("f-kraj", KRAJE.map(function (k) { return [k.kod, k.nazev]; }), r.kraj) + "</label>" +
-      '<label class="k-pole" for="f-mesto">Město *<input id="f-mesto" value="' + e(r.mesto || "") + '" required></label>' +
-      '<label class="k-pole" for="f-velikost">Velikost trička *' + vyber("f-velikost", VELIKOSTI.map(function (v) { return [v.rada + "|" + v.kod, v.rada + " " + v.kod]; }),
-        r.velikost ? r.velikost_rada + "|" + r.velikost : "") + "</label>" +
-      '<label class="k-pole" for="f-vykonnost">Čas na 10 km *<input id="f-vykonnost" value="' + e(HBK.vykonnost(r.vykonnost_10km)) + '" placeholder="52:30" required>' +
-        "<small>Minuty:sekundy, např. 52:30, nebo 1:02:30.</small></label>" +
-      '<label class="k-pole" for="f-poznamka">Poznámka<input id="f-poznamka" value="' + e(r.poznamka || "") + '"></label>' +
-      "</div>" +
-      '<p class="pocet">Pole s hvězdičkou jsou povinná.</p>' +
-      '<div class="k-akce"><button type="submit" class="k-tlacitko">' + (nova ? "Přidat na soupisku" : "Uložit změny") + "</button>" +
-      (nova ? "" : '<button type="button" class="k-vedlejsi" id="k-zrusit">Zrušit úpravu</button>') + "</div>" +
-      '<p class="k-hlaska" id="k-hlaska" role="status"></p></form>';
-  }
-
-  // 1 běžec / 2–4 běžci / 5 běžců; ve 4. pádě 1 běžce / 2–4 běžce / 5 běžců
-  function bezcu(n, akuz) { return n + " " + (n === 1 ? (akuz ? "běžce" : "běžec") : n >= 2 && n <= 4 ? (akuz ? "běžce" : "běžci") : "běžců"); }
-
-  // Konečný počet běžců (Keksa 4. 10. 2026): kapitán nebo zástupce potvrdí, že počet jmen na soupisce je konečný.
-  // Po potvrzení nejde přidat ani odebrat běžce, dokud potvrzení nezruší. Údaje (i jméno při náhradě) upravit jde dál.
-  function pocetKarta() {
-    var vede = P.role !== "bezec", n = RADKY.length, h = '<div class="k-karta"><h2>Konečný počet běžců</h2>';
-    var neuplni = (P.upozorneni || []).some(function (x) { return x.druh === "neuplne"; });
-    if (P.pocet_potvrzen) {
-      h += '<p><span class="k-stitek k-stitek-ok">potvrzeno</span> ' + e(bezcu(Number(P.pocet_konecny))) + ", " + e(HBK.cas(P.pocet_potvrzen)) + "</p>";
-      if (vede) h += '<p class="pocet">Běžce teď nepřidáš ani neodebereš. Jméno a údaje běžce upravit můžeš, třeba když za někoho nastupuje náhradník.</p>' +
-        (P.soupiska_otevrena ? '<div class="k-akce"><button type="button" class="k-vedlejsi" id="k-zmenit-pocet">Změnit počet</button></div>' : "");
-    } else if (!vede) {
-      h += "<p>Kapitán ho zatím nepotvrdil.</p>";
-    } else if (!P.soupiska_otevrena) {
-      h += "<p>Počet nebyl potvrzený a soupiska je uzavřená.</p>";
-    } else if (!n) {
-      h += "<p>Potvrdit půjde, až bude na soupisce aspoň jeden běžec.</p>";
-    } else {
-      h += "<p>Na soupisce " + (n >= 2 && n <= 4 ? "jsou " : "je ") + e(bezcu(n)) + ". Až budeš vědět, že tvůj tým poběží právě v tomhle složení, potvrď to. " +
-        "Pak už běžce nepřidáš ani neodebereš, dokud potvrzení nezrušíš. Údaje běžců upravovat můžeš dál" +
-        (P.soupiska_do ? ", změnit počet jde do " + e(HBK.cas(P.soupiska_do)) : "") + ".</p>" +
-        (neuplni ? '<p class="k-chyba">Potvrdit půjde, až budou u všech běžců vyplněné povinné údaje. Řádky s červeným okrajem doplň přes Upravit.</p>' : "") +
-        '<div class="k-akce"><button type="button" class="k-tlacitko" id="k-potvrdit-pocet"' + (neuplni ? " disabled" : "") + '>Potvrdit konečný počet: ' + e(bezcu(n)) + "</button></div>";
-    }
-    return h + '<p class="k-hlaska" id="k-hlaska-pocet" role="status"></p></div>';
   }
 
   function vykresli(hlaska, chyba) {
@@ -93,181 +36,50 @@
       (P.soupiska_otevrena ? (P.soupiska_do ? "Změny jdou do " + e(HBK.cas(P.soupiska_do)) + "." : "")
                            : "<b>Soupiska je uzavřená.</b> Změny řeší pořadatel na info@horybory.cz.") + "</p>");
     h.push(tabulka());
-    h.push(pocetKarta());
-    var u = (P.upozorneni || []).filter(function (x) { return ["neuplne", "vykonnost_mimo", "kulate", "bez_vykonnosti", "zensky_tym", "bez_etapy"].indexOf(x.druh) >= 0; });
-    if (u.length) h.push('<div class="k-karta"><h2>Zkontroluj</h2><ul class="k-upozorneni">' + u.map(function (x) { return "<li>" + e(x.text) + "</li>"; }).join("") + "</ul></div>");
-    if (P.soupiska_otevrena) {
-      var r = UPRAVUJI ? RADKY.filter(function (x) { return x.soupiska_id === UPRAVUJI; })[0] : null;
-      if (r) h.push(formular(r));
-      else if (vede && RADKY.length < P.max_bezcu && !P.pocet_potvrzen) { h.push(historie()); h.push(formular(null)); }
+    if (vede && P.soupiska_otevrena) {
+      if (P.pocet_potvrzen) h.push('<p class="k-pozn">Konečný počet máš potvrzený, takže běžce nepřidáš ani neodebereš. Změníš ho v kroku ' +
+        '<a href="' + HB.zaklad + '/kapitan/pocet/">Konečný počet</a>. Údaje běžců upravit můžeš.</p>');
+      else if (RADKY.length >= P.max_bezcu) h.push('<p class="k-pozn">Soupiska je plná (' + e(P.max_bezcu) + " běžců).</p>");
+      else h.push('<div class="k-akce k-akce-hlavni"><a class="k-tlacitko k-tlacitko-s-napovedou" href="' + HB.zaklad + '/kapitan/bezec/">+ Přidat běžce' +
+        "<small>Vybereš někoho z minulých ročníků, nebo zadáš nového.</small></a></div>");
     }
-    h.push('<div class="k-karta k-text" id="k-proc"></div>');
+    var u = (P.upozorneni || []).filter(function (x) { return ["neuplne", "vykonnost_mimo", "kulate", "bez_vykonnosti", "zensky_tym"].indexOf(x.druh) >= 0; });
+    if (u.length) h.push('<div class="k-karta"><h2>Zkontroluj</h2><ul class="k-upozorneni">' + u.map(function (x) { return "<li>" + e(x.text) + "</li>"; }).join("") + "</ul></div>");
     document.getElementById("k-obsah").innerHTML = h.join("");
     if (hlaska) HBK.hlaska("k-stav", hlaska, chyba);
-    nactiText();
   }
 
-  var TEXT = null;
-  async function nactiText() {
-    var el = document.getElementById("k-proc"); if (!el) return;
-    if (TEXT === null) {
-      try {
-        var t = await HBK.db("web_texty?select=web_texty_preklady(titulek,obsah,jazyk)&kod=eq.kapitan_vykonnost_proc");
-        var p = (t[0] && t[0].web_texty_preklady || []).filter(function (x) { return x.jazyk === "cs"; })[0];
-        TEXT = p ? "<h2>" + e(p.titulek) + "</h2>" + p.obsah : "";
-      } catch (err) { TEXT = ""; }
-    }
-    if (TEXT) el.innerHTML = TEXT; else el.remove();   // text je z redakce webu (web_texty), proto jako HTML
-  }
-
-  // Běžci z minulých ročníků týmu (web_k_nabidka_bezcu): nabídka nad formulářem, „Použít“ vyplní všechna pole, která v historii jsou.
-  // Bez nikoho, kdo ještě není na soupisce, se karta neukáže (Keksa 4. 10. 2026).
-  function nabidka() {
-    var na = {}; RADKY.forEach(function (r) { na[String(r.email || "").toLowerCase()] = 1; na[(r.jmeno + " " + r.prijmeni).toLowerCase()] = 1; });
-    var videno = {}, out = [];
-    HISTORIE.forEach(function (h, i) {
-      var k = String(h.email || h.jmeno || "").toLowerCase();
-      if (!k || videno[k] || na[String(h.email || "").toLowerCase()] || na[String(h.jmeno || "").toLowerCase()]) return;
-      videno[k] = 1; h._i = i; out.push(h);
-    });
-    return out;
-  }
-  function historie() {
-    var n = nabidka(); if (!n.length) return "";
-    return '<div class="k-karta k-historie"><h2>Běžci z minulých ročníků tvého týmu</h2>' +
-      '<p class="pocet">Klikni na „Použít“, údaje se doplní do formuláře níž. Před přidáním je zkontroluj, hlavně pohlaví a výkonnost. ' +
-      "„Skutečně“ je výkonnost přepočtená z časů, které běžec opravdu zaběhl na Horách Borách; pokud ji známe, vyplní se místo hlášené.</p><ul>" +
-      n.map(function (h) {
-        return "<li><span><b>" + e(h.jmeno) + "</b> · " + e(h.rocniky || h.rocnik) + (h.vykonnost_10km ? " · hlášeno na 10 km " + e(HBK.vykonnost(h.vykonnost_10km)) : "") +
-          (h.vykonnost_skutecna ? ' · <b class="k-skutecne">skutečně ' + e(HBK.vykonnost(h.vykonnost_skutecna)) + "</b> (" + e(h.skutecna_rocnik) + ")" : "") +
-          (h.mesto ? " · " + e(h.mesto) : "") + (h.email ? " · " + e(h.email) : "") + '</span><button type="button" class="k-vedlejsi" data-historie="' + h._i + '">Použít</button></li>';
-      }).join("") + "</ul></div>";
-  }
-  function vyplnZHistorie(h) {
-    function nastav(id, v) { var el = document.getElementById(id); if (el && v != null && v !== "") el.value = v; }
-    var j = String(h.jmeno || "").trim(), mezera = j.lastIndexOf(" ");
-    nastav("f-jmeno", mezera > 0 ? j.slice(0, mezera) : j); nastav("f-prijmeni", mezera > 0 ? j.slice(mezera + 1) : "");
-    nastav("f-email", h.email); nastav("f-telefon", h.telefon); nastav("f-mesto", h.mesto);
-    nastav("f-vykonnost", HBK.vykonnost(h.vykonnost_skutecna || h.vykonnost_10km)); nastav("f-rok", h.rok_narozeni); nastav("f-pohlavi", h.pohlavi);
-    var kraj = KRAJE.filter(function (k) { return k.kod === h.kraj || k.nazev === h.kraj; })[0]; if (kraj) nastav("f-kraj", kraj.kod);
-    var vel = VELIKOSTI.filter(function (v) { return (v.rada + " " + v.kod).toLowerCase() === String(h.velikost || "").toLowerCase(); })[0];
-    if (vel) nastav("f-velikost", vel.rada + "|" + vel.kod);
-    var f = document.getElementById("k-form"); if (f) f.scrollIntoView({ behavior: "smooth", block: "start" });
-    POVINNE.forEach(function (p) { oznac(p[0], ""); });
-    var chybi = POVINNE.filter(function (p) { var el = document.getElementById(p[0]); return el && !el.value.trim(); }).map(function (p) { return p[0]; });
-    chybi.forEach(function (id) { oznac(id, "V historii chybí, doplň."); });
-    HBK.toast(chybi.length ? "Údaje jsou ve formuláři. Doplň označená pole a přidej." : "Údaje jsou ve formuláři, zkontroluj je (hlavně pohlaví a výkonnost) a přidej.");
-  }
-
-  // Po uložení: stránka se překreslí, změněný řádek se zvýrazní a ukáže se hláška dole (Keksa 4. 10. 2026).
   function zvyrazni(id, text) {
-    var tr = document.querySelector('tr[data-radek="' + id + '"]');
+    var tr = id && document.querySelector('tr[data-radek="' + id + '"]');
     if (tr) { tr.classList.add("k-zmeneno"); tr.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(function () { tr.classList.remove("k-zmeneno"); }, 3000); }
-    HBK.toast(text);
+    if (text) HBK.toast(text);
   }
 
-  async function obnov(hlaska, chyba) {
+  async function obnov(hlaska) {
     var v = await Promise.all([HBK.rpc("web_k_prehled"), HBK.rpc("web_k_soupiska")]);
     P = v[0]; RADKY = v[1] || [];
-    vykresli(hlaska, chyba);
-    if (hlaska && !chyba) HBK.toast(hlaska);
+    vykresli(); HBK.kroky(P);
+    if (hlaska) HBK.toast(hlaska);
   }
-
-  function hodnota(id) { var el = document.getElementById(id); return el && !el.disabled ? el.value.trim() : null; }
-
-  // Povinná pole (vše kromě poznámky, Keksa 4. 10. 2026). Chybějící pole se označí a dostanou hlášku přímo u sebe.
-  var POVINNE = [["f-jmeno", "Vyplň jméno."], ["f-prijmeni", "Vyplň příjmení."], ["f-email", "Vyplň e-mail."], ["f-telefon", "Vyplň telefon."],
-    ["f-rok", "Vyplň rok narození."], ["f-pohlavi", "Vyber pohlaví."], ["f-kraj", "Vyber kraj."], ["f-mesto", "Vyplň město."],
-    ["f-velikost", "Vyber velikost trička."], ["f-vykonnost", "Vyplň čas na 10 km."]];
-  function oznac(id, text) {
-    var el = document.getElementById(id); if (!el) return;
-    var lab = el.closest(".k-pole"), m = lab.querySelector(".k-chyba-pole");
-    el.classList.toggle("k-chybi", !!text); el.setAttribute("aria-invalid", text ? "true" : "false");
-    if (text) { if (!m) { m = document.createElement("small"); m.className = "k-chyba-pole"; lab.appendChild(m); } m.textContent = text; }
-    else if (m) m.remove();
-  }
-  function zkontroluj() {
-    var chyby = [], rok = hodnota("f-rok"), v = hodnota("f-vykonnost"), em = hodnota("f-email"), letos = new Date().getFullYear();
-    POVINNE.forEach(function (p) {
-      var el = document.getElementById(p[0]), t = el && !el.disabled && !el.value.trim() ? p[1] : "";
-      oznac(p[0], t); if (t) chyby.push(p[0]);
-    });
-    if (rok && !(/^\d{4}$/.test(rok) && Number(rok) >= 1930 && Number(rok) <= letos - 10)) { oznac("f-rok", "Rok narození napiš čtyřmi číslicemi, např. 1990."); chyby.push("f-rok"); }
-    if (v && !/^(\d{1,2}:)?\d{1,3}(:\d{2})?$/.test(v)) { oznac("f-vykonnost", "Čas napiš jako minuty:sekundy, např. 52:30."); chyby.push("f-vykonnost"); }
-    if (em && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { oznac("f-email", "E-mail napiš ve tvaru jmeno@domena.cz."); chyby.push("f-email"); }
-    if (chyby.length) { var prvni = document.getElementById(chyby[0]); prvni.focus(); prvni.scrollIntoView({ behavior: "smooth", block: "center" }); }
-    return !chyby.length;
-  }
-  function opravPole(ev) { var t = ev.target; if (t && t.classList && t.classList.contains("k-chybi") && String(t.value).trim()) oznac(t.id, ""); }
-  document.addEventListener("input", opravPole);
-  document.addEventListener("change", opravPole);
-
-  document.addEventListener("submit", async function (ev) {
-    if (ev.target.id !== "k-form") return;
-    ev.preventDefault();
-    if (!zkontroluj()) { HBK.hlaska("k-hlaska", "Doplň označená pole.", true); return; }
-    var b = ev.target.querySelector("button[type=submit]"); b.disabled = true;
-    var vel = hodnota("f-velikost") || "", rok = hodnota("f-rok");
-    var data = {
-      p_jmeno: hodnota("f-jmeno"), p_prijmeni: hodnota("f-prijmeni"), p_email: hodnota("f-email"), p_telefon: hodnota("f-telefon"),
-      p_rok_narozeni: rok ? Number(rok) : null, p_pohlavi: hodnota("f-pohlavi"), p_kraj: hodnota("f-kraj"), p_mesto: hodnota("f-mesto"),
-      p_velikost_rada: vel ? vel.split("|")[0] : "", p_velikost: vel ? vel.split("|")[1] : "",
-      p_vykonnost: hodnota("f-vykonnost"), p_poznamka: hodnota("f-poznamka")
-    };
-    try {
-      if (UPRAVUJI) {
-        data.p_soupiska = UPRAVUJI;
-        await HBK.rpc("web_k_uprav_bezce", data);
-        var upraveny = UPRAVUJI; UPRAVUJI = null;
-        await obnov();
-        zvyrazni(upraveny, "Uloženo: " + data.p_jmeno + " " + data.p_prijmeni);
-      } else {
-        if (!data.p_vykonnost) data.p_vykonnost = null;
-        var novy = await HBK.rpc("web_k_pridej_bezce", data);
-        await obnov();
-        zvyrazni(novy && novy.soupiska_id, data.p_jmeno + " " + data.p_prijmeni + " je na soupisce.");
-      }
-    } catch (err) { HBK.hlaska("k-hlaska", err.message, true); b.disabled = false; }
-  });
 
   document.addEventListener("click", async function (ev) {
-    var t = ev.target; if (!t) return;
-    if (t.dataset && t.dataset.upravit) { UPRAVUJI = Number(t.dataset.upravit); vykresli(); document.getElementById("k-form").scrollIntoView({ behavior: "smooth" }); }
-    if (t.id === "k-zrusit") { UPRAVUJI = null; vykresli(); }
-    if (t.dataset && t.dataset.historie) vyplnZHistorie(HISTORIE[Number(t.dataset.historie)]);
-    if (t.id === "k-potvrdit-pocet") {
-      t.disabled = true;
-      try { await HBK.rpc("web_k_potvrd_pocet"); await obnov("Konečný počet běžců je potvrzený."); }
-      catch (err) { HBK.hlaska("k-hlaska-pocet", err.message, true); t.disabled = false; }
-    }
-    if (t.id === "k-zmenit-pocet") {
-      if (!confirm("Zrušit potvrzení konečného počtu? Pokud máš potvrzenou i soupisku a etapy, zruší se i to.")) return;
-      t.disabled = true;
-      try { await HBK.rpc("web_k_zrus_potvrzeni_poctu"); await obnov("Potvrzení počtu je zrušené. Teď můžeš běžce přidat nebo odebrat."); }
-      catch (err) { HBK.hlaska("k-hlaska-pocet", err.message, true); t.disabled = false; }
-    }
-    if (t.dataset && t.dataset.odebrat) {
-      var r = RADKY.filter(function (x) { return x.soupiska_id === Number(t.dataset.odebrat); })[0];
-      if (!r || !confirm("Odebrat " + r.jmeno + " " + r.prijmeni + " ze soupisky? Jeho etapy se uvolní.")) return;
-      try {
-        var v = await HBK.rpc("web_k_odeber_bezce", { p_soupiska: r.soupiska_id });
-        await obnov(r.jmeno + " " + r.prijmeni + " už na soupisce není." + (v.uvolnene_etapy && v.uvolnene_etapy.length
-          ? " Uvolněné etapy: " + v.uvolnene_etapy.join(", ") + ". Rozděl je na stránce Etapy." : ""));
-      } catch (err) { alert(err.message); }
-    }
+    var t = ev.target; if (!t || !t.dataset || !t.dataset.odebrat) return;
+    var r = RADKY.filter(function (x) { return x.soupiska_id === Number(t.dataset.odebrat); })[0];
+    if (!r || !confirm("Odebrat " + r.jmeno + " " + r.prijmeni + " ze soupisky? Jeho etapy se uvolní.")) return;
+    try {
+      var v = await HBK.rpc("web_k_odeber_bezce", { p_soupiska: r.soupiska_id });
+      await obnov(r.jmeno + " " + r.prijmeni + " už na soupisce není." + (v.uvolnene_etapy && v.uvolnene_etapy.length
+        ? " Uvolněné etapy: " + v.uvolnene_etapy.join(", ") + "." : ""));
+    } catch (err) { HBK.hlaska("k-stav", err.message, true); window.scrollTo(0, 0); }
   });
 
   document.addEventListener("DOMContentLoaded", async function () {
     P = await HBK.vyzadovat(); if (!P) return;
     try {
-      var v = await Promise.all([
-        HBK.rpc("web_k_soupiska"),
-        HBK.db("web_kraj?select=kod,nazev&aktivni=eq.true&order=poradi"),
-        HBK.db("velikosti?select=rada,kod,poradi&aktivni=eq.true&order=rada,poradi")
-      ]);
-      RADKY = v[0] || []; KRAJE = v[1] || []; VELIKOSTI = v[2] || [];
-      if (P.role !== "bezec") { try { HISTORIE = (await HBK.rpc("web_k_nabidka_bezcu")) || []; } catch (err) { HISTORIE = []; } }
+      var v = await Promise.all([HBK.rpc("web_k_soupiska"), HBK.db("web_kraj?select=kod,nazev&aktivni=eq.true&order=poradi")]);
+      RADKY = v[0] || []; KRAJE = v[1] || [];
     } catch (err) { document.getElementById("k-obsah").innerHTML = '<p class="k-chyba">' + e(err.message) + "</p>"; return; }
     vykresli();
+    var x = HBK.prevezmiHlasku(); if (x) zvyrazni(x.id, x.text);
   });
 })();
