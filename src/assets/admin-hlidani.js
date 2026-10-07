@@ -5,12 +5,14 @@
 //    zpětný test HB24–HB26: 11–21 hlášení za závod),
 //  • pozdní doběh – odhad cíle po zavření cíle (Nastavení: cil_zavren, neděle),
 //  • čelo – náskok prvního týmu před dalším (od 45 min se zvýrazní),
-//  • zápisy z předávek uložené přes varování a opravy týmů – k prověření.
+//  • zápisy z předávek uložené přes varování a opravy týmů – k prověření,
+//  • nelogické časy (záporná etapa), odstoupené týmy (DNF, tlačítko Odstoupil / Vrátit do závodu),
+//  • hromadné zkoušení kódů předávek (od 50 chybných kódů za 10 minut; 6. 10. 2026).
 // Samostatné „ticho 120 min“ se nehlídá: v HB26 by nevzniklo ani jednou, zpoždění ho pokryje.
 // Ukázka na HB26: ?ukazka=hb26&cas=<unix sekundy>.
 (function () {
   var Q = new URLSearchParams(location.search), UKAZKA = Q.get("ukazka") === "hb26";
-  var el, data = null, ted = null, nacteno = null;
+  var el, data = null, ted = null, nacteno = null, ptam = null, hlaska = "";
   function esc(s) { return HBA.esc(s); }
   var F_HM = new Intl.DateTimeFormat("cs-CZ", { timeZone: "Europe/Prague", hour: "2-digit", minute: "2-digit" });
   var F_HMS = new Intl.DateTimeFormat("cs-CZ", { timeZone: "Europe/Prague", hour: "2-digit", minute: "2-digit", second: "2-digit" });
@@ -34,10 +36,15 @@
   function vykresli() {
     var model = HBVysl.spocitej(data, ted), tymy = model.tymy, prah = (data.prah_min || 20) * 60;
     var naTrati = tymy.filter(function (t) { return t.bezi; }), vCili = tymy.filter(function (t) { return t.cil != null; });
-    var predStartem = tymy.filter(function (t) { return t.s == null || ted < t.s; });
+    var predStartem = tymy.filter(function (t) { return !t.dnf && (t.s == null || ted < t.s); });
+    var odstoupili = model.odstoupili;
     var h = '<p class="hl-souhrn">Teď ' + denHm(ted) + " · na trati " + naTrati.length + " · v cíli " + vCili.length +
-      " · před startem " + predStartem.length + (data.posledni_zapis ? " · poslední zápis z předávky " + hms(data.posledni_zapis) : "") +
+      " · před startem " + predStartem.length + (odstoupili.length ? " · odstoupilo " + odstoupili.length : "") +
+      (data.chybne_kody ? " · chybné kódy za 10 min " + data.chybne_kody : "") + (data.posledni_zapis ? " · poslední zápis z předávky " + hms(data.posledni_zapis) : "") +
       (UKAZKA ? " · <em>ukázka HB26</em>" : ' · <span class="adm-sub">načteno ' + F_HMS.format(new Date(nacteno)) + "</span>") + "</p>";
+    if (hlaska) h += '<p class="hl-hlaska">' + esc(hlaska) + "</p>";
+    if ((data.chybne_kody || 0) >= 50) h += '<section class="hl-blok hl-pozor"><h2>Hromadné zkoušení kódů předávek</h2><p>Za posledních 10 minut ' +
+      data.chybne_kody + " chybných kódů z " + (data.chybne_kody_ip || "?") + " adres. Někdo možná zkouší kódy. Sleduj zápisy z předávek níže.</p></section>";
 
     // 1) zpožděné týmy
     var zpozdene = naTrati.filter(function (t) { var e = t.E[t.bezi - 1]; return e.zpozdeni > prah; })
@@ -45,11 +52,12 @@
     h += '<section class="hl-blok' + (zpozdene.length ? " hl-pozor" : "") + '"><h2>Zpožděné týmy (' + zpozdene.length + ")</h2>" +
       '<p class="adm-sub">Pozadu za živým odhadem víc než ' + (prah / 60) + " min. Zavolej na předávku nebo kapitánovi.</p>";
     if (zpozdene.length) {
-      h += '<table class="hl-tab"><thead><tr><th>Tým</th><th>Běží na</th><th>Běžec</th><th>Čekal se</th><th>Pozadu</th><th>Naposledy</th></tr></thead><tbody>' +
+      h += '<table class="hl-tab"><thead><tr><th>Tým</th><th>Běží na</th><th>Běžec</th><th>Čekal se</th><th>Pozadu</th><th>Naposledy</th><th></th></tr></thead><tbody>' +
         zpozdene.map(function (t) {
           var e = t.E[t.bezi - 1], posl = t.posledni ? t.E[t.posledni - 1].dobeh : t.s;
           return "<tr><td>" + tym(t) + "</td><td>" + esc(P(t.bezi + 1)) + "</td><td>" + esc(e.jm) + "</td><td>≈ " + hm(ted - e.zpozdeni) +
-            '</td><td class="hl-cislo">' + min(e.zpozdeni) + " min</td><td>" + (t.posledni ? esc(P(t.posledni + 1)) : "start") + " " + hm(posl) + "</td></tr>";
+            '</td><td class="hl-cislo">' + min(e.zpozdeni) + " min</td><td>" + (t.posledni ? esc(P(t.posledni + 1)) : "start") + " " + hm(posl) + "</td><td>" +
+            (UKAZKA ? "" : dnfAkce(t, t.bezi)) + "</td></tr>";
         }).join("") + "</tbody></table>";
     } else h += "<p>Nikdo.</p>";
     h += "</section>";
@@ -68,13 +76,13 @@
     h += "</section>";
 
     // 3) čelo závodu
-    var vedouci = tymy.filter(function (t) { return t.posledni > 0; }).sort(function (a, b) {
+    var vedouci = tymy.filter(function (t) { return t.posledni > 0 && !t.dnf; }).sort(function (a, b) {
       return b.posledni - a.posledni || a.E[a.posledni - 1].dobeh - b.E[b.posledni - 1].dobeh; })[0];
     h += '<section class="hl-blok"><h2>Čelo závodu</h2>';
     if (vedouci) {
       var k = vedouci.posledni, prichod = vedouci.E[k - 1].dobeh, dalsi = null;
       tymy.forEach(function (t) {
-        if (t === vedouci) return;
+        if (t === vedouci || t.dnf) return;
         var x = t.E[k - 1], c = x.dobeh != null ? x.dobeh : x.odhad;
         if (c != null && (!dalsi || c < dalsi.c)) dalsi = { t: t, c: c, odhad: x.dobeh == null };
       });
@@ -83,6 +91,26 @@
         (dalsi ? ", další " + tym(dalsi.t) + (dalsi.odhad ? " ≈ " : " v ") + hm(dalsi.c) + " – náskok " + min(naskok) + " min" +
           (naskok >= 45 * 60 ? ". <strong>Čelo utíká – ověř, že na dalších předávkách už někdo je.</strong>" : ".") : ".") + "</p>";
     } else h += "<p>Zatím žádný zapsaný čas.</p>";
+    h += "</section>";
+
+    // 3b) nelogické časy
+    var nelog = tymy.filter(function (t) { return t.nelogicke.length; });
+    h += '<section class="hl-blok' + (nelog.length ? " hl-pozor" : "") + '"><h2>Nelogické časy (' + nelog.length + ")</h2>" +
+      '<p class="adm-sub">Doběh je dřív než příchod na předchozí předávku – nejspíš překlep nebo prohozené týmy. Oprav v sekci Časy.</p>';
+    h += nelog.length ? "<ul>" + nelog.map(function (t) {
+      return "<li>" + tym(t) + ": " + t.nelogicke.map(function (i) { return "úsek P" + i + " → P" + (i + 1) + " (" + esc(misto(i + 1)) + ")"; }).join(", ") + "</li>";
+    }).join("") + "</ul>" : "<p>Žádné.</p>";
+    h += "</section>";
+
+    // 3c) odstoupené týmy
+    h += '<section class="hl-blok"><h2>Odstoupené týmy (' + odstoupili.length + ")</h2>" +
+      '<p class="adm-sub">Na webu jsou na konci pořadí se značkou DNF, Hlídání je nehlásí a předávky je nevyhlížejí.</p>';
+    h += odstoupili.length ? '<table class="hl-tab"><thead><tr><th>Tým</th><th>Odstoupil na úseku</th><th>Poslední čas</th><th></th></tr></thead><tbody>' +
+      odstoupili.map(function (t) {
+        var k = Math.min(t.posledni, t.dnf - 1);
+        return "<tr><td>" + tym(t) + "</td><td>P" + t.dnf + " → P" + (t.dnf + 1) + " " + esc(misto(t.dnf + 1)) + "</td><td>" +
+          (k ? esc(P(k + 1)) + " " + hm(t.E[k - 1].dobeh) : "–") + "</td><td>" + (UKAZKA ? "" : dnfAkce(t, null)) + "</td></tr>";
+      }).join("") + "</tbody></table>" : "<p>Nikdo.</p>";
     h += "</section>";
 
     // 4) zápisy přes varování a opravy
@@ -98,6 +126,14 @@
     el.innerHTML = h;
   }
 
+  // tlačítko Odstoupil / Vrátit do závodu s potvrzením přímo na stránce
+  function dnfAkce(t, etapa) {
+    var klic = t.id + ":" + (etapa || "");
+    if (ptam === klic) return '<span class="hl-ptam">' + (etapa ? "Zapsat tým " + esc(t.c) + " jako odstoupený na úseku P" + etapa + " → P" + (etapa + 1) + "?" :
+      "Vrátit tým " + esc(t.c) + " do závodu?") + ' <button type="button" class="adm-tlacitko adm-tlacitko-male" data-dnf-ano="' + klic + '">' + (etapa ? "Ano, odstoupil" : "Ano, vrátit") +
+      '</button> <button type="button" class="adm-tlacitko adm-tlacitko-male" data-dnf-ne="1">Ne</button></span>';
+    return '<button type="button" class="adm-tlacitko adm-tlacitko-male" data-dnf="' + klic + '">' + (etapa ? "Odstoupil" : "Vrátit do závodu") + "</button>";
+  }
   async function nacti() {
     if (UKAZKA) {
       data = await (await fetch(HB.zaklad + "/assets/ukazka-hb26.json")).json();
@@ -113,6 +149,20 @@
 
   document.addEventListener("DOMContentLoaded", async function () {
     el = document.getElementById("hl-obsah");
+    el.addEventListener("click", async function (ev) {
+      var b = ev.target.closest("[data-dnf]");
+      if (b) { ptam = b.getAttribute("data-dnf"); vykresli(); return; }
+      if (ev.target.closest("[data-dnf-ne]")) { ptam = null; vykresli(); return; }
+      b = ev.target.closest("[data-dnf-ano]");
+      if (b) {
+        var x = b.getAttribute("data-dnf-ano").split(":"); b.disabled = true;
+        try {
+          var r = await HBA.rpc("web_tym_dnf", { p_tym: Number(x[0]), p_etapa: x[1] ? Number(x[1]) : null });
+          hlaska = r.dnf_etapa ? "Tým " + r.c + " je zapsaný jako odstoupený." : "Tým " + r.c + " je zpátky v závodě.";
+          ptam = null; await nacti();
+        } catch (e) { hlaska = e.message || String(e); ptam = null; vykresli(); }
+      }
+    });
     var j = await HBA.vyzadovat(); if (!j) return;
     try { await nacti(); } catch (e) { el.innerHTML = '<p class="adm-chyba">' + esc(e.message || e) + "</p>"; return; }
     if (!UKAZKA) setInterval(function () { if (!document.hidden) nacti().catch(function () {}); }, 60000);

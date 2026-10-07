@@ -326,6 +326,8 @@ a { color: var(--hb); }
 .v-odhad { font-style: italic; color: var(--seda); }
 .v-chybi { color: #b3261e; font-size: .9rem; }
 .v-zpozdeni { color: #8a5a00; font-size: .8rem; }
+.v-dnf { display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .04em; color: #fff; background: #6b6b6b; border-radius: 3px; padding: 0 .3rem; }
+.v-pausal { color: var(--seda); font-size: .8rem; }
 .v-bezi td { background: var(--hb-svetla); }
 .v-bezi-znacka { background: var(--hb); color: #fff; border-radius: 4px; padding: 1px 6px; font-size: .75rem; }
 .v-budouci td { color: var(--seda); }
@@ -351,14 +353,28 @@ a { color: var(--hb); }
 .p-jiny input { flex: 1; }
 .p-napoveda { color: var(--seda); font-size: .9rem; margin: 2px 0; }
 .p-hlavicka { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
-.p-misto { margin: 0 0 12px; }
+.p-misto { margin: 0 0 6px; font-size: .95rem; }
 .p-male { font: inherit; font-size: .85rem; background: none; border: 1px solid var(--ram); border-radius: 6px; padding: 5px 9px; cursor: pointer; }
-.p-tymy { display: grid; gap: 8px; }
-.p-tym { display: flex; gap: 12px; align-items: center; text-align: left; font: inherit; background: #fff; border: 2px solid var(--hb); border-radius: 10px; padding: 12px 14px; min-height: 64px; cursor: pointer; }
+.p-tymy { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 6px; }
+.p-tym { display: flex; flex-direction: column; align-items: stretch; gap: 1px; text-align: left; font: inherit; font-size: .9rem; line-height: 1.2; background: #fff; border: 2px solid var(--hb); border-radius: 8px; padding: 5px 8px 6px; min-width: 0; width: 100%; height: 100%; min-height: 66px; box-sizing: border-box; justify-content: flex-start; cursor: pointer; }
 .p-tym:active { background: var(--hb-svetla); }
-.p-tym-cislo { font-size: 1.6rem; font-weight: 700; color: var(--hb); min-width: 2.4em; text-align: center; }
-.p-tym-text strong { display: block; }
-.p-tym-text small { color: var(--seda); }
+.p-tym-radek { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+.p-tym-cislo { font-size: 1.35rem; font-weight: 700; color: var(--hb); }
+.p-tym-odhad { color: var(--seda); font-size: .8rem; white-space: nowrap; }
+.p-tym-nazev { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.p-tym-bezec { color: var(--seda); font-size: .8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-jiny { margin-top: 8px; }
+.p-jiny label { font-weight: 700; display: block; margin-bottom: 4px; }
+.p-jiny > div { display: flex; gap: 8px; }
+.p-jiny input { flex: 1; min-width: 0; font-size: 1.3rem; padding: 8px 10px; border: 2px solid var(--hb); border-radius: 8px; }
+.p-jiny button { font: inherit; font-weight: 700; background: var(--hb); color: #fff; border: 0; border-radius: 8px; padding: 8px 16px; cursor: pointer; }
+.p-posledni { color: var(--seda); font-size: .85rem; margin: 8px 0 0; text-align: center; }
+.p-test { margin: 0 0 4px; font-size: .82rem; color: var(--hb); background: var(--hb-svetla); border-radius: 6px; padding: 3px 8px; }
+.p-nadpis { font-size: 1.05rem; margin: 6px 0 6px; }
+.predavka-stranka .hlavicka-obal { padding-top: 6px; padding-bottom: 6px; }
+.p-prekryv { position: fixed; inset: 0; z-index: 50; background: rgba(20, 10, 12, .5); display: flex; align-items: flex-end; justify-content: center; padding: 0 0 env(safe-area-inset-bottom, 0px); }
+.p-prekryv .p-rozprac { width: 100%; max-width: 34rem; max-height: 92vh; overflow-y: auto; margin: 0; border-radius: 14px 14px 0 0; border-width: 0; padding: 14px 16px 18px; box-sizing: border-box; }
+.p-prekryv .p-akce button { font-size: 1rem; padding: 10px 14px; margin: 4px 6px 0 0; }
 .p-zapsano { list-style: none; padding: 0; }
 .p-zapsano li { border-bottom: 1px solid var(--ram); padding: 8px 0; }
 .p-akce { display: block; margin-top: 4px; }
@@ -366,7 +382,7 @@ a { color: var(--hb); }
 .p-ok { color: #2e7d32; } .p-ceka { color: #8a5a00; } .p-chyba { color: #b3261e; }
 .p-signal { background: #fff4e0; border-left: 4px solid #8a5a00; padding: 8px 12px; }
 /* Zápis na předávce – dva kroky, potvrzení, oprava (6. 10. 2026) */
-.p-dobehl { display: block; width: 100%; font: inherit; font-size: 1.6rem; font-weight: 700; letter-spacing: .04em; background: var(--hb); color: #fff; border: 0; border-radius: 12px; padding: 18px 12px; margin: 8px 0 16px; cursor: pointer; }
+.p-dobehl { display: block; width: 100%; font: inherit; font-size: 1.6rem; font-weight: 700; letter-spacing: .04em; background: var(--hb); color: #fff; border: 0; border-radius: 12px; padding: 14px 12px; margin: 6px 0 10px; cursor: pointer; }
 .p-dobehl small { display: block; font-size: .85rem; font-weight: 400; letter-spacing: 0; opacity: .85; }
 .p-dobehl:active { background: var(--hb-tmava); }
 .p-rozprac { border: 2px solid var(--hb); border-radius: 10px; padding: 10px 12px; margin: 0 0 12px; background: #fff; }
@@ -383,3 +399,22 @@ a { color: var(--hb); }
 .p-bylo { margin: 0 0 4px; color: var(--seda); }
 .p-varovani { color: #8a3b00; padding-left: 1.2em; margin: 6px 0; }
 .p-akce .p-hlavni { background: var(--hb); color: #fff; font-weight: 600; }
+/* malé telefony: 6 dlaždic + jiný tým bez posouvání i na výšku ~640 px (7. 10. 2026) */
+@media (max-height: 700px) {
+  .predavka-stranka .hlavicka { display: none; }
+  .p-dobehl { padding: 10px 12px; font-size: 1.4rem; margin: 4px 0 6px; }
+  .p-tym { min-height: 60px; padding: 3px 7px 4px; }
+  .p-tym-cislo { font-size: 1.15rem; }
+  .p-nadpis { margin: 2px 0 4px; font-size: 1rem; }
+  .p-jiny input { font-size: 1.15rem; padding: 6px 8px; }
+  .p-jiny label { margin: 0 0 2px; font-size: .9rem; }
+}
+/* PŘEDÁVKA TEĎ zůstává přístupné i nad otevřeným oknem – další tým může předávat hned (7. 10. 2026) */
+.p-dobehl { position: relative; z-index: 60; }
+/* potvrzení: velké Uložit přes celou šířku (Keksa 7. 10. 2026) */
+.p-ulozit-velke { display: block; width: 100%; font: inherit; font-size: 1.35rem; font-weight: 700; background: var(--hb); color: #fff; border: 0; border-radius: 10px; padding: 14px 12px; margin: 10px 0 4px; cursor: pointer; }
+.p-pozor .p-ulozit-velke { font-size: 1.1rem; }
+.p-ulozit-velke:active { background: var(--hb-tmava); }
+.p-akce-male { display: flex; gap: 8px; }
+.p-akce-male button { flex: 1; }
+.p-upravit { font: inherit; font-size: .8rem; background: none; border: 1px solid var(--ram); color: var(--hb); border-radius: 6px; padding: 2px 9px; margin-left: 4px; cursor: pointer; }

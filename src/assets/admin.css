@@ -164,6 +164,8 @@
 .hl-blok h2 { font-size: 1.05rem; margin: 2px 0 2px; }
 .hl-pozor { border-color: #c96a1a; border-left-width: 5px; background: #fff8f0; }
 .hl-pozor-text { color: #8a3b00; }
+.hl-hlaska { background: #eef6ee; border: 1px solid #b7d6b7; padding: 6px 10px; border-radius: 6px; }
+.hl-ptam { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: .88rem; }
 .hl-tab { border-collapse: collapse; width: 100%; font-size: .9rem; font-variant-numeric: tabular-nums; }
 .hl-tab th { text-align: left; color: #666; font-weight: 600; border-bottom: 2px solid #e3dcd0; padding: 5px 6px; }
 .hl-tab td { border-bottom: 1px solid #eee; padding: 5px 6px; vertical-align: top; }

@@ -1,16 +1,23 @@
 // Zápis časů na předávce (telefon časoměřiče). Přihlášení kódem předávky z formuláře (predavky.kod_predavky,
 // 8 číslic), bez účtu (rozhodnutí 5. a 6. 10. 2026).
-// Zápis ve dvou krocích (Keksa 6. 10. 2026): DOBĚHL TÝM zachytí čas, pak se vybere tým (číslo z dresu
+// Zápis ve dvou krocích (Keksa 6. 10. 2026): PŘEDÁVKA TEĎ (dříve DOBĚHL TÝM, přejmenováno 7. 10. 2026) zachytí čas, pak se vybere tým (číslo nebo název týmu – číslo dresu se na předávce neřeší, Keksa 7. 10. 2026; dříve číslo z dresu
 // nebo nabídka) a potvrdí se podle jména běžce. Klepnutí na tým v seznamu „Dobíhají“ zachytí čas a jde
 // rovnou k potvrzení. Kontrola věrohodnosti varuje (tým už dál, nereálné tempo), uložit jde jen s výslovným
 // potvrzením. Bez signálu se zápis uloží v telefonu s původním časem a odešle se sám (klient_id = žádné
 // duplicity). Zpět a Opravit tým (čas zůstane, změní se tým) fungují 60 minut, nic se nemaže.
+// Hodiny (6. 10. 2026): čas se bere podle serveru (posun od hodin telefonu se pamatuje). Když telefon serveru ještě
+// nikdy nedosáhl, zápisy se po prvním spojení samy přepočítají na čas serveru a teprve pak odešlou.
+// Po výběru týmu vždy následuje potvrzení (velké číslo, název, běžec, čas) a teprve Uložit odešle (7. 10. 2026).
+// Dobíhají (Keksa 7. 10. 2026): 6 nejbližších týmů jako tlačítka ve dvou sloupcích, pod nimi pole „Jiný tým“ –
+// čas se zachytí v okamžiku, kdy měřič začne psát číslo, uloží se po potvrzení (stejné kontroly jako jinde).
+// Přenos dat: celá data při přihlášení a každých 15 minut, mezitím jen týmy se změnou (web_predavka_zmeny).
 (function () {
   var koren = document.getElementById("predavka-zapis");
   if (!koren) return;
   var CFG = window.HB || {};
-  var K_KOD = "hb_predavka_kod", K_FRONTA = "hb_predavka_fronta", K_INFO = "hb_predavka_data";
-  var kod = null, info = null, model = null, posun = 0, chyba = null, odesilam = false, cisloText = "";
+  var K_KOD = "hb_predavka_kod", K_FRONTA = "hb_predavka_fronta", K_INFO = "hb_predavka_data", K_POSUN = "hb_predavka_posun";
+  var jinyCas = null, jinyText = "", rozbaleno = {};
+  var kod = null, info = null, model = null, posun = 0, posunOveren = false, chyba = null, odesilam = false, cisloText = "", posledniPlne = 0;
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
@@ -26,6 +33,17 @@
   function pis(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   function fronta() { return cti(K_FRONTA, []); }
   function ulozFrontu(f) { pis(K_FRONTA, f.slice(-300)); }
+  (function () { var p = cti(K_POSUN, null); if (p && typeof p.posun === "number") { posun = p.posun; posunOveren = true; } })();
+  // nově zjištěný posun hodin: neodeslané zápisy zachycené s neověřenými hodinami se přepočítají
+  function nastavPosun(novy) {
+    var f = fronta(), zmena = false;
+    f.forEach(function (z) {
+      if (!z.overeno && z.stav !== "odeslano" && z.stav !== "zruseno") { z.cas = z.cas - (z.posun || 0) + novy; z.posun = novy; z.overeno = true; zmena = true; }
+    });
+    if (zmena) ulozFrontu(f);
+    posun = novy; posunOveren = true; pis(K_POSUN, { posun: novy, kdy: Date.now() });
+  }
+  function novyZapis() { return { id: noveId(), kod: kod, cas: ted(), posun: posun, overeno: posunOveren, stav: "bez_tymu", vytvoreno: Date.now() }; }
   function noveId() {
     if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
     return "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
@@ -49,13 +67,27 @@
     kod = k.toUpperCase(); pis(K_KOD, kod);
     info = j; pis(K_INFO, { kod: kod, info: j });
     var tedServer = Date.parse(j.data && j.data.ted);
-    if (tedServer) posun = tedServer - Date.now();
+    if (tedServer) nastavPosun(tedServer - Date.now());
+    posledniPlne = Date.now();
     model = HBVysl.spocitej(j.data, Math.floor(ted() / 1000));
+    chyba = null;
+  }
+  // jen týmy se změnou od posledního načtení; celá data každých 15 minut
+  async function zmeny() {
+    if (!info || !info.data || !info.data.ted || !posunOveren || Date.now() - posledniPlne > 15 * 60000) return prihlas(kod);
+    var j = await rpc("web_predavka_zmeny", { p_kod: kod, p_od: info.data.ted });
+    if (j.chyba) throw Object.assign(new Error(j.chyba), { server: true });
+    var tedServer = Date.parse(j.data && j.data.ted);
+    if (tedServer) nastavPosun(tedServer - Date.now());
+    var data = HBVysl.slouc(info.data, j.data);
+    info = Object.assign({}, info, { predavka: j.predavka, etapa: j.etapa, rezim: j.rezim, misto: j.misto, data: data });
+    pis(K_INFO, { kod: kod, info: info });
+    model = HBVysl.spocitej(data, Math.floor(ted() / 1000));
     chyba = null;
   }
   async function obnov() {
     if (!kod) return;
-    try { await prihlas(kod); } catch (e) { if (e.server) chyba = e.message; }
+    try { await zmeny(); odesli(); } catch (e) { if (e.server) chyba = e.message; }
     vykresli();
   }
 
@@ -66,15 +98,31 @@
   function polozka(id) { var f = fronta(); return { f: f, z: f.filter(function (x) { return x.id === id; })[0] }; }
   function tymDat(id) { return (info.data.tymy || []).filter(function (x) { return String(x.id) === String(id); })[0]; }
   function tymModel(id) { return model.tymy.filter(function (x) { return String(x.id) === String(id); })[0]; }
-  function tymPodleCisla(c) { return (info.data.tymy || []).filter(function (t) { return String(t.c) === String(c).trim(); })[0]; }
+  // Tým podle čísla týmu nebo podle názvu (stačí část, bez diakritiky); víc shod = nic, dokud se nezpřesní.
+  function bezDiak(x) { return String(x || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
+  function tymyPodleTextu(c) {
+    var q = String(c || "").trim(), vse = info.data.tymy || [];
+    if (!q) return [];
+    if (/^\d+$/.test(q)) return vse.filter(function (t) { return String(t.c) === q; });
+    q = bezDiak(q);
+    return vse.filter(function (t) { return bezDiak(t.n).indexOf(q) >= 0; });
+  }
+  function tymPodleCisla(c) { var r = tymyPodleTextu(c); return r.length === 1 ? r[0] : null; }
+  function napovedaTymu(c) {
+    var r = tymyPodleTextu(c);
+    if (!String(c || "").trim()) return "";
+    if (r.length === 1) return r[0].n;
+    if (r.length > 1) return "Víc týmů: " + r.slice(0, 3).map(function (t) { return t.c + " " + t.n; }).join(", ") + (r.length > 3 ? " …" : "") + " – piš dál nebo zadej číslo.";
+    return /^\d+$/.test(String(c).trim()) ? "Tým s tímto číslem tu nezávodí." : "Takový tým tu nezávodí.";
+  }
   function dobehl() {
     var f = fronta();
-    f.push({ id: noveId(), kod: kod, cas: ted(), stav: "bez_tymu", vytvoreno: Date.now() });
+    f.push(novyZapis());
     ulozFrontu(f); if (navigator.vibrate) navigator.vibrate(60); vykresli();
   }
   function zeSeznamu(tymId) {
     var f = fronta();
-    f.push({ id: noveId(), kod: kod, cas: ted(), stav: "bez_tymu", vytvoreno: Date.now() });
+    f.push(novyZapis());
     ulozFrontu(f); if (navigator.vibrate) navigator.vibrate(60);
     prirad(f[f.length - 1].id, tymId);
   }
@@ -82,6 +130,7 @@
   function kontrola(tymId, cas) {
     var t = tymModel(tymId), e = info.etapa, v = [];
     if (!t) return v;
+    if (t.dnf) v.push("Tým " + (t.c || "?") + " je zapsaný jako odstoupený (etapa " + t.dnf + ").");
     for (var j = e; j < 30; j++) if (t.E[j].dobeh != null) { v.push("Tým " + (t.c || "?") + " už má zapsaný příchod na P" + (j + 2) + ", tedy dál po trati."); break; }
     var ze = 0, zakl = t.s;
     for (var k = e - 1; k >= 1; k--) if (t.E[k - 1].dobeh != null) { ze = k; zakl = t.E[k - 1].dobeh; break; }
@@ -103,10 +152,9 @@
     if (z.oprava) { z.oprava = { tym: t.id, c: t.c, n: t.n, varovani: kontrola(t.id, z.cas) }; }
     else {
       z.tym = t.id; z.c = t.c; z.n = t.n; z.varovani = kontrola(t.id, z.cas); z.potvrzeno = false;
-      z.stav = z.varovani.length ? "potvrdit" : "ceka"; // bez nesrovnalostí se ukládá hned (Zpět / Opravit tým 60 min)
+      z.stav = "potvrdit"; // vždy mezikrok s potvrzením výběru (Keksa 7. 10. 2026); při nesrovnalosti s varováním
     }
     delete vstupy[id]; ulozFrontu(p.f); vykresli();
-    if (!z.oprava && z.stav === "ceka") odesli();
   }
   function ulozit(id) {
     var p = polozka(id), z = p.z; if (!z) return;
@@ -119,6 +167,7 @@
   }
   async function odesli() {
     if (odesilam) return;
+    if (!posunOveren) { if (kod && navigator.onLine !== false) obnov(); return; }
     odesilam = true;
     try {
       var f = fronta();
@@ -140,7 +189,7 @@
         vykresli();
       }
     } finally { odesilam = false; }
-    if (fronta().some(function (z) { return z.stav === "odeslano" && Date.now() - z.odeslano < 5000; })) obnov();
+    if (fronta().some(function (z) { return z.stav === "odeslano" && Date.now() - z.odeslano < 5000; })) { try { await zmeny(); } catch (e) {} vykresli(); }
   }
   async function zpet(id) {
     var p = polozka(id), f = p.f, z = p.z;
@@ -194,22 +243,23 @@
   }
   function ocekavane(vynechat) {
     var e = info.etapa;
-    return model.tymy.filter(function (t) { return t.E[e - 1].dobeh == null && !vynechat[t.id]; })
+    return model.tymy.filter(function (t) { return t.E[e - 1].dobeh == null && !vynechat[t.id] && !(t.dnf && t.dnf <= e); })
       .sort(function (a, b) { return (a.E[e - 1].odhad || Infinity) - (b.E[e - 1].odhad || Infinity) || (a.c || 0) - (b.c || 0); });
   }
   function bezec(tymId) {
     var t = tymModel(tymId); if (!t) return "";
     var x = t.E[info.etapa - 1], r = ((info.data.tymy || []).filter(function (d) { return d.id === t.id; })[0] || {}).e;
     var sc = r && r[info.etapa - 1] ? r[info.etapa - 1][7] : null;
-    return x.jm ? x.jm + (sc ? " (číslo " + sc + ")" : "") : "";
+    return x.jm || "";
   }
-  function vyberTymu(z, vynechat, popis) {
+  // bezNavrhu: po PŘEDÁVKA TEĎ se nabízené týmy neopakují – jsou na dlaždicích (Keksa 7. 10. 2026)
+  function vyberTymu(z, vynechat, popis, bezNavrhu) {
     var txt = vstupy[z.id] || "", t = txt ? tymPodleCisla(txt) : null;
-    var navrhy = ocekavane(vynechat).slice(0, 4);
+    var navrhy = bezNavrhu ? [] : ocekavane(vynechat).slice(0, 4);
     return '<form class="p-vyber" data-form="' + z.id + '"><label for="p-v-' + z.id + '">' + popis + '</label><div>' +
-      '<input id="p-v-' + z.id + '" data-vstup="' + z.id + '" inputmode="numeric" autocomplete="off" value="' + esc(txt) + '">' +
+      '<input id="p-v-' + z.id + '" data-vstup="' + z.id + '" autocomplete="off" value="' + esc(txt) + '">' +
       '<button type="submit">Vybrat</button></div>' +
-      '<p class="p-napoveda">' + (txt ? (t ? esc(t.n) : "Tým s tímto číslem tu nezávodí.") : "") + "</p>" +
+      '<p class="p-napoveda">' + esc(napovedaTymu(txt)) + "</p>" +
       '<div class="p-navrhy">' + navrhy.map(function (n) {
         return '<button type="button" data-prirad="' + z.id + ":" + n.id + '"><strong>' + esc(n.c || "–") + "</strong> " + esc(n.n) + "</button>";
       }).join("") + "</div></form>";
@@ -218,15 +268,14 @@
     var v = cil.varovani || [], c = cil.c || "–";
     var h = '<div class="p-potvrzeni' + (v.length ? " p-pozor" : "") + '">';
     if (bylo) h += '<p class="p-bylo">Bylo: <s>' + esc(bylo) + "</s></p>";
-    h += '<p class="p-velke">' + esc(c) + "</p><p><strong>" + esc(cil.n) + "</strong><br>" + hms(z.cas) +
-      (bezec(cil.tym) ? "<br>Běží: " + esc(bezec(cil.tym)) : "") + "</p>";
+    h += '<p class="p-velke">' + esc(c) + "</p><p><strong>" + esc(cil.n) + "</strong>" + (bylo ? "<br>" + hms(z.cas) : "") + "</p>";
     if (v.length) h += '<ul class="p-varovani">' + v.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") +
-      "</ul><p><strong>Zkontroluj číslo na dresu.</strong></p>";
+      "</ul><p><strong>Ověř, že je to opravdu tým " + esc(c) + ".</strong></p>";
     if (cil.konflikt) h += '<p class="p-chyba">Tým ' + esc(c) + " už má na této předávce čas " + hms(cil.konflikt) + ".</p>" +
       '<p class="p-akce"><button type="button" class="p-hlavni" data-nahradit="' + z.id + '">Platí opravovaný čas</button> <button type="button" data-zpet="' + z.id + '">Neopravovat</button></p>';
-    else h += '<p class="p-akce"><button type="button" class="p-hlavni" data-' + (bylo ? "potvrdit-opravu" : "ulozit") + '="' + z.id + '">' +
-      (v.length ? "Ano, je to tým " + esc(c) + " – " + (bylo ? "potvrdit opravu" : "uložit") : (bylo ? "Potvrdit opravu" : "Uložit")) + "</button> " +
-      '<button type="button" data-jiny="' + z.id + '">Jiný tým</button> <button type="button" data-zpet="' + z.id + '">Zrušit</button></p>';
+    else h += '<button type="button" class="p-ulozit-velke" data-' + (bylo ? "potvrdit-opravu" : "ulozit") + '="' + z.id + '">' +
+      (v.length ? "Ano, je to tým " + esc(c) + " – " + (bylo ? "potvrdit opravu" : "uložit") : (bylo ? "Potvrdit opravu" : "Uložit")) + "</button>" +
+      '<p class="p-akce p-akce-male"><button type="button" data-jiny="' + z.id + '">Jiný tým</button> <button type="button" data-zpet="' + z.id + '">Zrušit</button></p>';
     return h + "</div>";
   }
   function vykresli() {
@@ -234,33 +283,48 @@
     var e = info.etapa, f = fronta().filter(function (z) { return z.kod === kod; });
     var obsazene = {};
     f.forEach(function (z) { if (z.tym && z.stav !== "zruseno" && z.stav !== "chyba") obsazene[z.tym] = true; });
-    var tymy = model.tymy, prosli = tymy.filter(function (t) { return t.E[e - 1].dobeh != null; }).length;
+    var tymy = model.tymy.filter(function (t) { return !(t.dnf && t.dnf <= e) || t.E[e - 1].dobeh != null; }),
+      prosli = tymy.filter(function (t) { return t.E[e - 1].dobeh != null; }).length;
     var cekajici = f.filter(function (z) { return z.stav === "ceka"; }).length;
-    var h = '<div class="p-hlavicka"><p class="p-misto"><strong>Předávka P' + info.predavka + " · " + esc(info.misto || "") + "</strong><br>" +
-      "Prošlo " + prosli + " z " + tymy.length + "</p>" +
+    // celá pracovní plocha (tlačítko, 6 dlaždic, jiný tým) se vejde na displej bez posouvání (Keksa 7. 10. 2026)
+    var h = '<div class="p-hlavicka"><p class="p-misto"><strong>P' + info.predavka + " · " + esc(info.misto || "") + "</strong> · prošlo " + prosli + " z " + tymy.length + "</p>" +
       '<button type="button" id="p-odhlasit" class="p-male">Odhlásit</button></div>';
-    if (info.rezim === "test") h += '<p class="upozorneni">Zkušební režim – jen zkušební týmy.</p>';
+    if (info.rezim === "test") h += '<p class="p-test">Zkušební režim – jen zkušební týmy</p>';
     if (cekajici) h += '<p class="p-signal">Bez signálu – čeká ' + cekajici + ", odešle se samo.</p>";
+    if (!posunOveren) h += '<p class="p-signal">Hodiny telefonu ještě nejsou ověřené. Časy se po připojení samy srovnají podle serveru.</p>';
     if (chyba) h += '<p class="p-chyba">' + esc(chyba) + "</p>";
     h += '<p id="p-hlaska" class="p-chyba" hidden></p>';
-    h += '<button type="button" id="p-dobehl" class="p-dobehl">DOBĚHL TÝM</button>';
-    // rozpracované: čas bez týmu a čekající na potvrzení
-    f.filter(function (z) { return z.stav === "bez_tymu" || z.stav === "potvrdit"; }).forEach(function (z) {
-      h += '<section class="p-rozprac"><p class="p-cas">Doběh ' + hms(z.cas) + "</p>" +
-        (z.stav === "bez_tymu" ? vyberTymu(z, obsazene, "Číslo týmu z dresu") + '<p class="p-akce"><button type="button" data-zpet="' + z.id + '">Zrušit</button></p>'
-          : potvrzeni(z, z, null)) + "</section>";
-    });
+    h += '<button type="button" id="p-dobehl" class="p-dobehl">PŘEDÁVKA TEĎ</button>';
+    // rozpracované (čas bez týmu, čeká na potvrzení) jako okno přes obrazovku – dlaždice se neposouvají
+    var rozprac = f.filter(function (z) { return z.stav === "bez_tymu" || z.stav === "potvrdit"; });
+    if (rozprac.length) {
+      var z0 = rozprac[0];
+      h += '<div class="p-prekryv" role="dialog" aria-modal="true" aria-label="Zápis doběhu"><section class="p-rozprac"><p class="p-cas">Doběh ' + hms(z0.cas) +
+        (rozprac.length > 1 ? ' <small class="p-napoveda">· čeká ještě ' + (rozprac.length - 1) + "</small>" : "") + "</p>" +
+        (z0.stav === "bez_tymu" ? vyberTymu(z0, obsazene, "Číslo nebo název týmu", true) + '<p class="p-akce"><button type="button" data-zpet="' + z0.id + '">Zrušit</button></p>'
+          : potvrzeni(z0, z0, null)) + "</section></div>";
+    }
     var dobihaji = ocekavane(obsazene);
-    h += "<h2>Dobíhají</h2>";
+    h += '<h2 class="p-nadpis">Dobíhají</h2>';
     if (!dobihaji.length) h += "<p>Všechny týmy už tu prošly.</p>";
-    h += '<div class="p-tymy">' + dobihaji.slice(0, 8).map(function (t) {
+    h += '<div class="p-tymy">' + dobihaji.slice(0, 6).map(function (t) {
       var x = t.E[e - 1];
-      return '<button type="button" class="p-tym" data-zapis="' + t.id + '"><span class="p-tym-cislo">' + esc(t.c || "–") + "</span>" +
-        '<span class="p-tym-text"><strong>' + esc(t.n) + "</strong><small>" + esc(x.jm || "") + (x.odhad ? " · " + odhad(x.odhad) : "") + "</small></span></button>";
+      return '<button type="button" class="p-tym" data-zapis="' + t.id + '"><span class="p-tym-radek"><span class="p-tym-cislo">' + esc(t.c || "–") + "</span>" +
+        (x.odhad ? '<small class="p-tym-odhad">' + odhad(x.odhad) + "</small>" : "") + "</span>" +
+        '<strong class="p-tym-nazev">' + esc(t.n) + "</strong></button>"; // bez jména běžce (Keksa 7. 10. 2026)
     }).join("") + "</div>";
+    if (dobihaji.length) {
+      var jt = jinyText ? tymPodleCisla(jinyText) : null;
+      h += '<form id="p-jiny" class="p-jiny"><label for="p-jiny-cislo">Jiný tým – číslo nebo název</label><div>' +
+        '<input id="p-jiny-cislo" autocomplete="off" autocapitalize="off" value="' + esc(jinyText) + '"><button type="submit">Zapsat</button></div>' +
+        '<p class="p-napoveda" id="p-jiny-info">' + jinyInfo(jt) + "</p></form>";
+    }
+    // kdy se čeká poslední tým (jen informace, bez jména; Keksa 7. 10. 2026)
+    var posledni = dobihaji.reduce(function (m, t) { var o = t.E[e - 1].odhad; return o && o > m ? o : m; }, 0);
+    if (posledni && dobihaji.length > 1) h += '<p class="p-posledni">Poslední tým se tu čeká ' + odhad(posledni) + "</p>";
     var hotove = f.slice().reverse().filter(function (z) { return z.stav !== "zruseno" && z.stav !== "bez_tymu" && z.stav !== "potvrdit"; }).slice(0, 20);
     if (hotove.length) {
-      h += "<h2>Zapsáno</h2><ul class=\"p-zapsano\">" + hotove.map(function (z) {
+      h += "<h2>Zapsáno</h2><ul class=\"p-zapsano\">" + hotove.map(function (z, poradi) {
         var stav = z.stav === "odeslano" ? '<span class="p-ok">odesláno</span>' :
           z.stav === "ceka" ? '<span class="p-ceka">čeká na signál</span>' :
           z.stav === "konflikt" ? '<span class="p-chyba">už bylo zapsáno ' + hms(z.existujici) + "</span>" :
@@ -278,19 +342,24 @@
             '<span class="p-akce"><button type="button" data-ulozit="' + z.id + '">Ano, je to tým ' + esc(z.c || "") + " – uložit</button> " +
             '<button type="button" data-oprav="' + z.id + '">Jiný tým</button> <button type="button" data-zpet="' + z.id + '">Zrušit</button></span>';
         } else if (Date.now() - z.vytvoreno < 60 * 60000) {
-          li += '<span class="p-akce"><button type="button" data-oprav="' + z.id + '">Opravit tým</button> <button type="button" data-zpet="' + z.id + '">Zpět</button></span>';
+          // tlačítka jen u nejnovějšího zápisu, starší přes malé Upravit (varianta C, Keksa 7. 10. 2026)
+          li += poradi === 0 || rozbaleno[z.id]
+            ? '<span class="p-akce"><button type="button" data-oprav="' + z.id + '">Opravit tým</button> <button type="button" data-zpet="' + z.id + '">Zpět</button></span>'
+            : ' <button type="button" class="p-upravit" data-rozbalit="' + z.id + '">Upravit</button>';
         }
         return li + "</li>";
       }).join("") + "</ul>";
     }
     var fokus = document.activeElement && document.activeElement.id;
     koren.innerHTML = h;
-    if (fokus) { var c = document.getElementById(fokus); if (c && c.setSelectionRange) { c.focus(); c.setSelectionRange(c.value.length, c.value.length); } }
+    if (fokus) { var c = document.getElementById(fokus);
+      if (c && koren.contains(c) && c.tagName === "INPUT" && (!c.type || c.type === "text")) { try { c.focus(); c.setSelectionRange(c.value.length, c.value.length); } catch (e) {} } }
   }
 
   koren.addEventListener("click", function (ev) {
     var b;
     if (ev.target.closest("#p-dobehl")) { dobehl(); return; }
+    b = ev.target.closest("[data-rozbalit]"); if (b) { rozbaleno[b.getAttribute("data-rozbalit")] = true; vykresli(); return; }
     b = ev.target.closest("[data-zapis]"); if (b) { zeSeznamu(b.getAttribute("data-zapis")); return; }
     b = ev.target.closest("[data-prirad]"); if (b) { var x = b.getAttribute("data-prirad").split(":"); prirad(x[0], x[1]); return; }
     b = ev.target.closest("[data-ulozit]"); if (b) { ulozit(b.getAttribute("data-ulozit")); return; }
@@ -305,11 +374,22 @@
       kod = null; info = null; pis(K_KOD, null); pis(K_INFO, null); vykresli();
     }
   });
+  function jinyInfo(t) {
+    if (!jinyText) return "Čas se zachytí, jakmile začneš psát.";
+    return (jinyCas ? "Čas " + hms(jinyCas) + " · " : "") + esc(napovedaTymu(jinyText));
+  }
   koren.addEventListener("input", function (ev) {
+    if (ev.target.id === "p-jiny-cislo") {
+      jinyText = ev.target.value.trim();
+      if (jinyText && !jinyCas) jinyCas = ted();
+      if (!jinyText) jinyCas = null;
+      var i = document.getElementById("p-jiny-info"); if (i) i.innerHTML = jinyInfo(jinyText ? tymPodleCisla(jinyText) : null);
+      return;
+    }
     var id = ev.target.getAttribute("data-vstup");
     if (id) { vstupy[id] = ev.target.value; var p = ev.target.closest("form").querySelector(".p-napoveda");
       var t = ev.target.value ? tymPodleCisla(ev.target.value) : null;
-      if (p) p.textContent = !ev.target.value ? "" : t ? t.n : "Tým s tímto číslem tu nezávodí."; }
+      if (p) p.textContent = napovedaTymu(ev.target.value); }
   });
   koren.addEventListener("submit", async function (ev) {
     ev.preventDefault();
@@ -319,14 +399,24 @@
       vykresli();
       return;
     }
+    if (ev.target.id === "p-jiny") {
+      var tj = tymPodleCisla(jinyText);
+      if (!tj) { alertText(napovedaTymu(jinyText) || "Zadej číslo nebo název týmu."); return; }
+      var f = fronta(), z = novyZapis();
+      if (jinyCas) { z.cas = jinyCas; }
+      f.push(z); ulozFrontu(f); jinyText = ""; jinyCas = null;
+      if (navigator.vibrate) navigator.vibrate(60);
+      prirad(z.id, tj.id);
+      return;
+    }
     var id = ev.target.getAttribute("data-form");
     if (id) {
       var t = tymPodleCisla(vstupy[id] || "");
-      if (!t) { alertText("Tým s číslem " + (vstupy[id] || "") + " tu nezávodí."); return; }
+      if (!t) { alertText(napovedaTymu(vstupy[id] || "") || "Zadej číslo nebo název týmu."); return; }
       prirad(id, t.id);
     }
   });
-  window.addEventListener("online", odesli);
+  window.addEventListener("online", function () { obnov(); });
   setInterval(function () { odesli(); }, 15000);
   setInterval(function () { if (!document.hidden) obnov(); }, 60000);
 

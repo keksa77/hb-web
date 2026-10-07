@@ -1,6 +1,7 @@
 // Časy – řádek = tým × etapa. Časy se nikdy nepřepisují: každá změna je nový záznam v web_cas,
 // předchozí se zneplatní a zůstane vidět v historii vpravo.
-// Doběh stačí zadat jako „14:32“ nebo „14:32:10“ – den se dopočítá ze startu etapy.
+// Doběh stačí zadat jako „14:32“ nebo „14:32:10“ – den se dopočítá od posledního známého času týmu (přes půlnoc
+// správně; čas víc než 6 h mimo se odmítne a chce datum – 6. 10. 2026). Sloupec Odstoupil zde zapíše DNF týmu.
 (function () {
   var e = HBA.esc;
   function an(b) { return b == null ? "" : b ? "ano" : "ne"; }
@@ -37,6 +38,7 @@
         r.zdroj_t = ZDROJ[r.zdroj] || r.zdroj || "";
         r.zapsano_m = HBT.mistniCas(r.zapsano);
         r.testovaci_t = an(r.testovaci);
+        r.dnf_t = r.dnf_etapa ? an(r.dnf_etapa === r.etapa) : "ne";
         return r;
       },
       popisRadku: function (r) { return (r.tym_cislo ? r.tym_cislo + " " : "") + r.tym + " – etapa " + r.etapa; },
@@ -54,13 +56,18 @@
         { pole: "plan_cas_t", nazev: "Plán čas etapy", sirka: 95, razeni: "plan_cas_s", zarovnat: "right", trvani: true, napoveda: "Plánovaný doběh − plánovaný start" },
         { pole: "start_m", nazev: "Start", typ: "cas", sirka: 140, napoveda: "Skutečný start = doběh předchozí etapy + pauza (u 1. etapy start týmu)" },
         { pole: "dobeh_m", nazev: "Doběh", typ: "cas", sirka: 140, uprava: zapis("dobeh"),
-          napoveda: "Zadej 14:32 nebo 14:32:10 (den se dopočítá ze startu etapy), případně s datem 4. 9. 14:32. Prázdná hodnota čas zruší." },
+          napoveda: "Zadej 14:32 nebo 14:32:10 – den se dopočítá od posledního známého času týmu, i přes půlnoc. Když by čas vyšel víc než 6 h mimo, zadej i datum: 5. 9. 02:15. Prázdná hodnota čas zruší." },
         { pole: "cas_etapy_t", nazev: "Čas etapy", sirka: 85, razeni: "cas_etapy_s", zarovnat: "right", trvani: true },
         { pole: "prubezny_t", nazev: "Čas týmu průběžně", sirka: 110, razeni: "prubezny_s", zarovnat: "right", trvani: true,
           napoveda: "Součet časů etap 1 až tato. Prázdné, dokud některé dřívější etapě chybí čas." },
         { pole: "pauza_t", nazev: "Pauza po etapě", sirka: 95, zarovnat: "right", uprava: zapis("pauza"), trvani: true, napoveda: "10 = 10 minut, 10:30 = minuty:sekundy, 1:10:00 = hodiny:minuty:sekundy" },
         { pole: "penalizace_t", nazev: "Penalizace", sirka: 90, zarovnat: "right", uprava: zapis("penalizace"), trvani: true, napoveda: "Přičte se k času etapy. 2 = 2 minuty, 2:30 = minuty:sekundy" },
         { pole: "pausal_t", nazev: "Paušál", typ: "bool", sirka: 75, uprava: zapis("pausal"), napoveda: "Etapa se počítá paušálem z nastavení etapy" },
+        { pole: "dnf_t", nazev: "Odstoupil zde", typ: "bool", sirka: 95, uprava: { klic: "tym_id", ulozit: function (r, v) {
+            var ano = v === true || v === "ano";
+            if (!ano && r.dnf_etapa !== r.etapa) return Promise.resolve();
+            return HBA.rpc("web_tym_dnf", { p_tym: r.tym_id, p_etapa: ano ? r.etapa : null });
+          } }, napoveda: "Ano = tým odstoupil (DNF) na této etapě. Časy dřívějších etap platí, tým nemá čas ani pořadí. Ne = vrátit do závodu." },
         { pole: "zdroj_t", nazev: "Zdroj", typ: "vycet", sirka: 100 },
         { pole: "zapsal", nazev: "Zapsal", sirka: 120 },
         { pole: "zapsano_m", nazev: "Zapsáno", typ: "cas", sirka: 125 },

@@ -1,5 +1,6 @@
 // Online výsledky – veřejná stránka Výsledky.
-// Data: RPC web_vysledky_online (jen veřejné údaje: tým, jméno běžce s iniciálou, časy).
+// Data: RPC web_vysledky_online (jen veřejné údaje: tým, jméno běžce s iniciálou, časy), pak každou minutu
+// jen změny (web_vysledky_online_zmeny) – šetří přenos dat (6. 10. 2026); celé znovu každých 15 minut.
 // Živý odhad počítá vysledky-model.js (metoda C ze zpětného testu). Chybějící čas zůstává vidět jako chybějící.
 // Ukázka: ?ukazka=hb26 přehraje ročník 2026 s posuvníkem času (data assets/ukazka-hb26.json).
 (function () {
@@ -98,6 +99,7 @@
     return h + "</select></label>";
   }
   function kdeJe(t) {
+    if (t.dnf) return '<span class="v-dnf">DNF</span> odstoupil na úseku P' + t.dnf + " → P" + (t.dnf + 1);
     if (t.cil != null) return "v cíli " + hm(t.cil);
     if (t.s == null) return "start neurčen";
     if (ted < t.s) return "start " + hm(t.s);
@@ -121,12 +123,18 @@
         '</td><td class="v-mimo-mobil">' + (posun ? '<span class="' + (posun > 0 ? "v-nahoru" : "v-dolu") + '">' + (posun > 0 ? "▲ " + posun : "▼ " + -posun) + "</span>" : "") + "</td></tr>";
     });
     h += "</tbody></table></div>";
-    var zbyva = model.tymy.filter(function (t) { return t.E[e - 1].casTymu == null && (!st.kat || t.k === st.kat); });
+    var zbyva = model.tymy.filter(function (t) { return t.E[e - 1].casTymu == null && !(t.dnf && t.dnf <= e) && (!st.kat || t.k === st.kat); });
     if (zbyva.length) {
       h += "<h3>Na " + esc(P(e + 1)) + " zatím nedorazili (" + zbyva.length + ")</h3><ul class=\"v-zbyva\">" + zbyva.map(function (t) {
         var x = t.E[e - 1];
         return '<li><a href="#pohled=tym&tym=' + t.id + '" data-tym="' + t.id + '">' + esc(t.n) + "</a> – " + kdeJe(t) +
           (x.odhad ? ", na P" + (e + 1) + " " + odhadText(x.odhad) : x.dobeh == null && t.posledni > e ? ", čas na P" + (e + 1) + " chybí" : "") + "</li>";
+      }).join("") + "</ul>";
+    }
+    var dnf = model.odstoupili.filter(function (t) { return t.dnf <= e && (!st.kat || t.k === st.kat); });
+    if (dnf.length) {
+      h += '<h3>Odstoupili (' + dnf.length + ')</h3><ul class="v-zbyva">' + dnf.map(function (t) {
+        return '<li><a href="#pohled=tym&tym=' + t.id + '" data-tym="' + t.id + '">' + esc(t.n) + '</a> <span class="v-cislo">' + esc(t.c) + "</span> – " + kdeJe(t) + "</li>";
       }).join("") + "</ul>";
     }
     return h;
@@ -167,8 +175,11 @@
       var naPred, casE = "", proti = "";
       if (e.dobeh != null) {
         naPred = hms(e.dobeh);
-        if (e.cas != null) { casE = trvani(e.cas); proti = e.plan ? rozdil(e.cas - e.plan) : ""; }
+        if (e.nelogicky) casE = '<span class="v-chybi">čas se prověřuje</span>';
+        else if (e.cas != null) { casE = trvani(e.cas) + (e.pausal != null ? ' <small class="v-pausal">paušál</small>' : ""); proti = e.plan && e.pausal == null ? rozdil(e.cas - e.plan) : ""; }
         else casE = '<span class="v-chybi">chybí čas předávky ' + e.i + "</span>";
+      } else if (t.dnf && e.i >= t.dnf) {
+        naPred = e.i === t.dnf ? '<span class="v-dnf">DNF</span>' : "";
       } else if (e.odhad) {
         naPred = '<span class="v-odhad">' + odhadText(e.odhad) + "</span>" + (e.zpozdeni ? ' <span class="v-zpozdeni">déle, než se čekalo</span>' : "");
       } else if (t.posledni > e.i) {
@@ -184,12 +195,14 @@
     var h = '<p class="v-poznamka">U každé předávky: kolik týmů už prošlo a kdy se čekají další. Odhad je zaokrouhlený na 5 minut.</p><div class="v-predavky">';
     var hotove = 0;
     for (var m0 = 2; m0 <= 31; m0++) {
-      if (model.tymy.every(function (t) { return t.E[m0 - 2].dobeh != null || t.posledni > m0 - 1; })) hotove = m0; else break;
+      if (model.tymy.every(function (t) { return t.E[m0 - 2].dobeh != null || t.posledni > m0 - 1 || (t.dnf && t.dnf <= m0 - 1); })) hotove = m0; else break;
     }
     if (hotove >= 2) h += '<p class="v-predavka">' + (hotove > 2 ? "Předávkami P2–P" + hotove : "Předávkou P2") + " už prošly všechny týmy.</p>";
     for (var m = Math.max(2, hotove + 1); m <= 31; m++) {
-      var e = m - 1, pros = [], ceka = [];
+      var e = m - 1, pros = [], ceka = [], celkem = 0;
       model.tymy.forEach(function (t) {
+        if (t.dnf && t.dnf <= e) return;
+        celkem++;
         var x = t.E[e - 1];
         if (x.dobeh != null) pros.push(x.dobeh);
         else if (x.odhad) ceka.push({ t: t, p: x.odhad });
@@ -197,7 +210,7 @@
       ceka.sort(function (a, b) { return a.p - b.p; });
       var brzy = ceka.filter(function (c) { return c.p <= ted + 1800; });
       pros.sort(function (a, b) { return a - b; });
-      var souhrn = "prošlo " + pros.length + " z " + model.tymy.length + (ceka.length ? " · další " + odhadText(ceka[0].p) : pros.length === model.tymy.length ? " · všichni prošli" : "");
+      var souhrn = "prošlo " + pros.length + " z " + celkem + (ceka.length ? " · další " + odhadText(ceka[0].p) : pros.length === celkem ? " · všichni prošli" : "");
       h += '<details class="v-predavka"' + (brzy.length ? " open" : "") + "><summary><strong>" + esc(P(m)) + "</strong> <span>" + souhrn + "</span></summary>";
       h += "<p>" + (pros.length ? "První prošel " + hm(pros[0]) + ", zatím poslední " + hm(pros[pros.length - 1]) + ". " : "") +
         (ceka.length ? "Ze zbývajících se první čeká " + odhadText(ceka[0].p) + ", poslední " + odhadText(ceka[ceka.length - 1].p) + "." : "") + "</p>";
@@ -211,7 +224,7 @@
 
   function pohledEtapy() {
     var e = st.etapaCasy || model.vychozi || 1;
-    var r = model.tymy.filter(function (t) { return t.E[e - 1].cas != null && (!st.kat || t.k === st.kat); })
+    var r = model.tymy.filter(function (t) { var x = t.E[e - 1]; return x.cas != null && x.pausal == null && !x.nelogicky && (!st.kat || t.k === st.kat); })
       .sort(function (a, b) { return a.E[e - 1].cas - b.E[e - 1].cas; });
     var h = '<div class="v-filtry"><label>Úsek <select id="v-etapa-casy">';
     for (var i = 1; i <= 30; i++) h += '<option value="' + i + '"' + (i === e ? " selected" : "") + ">P" + i + " " + esc(misto(i)) + " → P" + (i + 1) + " " + esc(misto(i + 1)) + " (etapa " + i + ")</option>";
@@ -228,7 +241,7 @@
   }
 
   function legenda() {
-    return '<p class="v-legenda">14:32:10 = změřený čas · <span class="v-odhad">≈ 14:35</span> = odhad podle dosavadního tempa (zaokrouhlený na 5 min) · <span class="v-chybi">chybí</span> = čas nebyl zapsán.</p>';
+    return '<p class="v-legenda">14:32:10 = změřený čas · <span class="v-odhad">≈ 14:35</span> = odhad podle dosavadního tempa (zaokrouhlený na 5 min) · <span class="v-chybi">chybí</span> = čas nebyl zapsán · <span class="v-dnf">DNF</span> = tým odstoupil.</p>';
   }
 
   function vykresli() {
@@ -294,6 +307,14 @@
       return r && Date.now() < r.vyprsi - 60000 ? r.access_token : null;
     } catch (e) { return null; }
   }
+  var posledniPlne = 0;
+  function rpc(fce, telo) {
+    return fetch(CFG.url + "/rest/v1/rpc/" + fce, {
+      method: "POST",
+      headers: { apikey: CFG.klic, Authorization: "Bearer " + (tokenOrganizatora() || CFG.klic), "Content-Type": "application/json" },
+      body: JSON.stringify(telo)
+    }).then(function (odp) { if (!odp.ok) throw new Error("HTTP " + odp.status); return odp.json(); });
+  }
   async function nacti() {
     try {
       if (UKAZKA) {
@@ -301,13 +322,13 @@
         data = await o.json();
         if (ted == null) ted = Number(Q.get("cas")) || Math.round((data.tymy[0].s + 12 * 3600) / 300) * 300;
       } else {
-        var odp = await fetch(CFG.url + "/rest/v1/rpc/web_vysledky_online", {
-          method: "POST",
-          headers: { apikey: CFG.klic, Authorization: "Bearer " + (tokenOrganizatora() || CFG.klic), "Content-Type": "application/json" },
-          body: "{}"
-        });
-        if (!odp.ok) throw new Error("HTTP " + odp.status);
-        data = await odp.json();
+        // celá data jednou za 15 minut (a poprvé), mezitím jen týmy se změnou od posledního načtení
+        var plne = !data || !data.zobrazit || !data.ted || Date.now() - posledniPlne > 15 * 60000;
+        if (plne) { data = await rpc("web_vysledky_online", {}); posledniPlne = Date.now(); }
+        else {
+          var z = await rpc("web_vysledky_online_zmeny", { p_rok: data.rok, p_od: data.ted });
+          data = z.zobrazit ? HBVysl.slouc(data, z) : z;
+        }
         ted = Math.floor(Date.parse(data.ted) / 1000) || Math.floor(Date.now() / 1000);
       }
       nacteno = Math.floor(Date.now() / 1000);
