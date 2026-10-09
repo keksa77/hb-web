@@ -23,5 +23,6 @@ eleventyExcludeFromCollections: true
 <script>window.HB = { url: "{{ web.supabaseUrl }}", klic: "{{ web.supabaseKlic }}", zaklad: "{{ web.zaklad }}" };</script>
 <script src="{{ web.zaklad }}/assets/vysledky-model.js"></script>
 <script src="{{ web.zaklad }}/assets/predavka.js"></script>
+<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});</script>
 </body>
 </html>

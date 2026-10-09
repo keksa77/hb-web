@@ -1,0 +1,58 @@
+---
+permalink: "predavka/sw.js"
+eleventyExcludeFromCollections: true
+---
+// Service worker stránky předávky (7. 10. 2026): stránka jde otevřít i znovu načíst bez signálu.
+// Stránka a její 3 soubory se ukládají do mezipaměti telefonu. Se signálem vždy platí nová verze ze serveru
+// (čeká se nejvýš 4 s), bez signálu poslední uložená. Data týmů a fronta zápisů jsou v localStorage (predavka.js),
+// dotazy do databáze (jiná doména) service worker vůbec neřeší.
+// stránka = složka, ve které leží tento soubor (/predavka/ nebo zkušební /predavka-zkouska/)
+var STRANKA = new URL("./", self.location).pathname;
+var PREDPONA = "hb-predavka-" + STRANKA + "-";
+var CACHE = PREDPONA + "{{ web.verze }}-{{ web.sestaveno }}";
+var SOUBORY = [
+  STRANKA,
+  "{{ web.zaklad }}/assets/styl.css",
+  "{{ web.zaklad }}/assets/vysledky-model.js",
+  "{{ web.zaklad }}/assets/predavka.js"
+];
+
+self.addEventListener("install", function (ev) {
+  ev.waitUntil(caches.open(CACHE).then(function (c) {
+    return Promise.all(SOUBORY.map(function (u) {
+      return fetch(u, { cache: "reload" }).then(function (o) { if (o.ok) return c.put(u, o); }).catch(function () {});
+    }));
+  }).then(function () { return self.skipWaiting(); }));
+});
+
+self.addEventListener("activate", function (ev) {
+  ev.waitUntil(caches.keys().then(function (klice) {
+    return Promise.all(klice.filter(function (k) { return k.indexOf(PREDPONA) === 0 && k !== CACHE; })
+      .map(function (k) { return caches.delete(k); }));
+  }).then(function () { return self.clients.claim(); }));
+});
+
+function klic(req) {
+  var u = new URL(req.url);
+  if (req.mode === "navigate" || u.pathname === STRANKA || u.pathname === STRANKA + "index.html") return STRANKA;
+  return SOUBORY.indexOf(u.pathname) >= 0 ? u.pathname : null;
+}
+
+self.addEventListener("fetch", function (ev) {
+  var req = ev.request;
+  if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin) return;
+  var k = klic(req);
+  if (!k) return;
+  ev.respondWith(caches.open(CACHE).then(function (c) {
+    var zSite = (req.mode === "navigate" ? fetch(req) : fetch(k, { cache: "no-cache" })).then(function (o) {
+      if (o.ok && !o.redirected) c.put(k, o.clone());
+      return o;
+    });
+    var limit = new Promise(function (hotovo) { setTimeout(hotovo, 4000); });
+    // co přijde dřív: odpověď ze sítě, nebo (po 4 s / při chybě sítě) uložená verze
+    return Promise.race([
+      zSite.catch(function () { return c.match(k); }),
+      limit.then(function () { return c.match(k); }).then(function (o) { return o || zSite; })
+    ]).then(function (o) { return o || zSite; });
+  }));
+});
