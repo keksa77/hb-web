@@ -61,5 +61,19 @@
   document.addEventListener("DOMContentLoaded", async function () {
     var p = await HBK.vyzadovat(); if (!p) return;
     vykresli(p);
+    oprava();
   });
+
+  // Oprava času (9. 10. 2026): od startu závodu, nebo když už tým nějakou žádost má, odkaz na stránku Oprava času.
+  async function oprava() {
+    var o = null;
+    try { o = await HBK.rpc("web_k_oprava_casu"); } catch (err) { return; }
+    if (!o || (!o.otevreno && !(o.zadosti || []).length)) return;
+    var ceka = o.zadosti.filter(function (z) { return z.stav === "ceka"; }).length, vyr = o.zadosti.length - ceka;
+    var m = document.querySelector(".k-mrizka"); if (!m) return;
+    m.insertAdjacentHTML("beforeend", '<div class="k-karta"><h2>Oprava času</h2><p>' +
+      (o.zadosti.length ? "Žádosti: " + (ceka ? ceka + " čeká" : "") + (ceka && vyr ? ", " : "") + (vyr ? vyr + " vyřízeno" : "") + "."
+                        : "Je některý čas na předávce špatně nebo chybí? Napiš nám.") + "</p>" +
+      '<div class="k-akce"><a class="k-tlacitko" href="' + HB.zaklad + '/kapitan/oprava-casu/">' + (o.zadosti.length ? "Žádosti o opravu času" : "Požádat o opravu času") + "</a></div></div>");
+  }
 })();

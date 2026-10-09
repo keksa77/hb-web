@@ -17,7 +17,8 @@
         E.push({ i: i + 1, plan: r[0], bid: r[1], jm: r[2] || "", dobeh: r[3] != null && r[3] <= ted ? r[3] : null,
                  pauza: r[4] || 0, penal: r[5] || 0, pausal: r[6] != null ? r[6] : null });
       }
-      var x = { id: t.id, c: t.c, n: t.n, k: t.k, s: t.s, E: E, posledni: 0, dnf: dnf };
+      var x = { id: t.id, c: t.c, n: t.n, k: t.k, s: t.s, E: E, posledni: 0, dnf: dnf, proveruje: t.v || [] };
+      x.proveruje.forEach(function (et) { if (E[et - 1]) E[et - 1].proveruje = true; }); // čekající žádost kapitána o opravu času
       for (i = 0; i < 30; i++) if (E[i].dobeh != null) x.posledni = i + 1;
       // čas etapy jen tam, kde je známý i začátek (předchozí doběh nebo start)
       var sumR = 0, sumP = 0, k = 0, pauzy = 0, upravy = 0, bezci = {};

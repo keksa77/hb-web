@@ -176,6 +176,13 @@
         }
       }).catch(function () {});
     }
+    if (p.vse || p.casy_vysledky) {
+      // Počet čekajících žádostí kapitánů o opravu času (9. 10. 2026).
+      rpc("web_admin_zadosti_cas_pocet").then(function (n) {
+        var el = document.getElementById("adm-pocet-zadosti");
+        if (el && n) { el.textContent = "(" + n + ")"; el.style.fontWeight = "700"; }
+      }).catch(function () {});
+    }
     if (p.vse || p.odchozi_maily || p.fronta_mailu) {
       db("web_mail_fronta?select=id&stav=eq.ceka").then(function (r) {
         var el = document.getElementById("adm-pocet-odchozi");

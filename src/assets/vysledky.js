@@ -175,7 +175,7 @@
       var naPred, casE = "", proti = "";
       if (e.dobeh != null) {
         naPred = hms(e.dobeh);
-        if (e.nelogicky) casE = '<span class="v-chybi">čas se prověřuje</span>';
+        if (e.nelogicky || e.proveruje) casE = '<span class="v-chybi">čas se prověřuje</span>';
         else if (e.cas != null) { casE = trvani(e.cas) + (e.pausal != null ? ' <small class="v-pausal">paušál</small>' : ""); proti = e.plan && e.pausal == null ? rozdil(e.cas - e.plan) : ""; }
         else casE = '<span class="v-chybi">chybí čas předávky ' + e.i + "</span>";
       } else if (t.dnf && e.i >= t.dnf) {
@@ -183,7 +183,7 @@
       } else if (e.odhad) {
         naPred = '<span class="v-odhad">' + odhadText(e.odhad) + "</span>" + (e.zpozdeni ? ' <span class="v-zpozdeni">déle, než se čekalo</span>' : "");
       } else if (t.posledni > e.i) {
-        naPred = '<span class="v-chybi">chybí</span>';
+        naPred = '<span class="v-chybi">' + (e.proveruje ? "čas se prověřuje" : "chybí") + "</span>";
       } else naPred = "";
       h += "<tr" + tr + "><td>P" + e.i + " → P" + (e.i + 1) + ' <small class="v-misto">' + esc(misto(e.i)) + " → " + esc(misto(e.i + 1)) + " · etapa " + e.i + "</small></td><td>" + esc(e.jm) +
         (e.i === t.bezi ? ' <small class="v-bezi-znacka">běží</small>' : "") + "</td><td>" + naPred + "</td><td>" + casE + '</td><td class="v-mimo-mobil">' + proti + "</td></tr>";

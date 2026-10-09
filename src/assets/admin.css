@@ -171,3 +171,8 @@
 .hl-tab td { border-bottom: 1px solid #eee; padding: 5px 6px; vertical-align: top; }
 .hl-cislo { font-weight: 700; color: #8a3b00; white-space: nowrap; }
 .hl-neplati td { color: #999; text-decoration: line-through; }
+/* Žádosti o opravu času (9. 10. 2026) */
+.zc-tab th { width: 13rem; color: #666; font-weight: 600; border-bottom: 1px solid #eee; vertical-align: top; }
+.zc-popis { white-space: pre-line; }
+.zc-akce { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: flex-end; margin: 10px 0 2px; }
+.zc-akce .adm-pole { margin: 0; min-width: 16rem; }

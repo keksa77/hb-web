@@ -191,3 +191,15 @@ a.k-vedlejsi.k-tlacitko-s-napovedou, a.k-tlacitko.k-tlacitko-s-napovedou { displ
   .k-etapy-mobil tfoot { display: none; }
 }
 .k-kopie span { white-space: nowrap; }
+/* Oprava času (9. 10. 2026) */
+.k-uvod { margin: 0 0 14px; }
+.k-volby { border: 0; padding: 0; }
+.k-volby legend { padding: 0; margin-bottom: 4px; }
+.k-volby label { display: flex; gap: 8px; align-items: center; font-weight: 400; margin: 4px 0; }
+.k-volby input { width: auto; margin: 0; }
+.k-zadosti { list-style: none; margin: 0; padding: 0; }
+.k-zadosti li { border-top: 1px solid var(--ram); padding: 10px 0; display: grid; gap: 4px; }
+.k-zadosti li:first-child { border-top: 0; padding-top: 0; }
+.k-zadost-popis { white-space: pre-line; }
+.k-zadost-odpoved { background: #f6f3ef; border-radius: 6px; padding: 6px 10px; }
+.k-zadost-kdy { color: var(--seda); }

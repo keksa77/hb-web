@@ -43,6 +43,8 @@
       (data.chybne_kody ? " · chybné kódy za 10 min " + data.chybne_kody : "") + (data.posledni_zapis ? " · poslední zápis z předávky " + hms(data.posledni_zapis) : "") +
       (UKAZKA ? " · <em>ukázka HB26</em>" : ' · <span class="adm-sub">načteno ' + F_HMS.format(new Date(nacteno)) + "</span>") + "</p>";
     if (hlaska) h += '<p class="hl-hlaska">' + esc(hlaska) + "</p>";
+    if (data.zadosti_cas) h += '<section class="hl-blok hl-pozor"><h2>Žádosti o opravu času: ' + data.zadosti_cas + ' čeká</h2><p>Kapitáni nebo zástupci žádají o opravu času. ' +
+      '<a href="' + HB.zaklad + '/admin/zadosti-casu/">Otevřít žádosti</a></p></section>';
     if ((data.chybne_kody || 0) >= 50) h += '<section class="hl-blok hl-pozor"><h2>Hromadné zkoušení kódů předávek</h2><p>Za posledních 10 minut ' +
       data.chybne_kody + " chybných kódů z " + (data.chybne_kody_ip || "?") + " adres. Někdo možná zkouší kódy. Sleduj zápisy z předávek níže.</p></section>";
 
