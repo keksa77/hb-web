@@ -278,8 +278,13 @@
       '<p class="p-akce p-akce-male"><button type="button" data-jiny="' + z.id + '">Jiný tým</button> <button type="button" data-zpet="' + z.id + '">Zrušit</button></p>';
     return h + "</div>";
   }
+  function nadpisStranky(t) {
+    var z = document.querySelector(".hlavicka .znacka");
+    if (z && z.textContent !== t) z.textContent = t;
+    document.title = t === "Zápis časů" ? "Zápis časů na předávce" : t + " – zápis časů";
+  }
   function vykresli() {
-    if (!kod || !info) { koren.innerHTML = prihlaseni(); return; }
+    if (!kod || !info) { nadpisStranky("Zápis časů"); koren.innerHTML = prihlaseni(); return; }
     var e = info.etapa, f = fronta().filter(function (z) { return z.kod === kod; });
     var obsazene = {};
     f.forEach(function (z) { if (z.tym && z.stav !== "zruseno" && z.stav !== "chyba") obsazene[z.tym] = true; });
@@ -287,7 +292,10 @@
       prosli = tymy.filter(function (t) { return t.E[e - 1].dobeh != null; }).length;
     var cekajici = f.filter(function (z) { return z.stav === "ceka"; }).length;
     // celá pracovní plocha (tlačítko, 6 dlaždic, jiný tým) se vejde na displej bez posouvání (Keksa 7. 10. 2026)
-    var h = '<div class="p-hlavicka"><p class="p-misto"><strong>P' + info.predavka + " · " + esc(info.misto || "") + "</strong> · prošlo " + prosli + " z " + tymy.length + "</p>" +
+    // nahoře stránky číslo a název předávky, např. „12-Pulčín“ (Keksa 7. 10. 2026)
+    var jmeno = info.predavka + "-" + (info.misto || "");
+    nadpisStranky(jmeno);
+    var h = '<div class="p-hlavicka"><p class="p-misto"><strong class="p-jmeno">' + esc(jmeno) + ' · </strong>prošlo ' + prosli + " z " + tymy.length + "</p>" +
       '<button type="button" id="p-odhlasit" class="p-male">Odhlásit</button></div>';
     if (info.rezim === "test") h += '<p class="p-test">Zkušební režim – jen zkušební týmy</p>';
     if (cekajici) h += '<p class="p-signal">Bez signálu – čeká ' + cekajici + ", odešle se samo.</p>";
