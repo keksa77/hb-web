@@ -97,7 +97,7 @@
 
   document.addEventListener("DOMContentLoaded", async function () {
     P = await HBK.vyzadovat(); if (!P) return;
-    HBK.navigace(P, { zpet: { n: "Přehled a startovné", url: "/kapitan/", hint: "Zpět na přehled týmu." } });
+    HBK.navigace(P, { zpet: { n: "Přehled týmu", url: "/kapitan/", hint: "Zpět na přehled týmu." } });
     try { D = await HBK.rpc("web_k_oprava_casu"); } catch (err) {
       document.getElementById("k-obsah").innerHTML = '<p class="k-chyba">' + e(err.message) + "</p>"; return;
     }

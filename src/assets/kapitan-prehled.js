@@ -30,11 +30,12 @@
       "<dt>Ročník</dt><dd>" + e(p.rocnik) + "</dd>" +
       "<dt>Registrace</dt><dd>" + (p.stav === "nahradnik" ? "náhradník" : p.stav === "zruseno" ? "zrušená" : "přijatá") + "</dd>" +
       "<dt>Start</dt><dd>" + (p.start_cas ? HBK.cas(p.start_cas) : "čas startu pošleme nejpozději týden před závodem") + "</dd>" +
+      (p.role !== "bezec" && p.zaplaceno ? "<dt>Startovné</dt><dd>zaplaceno " + e(HBK.datum(p.zaplaceno_dne)) + "</dd>" : "") +
       "<dt>Soupiska a etapy</dt><dd>" + (p.soupiska_otevrena ? "měnit jde " + (p.soupiska_do ? "do " + e(HBK.cas(p.soupiska_do)) : "do termínu, který ještě oznámíme")
                                                          : "<b>uzavřené</b>, změny řeší pořadatel na info@horybory.cz") + "</dd>" +
       "</dl></div>");
-    // Startovné: QR platba, údaje pro ruční zadání malým písmem pod ní.
-    h.push('<div class="k-karta"><h2>Startovné</h2><dl class="k-dl">' +
+    // Startovné: QR platba, údaje pro ruční zadání malým písmem pod ní. Jen dokud není zaplaceno a ne u běžce (Keksa 10. 10. 2026).
+    if (!HBK.bezStartovneho(p)) h.push('<div class="k-karta"><h2>Startovné</h2><dl class="k-dl">' +
       "<dt>Stav</dt><dd>" + (p.zaplaceno ? '<span class="k-stitek k-stitek-ok">zaplaceno ' + e(HBK.datum(p.zaplaceno_dne)) + "</span>"
                                          : '<span class="k-stitek k-stitek-ne">zatím nezaplaceno</span>') + "</dd>" +
       (p.zaplaceno ? "<dt>Částka</dt><dd>" + e(HBK.kc(p.castka_kc)) + "</dd>" : "") +

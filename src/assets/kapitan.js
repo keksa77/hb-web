@@ -152,8 +152,11 @@
     if (k === "potvrzeni") return !!p.soupiska_potvrzena;
     return false;
   }
+  // Startovné jen tam, kde je potřeba (Keksa 10. 10. 2026): po zaplacení a u běžce se krok jmenuje „Přehled týmu“.
+  function bezStartovneho(p) { return !!p.zaplaceno || p.role === "bezec"; }
   function viditelneKroky(p) {
     return KROKY.filter(function (x) { return !x.vede || p.role !== "bezec"; }).map(function (x) {
+      if (x.k === "prehled" && bezStartovneho(p)) return Object.assign({}, x, { n: "Přehled týmu", hint: "Tvůj tým a stav registrace." });
       // běžec soupisku jen prohlíží a upravuje své údaje (UX revize 5. 10. 2026)
       return p.role === "bezec" && x.k === "soupiska" ? Object.assign({}, x, { hint: "Tvoje údaje a tým na soupisce." }) : x;
     });
@@ -232,6 +235,10 @@
       var role = { kapitan: "kapitán", zastupce: "zástupce kapitána", bezec: "běžec" }[p.role] || p.role;
       document.getElementById("k-tym").textContent = (p.cislo ? p.cislo + " · " : "") + p.nazev + " · " + role;
     }
+    if (HB.krok === "prehled" && bezStartovneho(p)) {
+      var h1 = document.querySelector("h1"); if (h1) h1.textContent = "Přehled týmu";
+      document.title = document.title.replace("Přehled a startovné", "Přehled týmu");
+    }
     vykresliKroky(p);
     if (!(window.HB && HB.vlastniNavigace)) navigace(p);
     // krátké potvrzení z předchozí stránky (třeba „Rozdělení je uložené.“ po přechodu z etap)
@@ -279,6 +286,6 @@
   window.HBK = { poslatOdkaz: poslatOdkaz, prevezmiZOdkazu: prevezmiZOdkazu, platnyToken: platnyToken,
                  odhlasit: odhlasit, db: db, rpc: rpc, esc: esc, datum: datum, cas: cas, kc: kc,
                  vykonnost: vykonnost, hlaska: hlaska, toast: toast, vyzadovat: vyzadovat,
-                 kroky: vykresliKroky, navigace: navigace, krok: krok, hotovo: hotovo, hlaskaDal: hlaskaDal, prevezmiHlasku: prevezmiHlasku,
+                 kroky: vykresliKroky, navigace: navigace, bezStartovneho: bezStartovneho, krok: krok, hotovo: hotovo, hlaskaDal: hlaskaDal, prevezmiHlasku: prevezmiHlasku,
                  konceptKlic: konceptKlic, konceptNacti: konceptNacti, konceptUloz: konceptUloz, konceptZahod: konceptZahod, koncepty: koncepty, rokyVykonnosti: rokyVykonnosti };
 })();
