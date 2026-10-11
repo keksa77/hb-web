@@ -420,3 +420,12 @@ a { color: var(--hb); }
 .p-akce-male { display: flex; gap: 8px; }
 .p-akce-male button { flex: 1; }
 .p-upravit { font: inherit; font-size: .8rem; background: none; border: 1px solid var(--ram); color: var(--hb); border-radius: 6px; padding: 2px 9px; margin-left: 4px; cursor: pointer; }
+
+/* Partneři (stránka Partneři, loga s odkazy) */
+.text ul.partneri { list-style: none; padding: 0; margin: 20px 0; display: flex; flex-wrap: wrap; gap: 16px; }
+.partneri li { flex: 0 1 200px; }
+.partneri a { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px; border: 1px solid var(--ram); border-radius: 8px; background: #fff; text-decoration: none; text-align: center; height: 100%; box-sizing: border-box; }
+.partneri a:hover { border-color: var(--hb); }
+.partneri img { max-height: 80px; width: auto; max-width: 100%; }
+.partneri span { font-size: .9rem; color: var(--text); }
+@media (max-width: 480px) { .partneri li { flex-basis: calc(50% - 8px); } }
