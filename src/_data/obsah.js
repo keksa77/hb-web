@@ -26,6 +26,14 @@ function cistyText(s) {
     .trim();
 }
 
+// Odkazy a obrázky v textech z databáze se píšou od kořene webu (/kapitan/prihlaseni/).
+// Na testovací adrese běží web v podsložce /hb-web/, proto se jim tu začátek doplní (12. 10. 2026).
+// Odkazy na jiné weby (https://…) a //adresy se nemění.
+function sZakladem(html) {
+  if (!html || !web.zaklad) return html;
+  return String(html).replace(/(href|src)="\/(?!\/)/g, `$1="${web.zaklad}/`);
+}
+
 async function tabulka(cesta) {
   const url = `${web.supabaseUrl}/rest/v1/${cesta}`;
   const odpoved = await fetch(url, {
@@ -64,7 +72,7 @@ export default async function () {
   const textPodleKodu = {};
   for (const t of texty) {
     const p = textyPreklady.find((x) => x.text_id === t.id && x.jazyk === jazyk);
-    if (p) textPodleKodu[t.kod] = { titulek: p.titulek, obsah: p.obsah, popis: t.popis };
+    if (p) textPodleKodu[t.kod] = { titulek: p.titulek, obsah: sZakladem(p.obsah), popis: t.popis };
   }
 
   const seznamStranek = stranky
@@ -80,7 +88,7 @@ export default async function () {
         titulek: p.titulek,
         slug: p.slug,
         adresa: p.slug === "" ? "/" : `/${p.slug}/`,
-        text: p.text,
+        text: sZakladem(p.text),
         metaPopis: p.meta_popis,
         bloky: (blokyStranek[s.kod] || []).map((kod) => textPodleKodu[kod]).filter(Boolean),
       };
@@ -91,7 +99,7 @@ export default async function () {
     .filter((f) => f.aktivni)
     .map((f) => {
       const p = faqPreklady.find((x) => x.faq_id === f.id && x.jazyk === jazyk);
-      return p ? { poradi: f.poradi, otazka: cistyText(p.otazka), odpoved: p.odpoved } : null;
+      return p ? { poradi: f.poradi, otazka: cistyText(p.otazka), odpoved: sZakladem(p.odpoved) } : null;
     })
     .filter(Boolean);
 
