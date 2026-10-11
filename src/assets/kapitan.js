@@ -212,6 +212,8 @@
       location.href = HB.zaklad + "/kapitan/prihlaseni/?zpet=" + encodeURIComponent(location.pathname);
       return null;
     }
+    // rozpracované převzetí týmu odkazem z e-mailu (11. 10. 2026): po přihlášení se vrátí na stránku Převzetí týmu
+    try { if (localStorage.getItem("hb_prevzeti_token") && HB.krok !== "prevzeti") { location.href = HB.zaklad + "/kapitan/prevzeti/"; return null; } } catch (e) {}
     var hotovo = false;
     try { hotovo = sessionStorage.getItem("hb_kapitan_dokonceno") === "1"; } catch (e) {}
     if (!hotovo) {

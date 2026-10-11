@@ -203,3 +203,23 @@ a.k-vedlejsi.k-tlacitko-s-napovedou, a.k-tlacitko.k-tlacitko-s-napovedou { displ
 .k-zadost-popis { white-space: pre-line; }
 .k-zadost-odpoved { background: #f6f3ef; border-radius: 6px; padding: 6px 10px; }
 .k-zadost-kdy { color: var(--seda); }
+
+/* Kapitán a zástupce (11. 10. 2026) */
+.k-seda { color: var(--seda); font-weight: 400; font-size: .9em; }
+/* Startovní čas a harmonogram (11. 10. 2026) */
+.k-harm-tab { width: 100%; border-collapse: collapse; font-size: .92rem; font-variant-numeric: tabular-nums; }
+.k-harm-tab th { text-align: left; color: var(--seda); font-weight: 600; border-bottom: 2px solid var(--ram); padding: 4px 6px; }
+.k-harm-tab td { border-bottom: 1px solid var(--ram); padding: 6px; vertical-align: top; }
+.k-harm-tab td small { display: block; color: var(--seda); font-size: .8rem; }
+.k-harm-tab td:first-child { width: 2rem; color: var(--seda); }
+@media print {
+  .hlavicka, .paticka, .k-lista, .k-kroky, .k-krok-mobil, .k-navigace, .k-netisk, header, footer, nav { display: none !important; }
+  body { background: #fff; }
+  body > main#obsah, main#obsah > #k-obsah { display: block !important; }
+  .k-karta { border: 0; box-shadow: none; padding: 0; margin: 0 0 8px; }
+  .k-harm-tab { font-size: 8.5pt; } .k-harm-tab td, .k-harm-tab th { padding: 1px 4px; line-height: 1.25; }
+  .k-harm-tab td small { display: inline; font-size: 7.5pt; margin-left: 6px; }
+  .k-pozn { margin: 2px 0; padding: 2px 0; background: none; }
+  h2 { margin: 2px 0 4px; }
+  @page { size: A4; margin: 10mm; }
+}

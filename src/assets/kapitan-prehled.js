@@ -62,6 +62,8 @@
   document.addEventListener("DOMContentLoaded", async function () {
     var p = await HBK.vyzadovat(); if (!p) return;
     vykresli(p);
+    vedeni(p);
+    harmonogram();
     oprava();
   });
 
@@ -76,5 +78,27 @@
       (o.zadosti.length ? "Žádosti: " + (ceka ? ceka + " čeká" : "") + (ceka && vyr ? ", " : "") + (vyr ? vyr + " vyřízeno" : "") + "."
                         : "Je některý čas na předávce špatně nebo chybí? Napiš nám.") + "</p>" +
       '<div class="k-akce"><a class="k-tlacitko" href="' + HB.zaklad + '/kapitan/oprava-casu/">' + (o.zadosti.length ? "Žádosti o opravu času" : "Požádat o opravu času") + "</a></div></div>");
+  }
+  // Kapitán a zástupce (11. 10. 2026): kapitán a zástupce vidí kartu s odkazem na stránku Kapitán a zástupce.
+  function vedeni(p) {
+    if (p.role === "bezec") return;
+    var m = document.querySelector(".k-mrizka"); if (!m) return;
+    m.insertAdjacentHTML("beforeend", '<div class="k-karta"><h2>Kapitán a zástupce</h2><p>' +
+      (p.role === "kapitan" ? "Předat tým jinému kapitánovi nebo změnit zástupce." : "Kdo tým vede. Kapitána a zástupce mění kapitán.") + "</p>" +
+      '<div class="k-akce"><a class="k-tlacitko" href="' + HB.zaklad + '/kapitan/kapitan-a-zastupce/">Kapitán a zástupce</a></div></div>');
+    // Seznamka (11. 10. 2026): poptávka týmu „Hledáme běžce“
+    m.insertAdjacentHTML("beforeend", '<div class="k-karta"><h2>Chybí vám běžci?</h2><p>Dejte poptávku do seznamky na webu.</p>' +
+      '<div class="k-akce"><a class="k-vedlejsi" href="' + HB.zaklad + '/kapitan/seznamka/">Hledáme běžce</a></div></div>');
+  }
+  // Startovní čas (11. 10. 2026): po zveřejnění startovní listiny karta s časem startu a odkazem na harmonogram (celý tým).
+  async function harmonogram() {
+    var H = null;
+    try { H = await HBK.rpc("web_k_harmonogram"); } catch (err) { return; }
+    if (!H || !H.zverejneno || !H.spocitano) return;
+    var F = new Intl.DateTimeFormat("cs-CZ", { timeZone: "Europe/Prague", weekday: "short", day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" });
+    var m = document.querySelector(".k-mrizka"); if (!m) return;
+    m.insertAdjacentHTML("afterbegin", '<div class="k-karta"><h2>Startovní čas</h2><p><b>' + HBK.esc(F.format(new Date(H.start))) + "</b>" +
+      (H.vlna ? " · " + HBK.esc(H.vlna) + ". vlna" : "") + "</p>" +
+      '<div class="k-akce"><a class="k-tlacitko" href="' + HB.zaklad + '/kapitan/startovni-cas/">Harmonogram etap</a></div></div>');
   }
 })();

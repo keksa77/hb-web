@@ -1,0 +1,21 @@
+/* Seznamka – Hledám tým / Hledáme běžce (11. 10. 2026) */
+.sz-sloupce { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin: 18px 0; }
+.sz-sloupce h2 { margin: 0 0 8px; }
+.sz-inzerat { background: #fff; border: 1px solid #e2d9da; border-radius: 8px; padding: 12px 14px; margin: 0 0 10px; }
+.sz-inzerat h3 { margin: 0 0 4px; font-size: 1.05rem; }
+.sz-meta { color: #6b5b5e; font-size: .9rem; margin: 0 0 6px; }
+.sz-text { white-space: pre-line; margin: 0 0 8px; }
+.sz-prazdno { color: #6b5b5e; }
+.sz-form { background: #fff; border: 1px solid #e2d9da; border-radius: 8px; padding: 14px 16px; margin: 8px 0 14px; }
+.sz-form label { display: block; font-weight: 600; font-size: .95rem; margin: 0 0 10px; }
+.sz-form input, .sz-form select, .sz-form textarea { display: block; width: 100%; box-sizing: border-box; margin-top: 4px; padding: 8px 10px;
+  border: 1px solid #cfc4c5; border-radius: 5px; font: inherit; font-weight: 400; background: #fff; }
+.sz-form small { display: block; font-weight: 400; color: #6b5b5e; font-size: .85rem; margin-top: 3px; }
+.sz-radek { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0 12px; }
+.sz-tlacitko { background: #78212E; color: #fff; border: 0; border-radius: 6px; padding: 10px 18px; font: inherit; font-weight: 700; cursor: pointer; }
+.sz-tlacitko:disabled { opacity: .5; }
+.sz-vedlejsi { background: #fff; color: #78212E; border: 1px solid #cfc4c5; border-radius: 6px; padding: 7px 12px; font: inherit; cursor: pointer; }
+.sz-hlaska { min-height: 1.2em; margin: 6px 0; font-weight: 600; }
+.sz-hlaska.chyba { color: #7a1f1f; }
+.sz-hlaska.ok { color: #2c5c3a; }
+.sz-pozn { background: #f6f3ef; border-radius: 6px; padding: 8px 12px; font-size: .92rem; }
