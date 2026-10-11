@@ -75,6 +75,13 @@ eleventyComputed:
   <script src="{{ web.zaklad }}/assets/vysledky.js" defer></script>
 {% endif %}
 
-{% if not stranka.text and stranka.bloky.length == 0 and stranka.kod != "casto-se-ptate" and stranka.kod != "vysledky" %}
+{% if stranka.kod == "seznamka" %}
+  <link rel="stylesheet" href="{{ web.zaklad }}/assets/seznamka.css">
+  <div id="seznamka" class="seznamka"><p class="prazdno">Načítám inzeráty…</p></div>
+  <script>window.HB = { url: "{{ web.supabaseUrl }}", klic: "{{ web.supabaseKlic }}", zaklad: "{{ web.zaklad }}" };</script>
+  <script src="{{ web.zaklad }}/assets/seznamka.js" defer></script>
+{% endif %}
+
+{% if not stranka.text and stranka.bloky.length == 0 and stranka.kod != "casto-se-ptate" and stranka.kod != "vysledky" and stranka.kod != "seznamka" %}
   <p class="prazdno">Obsah téhle stránky se teprve připravuje.</p>
 {% endif %}

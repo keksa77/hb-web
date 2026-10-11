@@ -1,0 +1,14 @@
+---
+permalink: "/seznamka/inzerat/index.html"
+layout: zaklad.njk
+titulek: "Můj inzerát v seznamce"
+metaPopis: "Správa inzerátu v seznamce Hory Bory."
+eleventyExcludeFromCollections: true
+---
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="{{ web.zaklad }}/assets/seznamka.css">
+<h1>Můj inzerát v seznamce</h1>
+<div id="seznamka-muj"><p class="prazdno">Načítám…</p></div>
+<script>window.HB = { url: "{{ web.supabaseUrl }}", klic: "{{ web.supabaseKlic }}", zaklad: "{{ web.zaklad }}" };</script>
+<script src="{{ web.zaklad }}/assets/seznamka.js"></script>
+<script src="{{ web.zaklad }}/assets/seznamka-muj.js"></script>
