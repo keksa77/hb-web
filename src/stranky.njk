@@ -73,6 +73,31 @@ eleventyComputed:
   <script>window.HB = { url: "{{ web.supabaseUrl }}", klic: "{{ web.supabaseKlic }}", zaklad: "{{ web.zaklad }}" };</script>
   <script src="{{ web.zaklad }}/assets/vysledky-model.js" defer></script>
   <script src="{{ web.zaklad }}/assets/vysledky.js" defer></script>
+  {% if obsah.archiv and obsah.archiv.length %}
+  <section class="vitezove">
+    <h2>Vítězové ročníků</h2>
+    <div class="vit-mrizka">
+    {% for r in obsah.archiv %}
+      <article class="vit">
+        {% if r.fotoCelkem %}<img src="{{ r.fotoCelkem }}" alt="Vítězný tým Hory Bory {{ r.letopocet }} – {{ r.vitez.tym }}" loading="lazy" width="768" height="512">{% endif %}
+        <div class="vit-text">
+          <p class="vit-rok">Hory Bory {{ r.letopocet }}</p>
+          <p class="vit-jmeno">{{ r.vitez.tym }}</p>
+          <p class="vit-cas">{{ r.vitez.cas }}</p>
+          <ol start="2">{% for d in r.dalsi %}<li>{{ d.tym }} <span class="vit-cas">{{ d.cas }}</span></li>{% endfor %}</ol>
+          {% if r.zeny %}
+          <div class="vit-zeny">
+            {% if r.fotoZeny %}<img src="{{ r.fotoZeny }}" alt="Vítězky ženské kategorie Hory Bory {{ r.letopocet }} – {{ r.zeny.tym }}" loading="lazy" width="768" height="512">{% endif %}
+            Ženy: <strong>{{ r.zeny.tym }}</strong> <span class="vit-cas">{{ r.zeny.cas }}</span>
+          </div>
+          {% endif %}
+          <a href="{{ web.zaklad }}{{ r.adresa }}">Celé výsledky {{ r.letopocet }}</a>
+        </div>
+      </article>
+    {% endfor %}
+    </div>
+  </section>
+  {% endif %}
 {% endif %}
 
 {% if stranka.kod == "seznamka" %}

@@ -1,0 +1,27 @@
+---
+pagination:
+  data: obsah.archiv
+  size: 1
+  alias: r
+permalink: "/vysledky/{{ r.letopocet }}/index.html"
+layout: zaklad.njk
+eleventyComputed:
+  titulek: "Výsledky Hory Bory {{ r.letopocet }}"
+  metaPopis: "Celkové výsledky štafetového běhu Hory Bory {{ r.letopocet }}: pořadí týmů a časy na trase."
+  adresa: "/vysledky/{{ r.letopocet }}/"
+---
+{# Archiv výsledků jednoho ročníku z výsledkové listiny (tabulka web_vysledky_archiv). Keksa 12. 10. 2026. #}
+<p class="drobecky"><a href="{{ web.zaklad }}/vysledky/">Výsledky</a> › {{ r.letopocet }}</p>
+<h1>Výsledky Hory Bory {{ r.letopocet }}</h1>
+<p>Celkové pořadí {{ r.tymy.length }} týmů podle výsledkové listiny.{% if r.sKategorii %} Písmeno Z označuje ženský tým.{% endif %}</p>
+<div class="table-responsive">
+<table class="archiv-tabulka">
+  <thead><tr><th>#</th>{% if r.sCisly %}<th class="archiv-cislo">Číslo</th>{% endif %}<th>Tým</th>{% if r.sKategorii %}<th>Kat.</th>{% endif %}<th>Čas na trase</th></tr></thead>
+  <tbody>
+  {% for t in r.tymy %}
+    <tr{% if t.kategorie == "Z" %} class="archiv-z"{% endif %}><td>{{ t.poradi }}.</td>{% if r.sCisly %}<td class="archiv-cislo">{{ t.cislo }}</td>{% endif %}<td>{{ t.tym }}</td>{% if r.sKategorii %}<td>{{ "Z" if t.kategorie == "Z" else "" }}</td>{% endif %}<td class="archiv-cas">{{ t.cas }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+<p class="archiv-dalsi">Další ročníky: {% for x in obsah.archiv %}{% if x.rok != r.rok %}<a href="{{ web.zaklad }}{{ x.adresa }}">{{ x.letopocet }}</a>{% if not loop.last %} · {% endif %}{% endif %}{% endfor %}</p>
