@@ -463,3 +463,32 @@ a { color: var(--hb); }
   .archiv-tabulka th, .archiv-tabulka td { padding: 6px 5px; }
   .archiv-tabulka .archiv-cislo { display: none; }
 }
+
+/* Galerie Fotky (/fotky/ a /fotky/RRRR/) */
+.gal-roky { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; margin-top: 16px; }
+.gal-rok { display: block; border-radius: 10px; overflow: hidden; border: 1px solid var(--ram); background: #fff; text-decoration: none; color: var(--text); }
+.gal-rok img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; display: block; }
+.gal-rok-text { display: block; padding: 10px 12px; }
+.gal-rok-text strong { display: block; color: var(--hb); font-size: 1.05rem; }
+.gal-rok:hover { border-color: var(--hb); }
+.gal-zalozky { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 14px; }
+.gal-zalozka { font: inherit; border: 1px solid var(--ram); background: #fff; color: var(--hb); border-radius: 999px; padding: 5px 14px; cursor: pointer; }
+.gal-zalozka span { color: var(--seda); font-size: .85rem; }
+.gal-zalozka.gal-aktivni { background: var(--hb); color: #fff; border-color: var(--hb); }
+.gal-zalozka.gal-aktivni span { color: #fff; }
+.gal-mrizka { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+.gal-mrizka a { display: block; border-radius: 6px; overflow: hidden; background: var(--hb-svetla); }
+.gal-mrizka a[hidden] { display: none; }
+.gal-mrizka img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; display: block; }
+@media (max-width: 480px) { .gal-mrizka { grid-template-columns: repeat(2, 1fr); gap: 4px; } }
+.gal-dalsi { margin-top: 20px; }
+.gal-box { position: fixed; inset: 0; background: rgba(20, 12, 14, .94); z-index: 100; display: flex; align-items: center; justify-content: center; }
+.gal-box[hidden] { display: none; }
+.gal-box figure { margin: 0; max-width: 96vw; max-height: 92vh; text-align: center; }
+.gal-box img { max-width: 96vw; max-height: 86vh; width: auto; height: auto; display: block; margin: 0 auto; border-radius: 4px; }
+.gal-box figcaption { color: #ddd; font-size: .9rem; margin-top: 8px; }
+.gal-box button { position: absolute; background: rgba(255,255,255,.12); color: #fff; border: 0; font-size: 2rem; line-height: 1; width: 48px; height: 48px; border-radius: 50%; cursor: pointer; }
+.gal-zavrit { top: 12px; right: 12px; }
+.gal-pred { left: 10px; top: 50%; transform: translateY(-50%); }
+.gal-dalsi-f { right: 10px; top: 50%; transform: translateY(-50%); }
+@media (max-width: 480px) { .gal-roky { grid-template-columns: 1fr 1fr; gap: 10px; } .gal-rok-text { padding: 8px; font-size: .9rem; } }
