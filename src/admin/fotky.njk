@@ -1,0 +1,35 @@
+---
+permalink: "/admin/fotky/index.html"
+layout: admin.njk
+titulek: "Fotky – nahrát náhledy"
+sekce: "fotky"
+skript: "admin-fotky.js"
+eleventyExcludeFromCollections: true
+---
+<div class="adm-stranka fo-stranka">
+  <h1>Fotky – nahrát náhledy</h1>
+  <p class="adm-sub">Vyber ročník a složku s fotkami. Prohlížeč každou fotku zmenší na 768 px, nahraje ji do úložiště a spáruje s katalogem fotek podle jména souboru. Originály zůstávají u tebe, nic se neposílá ve velké velikosti. Fotky, které v katalogu ještě nejsou, se do něj přidají.</p>
+  <div class="fo-radek">
+    <label>Ročník <select id="fo-rok"></select></label>
+    <label>Fotograf (pro nové fotky) <input id="fo-fotograf" placeholder="např. Mego"></label>
+  </div>
+  <div id="fo-prehled" class="fo-prehled"><p class="adm-sub">Načítám…</p></div>
+  <div class="fo-radek">
+    <label class="fo-vyber">Vybrat složku <input type="file" id="fo-slozka" webkitdirectory multiple accept="image/jpeg,image/png,image/webp"></label>
+    <label class="fo-vyber">nebo jednotlivé fotky <input type="file" id="fo-soubory" multiple accept="image/jpeg,image/png,image/webp"></label>
+    <label><input type="checkbox" id="fo-jen-chybejici" checked> nahrát jen fotky, kterým náhled chybí</label>
+  </div>
+  <div id="fo-prubeh" class="fo-prubeh" hidden><progress id="fo-progress" max="1" value="0"></progress> <span id="fo-stav"></span></div>
+  <ul id="fo-chyby" class="fo-chyby"></ul>
+</div>
+<style>
+.fo-stranka { padding: 0 16px 24px; max-width: 900px; }
+.fo-radek { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; margin: 14px 0; }
+.fo-radek label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.fo-radek label:has(input[type=checkbox]) { flex-direction: row; align-items: center; }
+.fo-prehled { background: #F6EEDC; border-left: 3px solid #78212E; padding: 8px 12px; font-size: 13.5px; }
+.fo-prehled p { margin: 3px 0; }
+.fo-prubeh { margin: 12px 0; font-size: 13.5px; }
+.fo-prubeh progress { width: 320px; max-width: 100%; vertical-align: middle; }
+.fo-chyby { color: #A3302B; font-size: 13px; }
+</style>
