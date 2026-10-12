@@ -54,6 +54,33 @@ const blokyStranek = {
   "startovne": ["startingFee", "startingPayment", "registration"],
 };
 
+// Archiv výsledků minulých ročníků a karty „Vítězové ročníků“ na stránce Výsledky (Keksa 12. 10. 2026).
+// Data jsou z výsledkových listin 2019–2026 (tabulka web_vysledky_archiv), fotky vítězů z katalogu fotek.
+// Vítězky ženské kategorie = nejrychlejší tým s kategorií Z; kde kategorie Z není, řádek „Ženy“ se nezobrazí.
+async function archivVysledku() {
+  const [radky, fotky] = await Promise.all([
+    tabulka("web_vysledky_archiv?select=rok,poradi,cislo,tym,kategorie,cas&order=rok.desc,poradi.asc"),
+    tabulka("web_vitezove_foto?select=*"),
+  ]);
+  const foto = (rok, kat) => {
+    const f = fotky.find((x) => x.rok === rok && x.kategorie === kat);
+    return f ? `${web.supabaseUrl}/storage/v1/object/public/fotky-nahledy/${f.nahled}` : null;
+  };
+  const roky = [...new Set(radky.map((r) => r.rok))];
+  return roky.map((rok) => {
+    const tymy = radky.filter((r) => r.rok === rok).map((r) => ({ ...r, cas: String(r.cas).slice(0, 8) }));
+    const zeny = tymy.filter((r) => r.kategorie === "Z");
+    const letopocet = "20" + rok.slice(2);
+    return {
+      rok, letopocet, adresa: `/vysledky/${letopocet}/`,
+      vitez: tymy[0], dalsi: tymy.slice(1, 3), zeny: zeny[0] || null,
+      fotoCelkem: foto(rok, "celkem"), fotoZeny: foto(rok, "zeny"),
+      sCisly: tymy.some((r) => r.cislo), sKategorii: zeny.length > 0,
+      tymy,
+    };
+  });
+}
+
 export default async function () {
   if (zeSouboru) {
     return JSON.parse(await readFile(zeSouboru, "utf8"));
@@ -67,6 +94,7 @@ export default async function () {
     tabulka("web_faq_preklady?select=*"),
     tabulka("web_jazyky?select=*&order=poradi"),
   ]);
+  const archiv = await archivVysledku();
 
   const jazyk = web.jazyk;
   const textPodleKodu = {};
@@ -107,6 +135,7 @@ export default async function () {
     stranky: seznamStranek,
     otazky,
     jazyky: jazyky.filter((j) => j.aktivni),
+    archiv,
     staženo: new Date().toISOString(),
   };
 }
