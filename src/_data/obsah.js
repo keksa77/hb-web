@@ -81,6 +81,20 @@ async function archivVysledku() {
   });
 }
 
+// Galerie Fotky (Keksa 12. 10. 2026, rozhodnutí 20. 9.: galerie čte tabulku fotky). Funkce web_galerie vrátí
+// ročníky s fotkami, které jsou na webu a mají náhled 768 px v úložišti fotky-nahledy. Náhled = [jméno, sekce, fotograf].
+async function galerie() {
+  const data = await tabulka("rpc/web_galerie");
+  const zaklad = `${web.supabaseUrl}/storage/v1/object/public/fotky-nahledy/`;
+  return (data || []).map((g) => {
+    const fotky = g.fotky.map(([n, s, a]) => ({ u: zaklad + n, s: s || "", a: a || "" }));
+    const sekce = ["start", "trasa", "cil"].filter((k) => fotky.some((f) => f.s === k));
+    const letopocet = "20" + g.rok.slice(2);
+    return { rok: g.rok, letopocet, adresa: `/fotky/${letopocet}/`, pocet: fotky.length, sekce,
+             obal: fotky[Math.floor(fotky.length / 3)].u, fotky };
+  });
+}
+
 export default async function () {
   if (zeSouboru) {
     return JSON.parse(await readFile(zeSouboru, "utf8"));
@@ -94,7 +108,7 @@ export default async function () {
     tabulka("web_faq_preklady?select=*"),
     tabulka("web_jazyky?select=*&order=poradi"),
   ]);
-  const archiv = await archivVysledku();
+  const [archiv, fotogalerie] = await Promise.all([archivVysledku(), galerie()]);
 
   const jazyk = web.jazyk;
   const textPodleKodu = {};
@@ -136,6 +150,7 @@ export default async function () {
     otazky,
     jazyky: jazyky.filter((j) => j.aktivni),
     archiv,
+    galerie: fotogalerie,
     staženo: new Date().toISOString(),
   };
 }
