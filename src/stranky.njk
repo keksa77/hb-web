@@ -107,6 +107,17 @@ eleventyComputed:
   <script src="{{ web.zaklad }}/assets/seznamka.js" defer></script>
 {% endif %}
 
-{% if not stranka.text and stranka.bloky.length == 0 and stranka.kod != "casto-se-ptate" and stranka.kod != "vysledky" and stranka.kod != "seznamka" %}
+{% if stranka.kod == "fotky" and obsah.galerie and obsah.galerie.length %}
+  <div class="gal-roky">
+  {% for g in obsah.galerie %}
+    <a class="gal-rok" href="{{ web.zaklad }}{{ g.adresa }}">
+      <img src="{{ g.obal }}" alt="Hory Bory {{ g.letopocet }}" loading="lazy" width="768" height="512">
+      <span class="gal-rok-text"><strong>Hory Bory {{ g.letopocet }}</strong> {{ g.pocet }} fotek</span>
+    </a>
+  {% endfor %}
+  </div>
+{% endif %}
+
+{% if not stranka.text and stranka.bloky.length == 0 and stranka.kod != "casto-se-ptate" and stranka.kod != "vysledky" and stranka.kod != "seznamka" and not (stranka.kod == "fotky" and obsah.galerie and obsah.galerie.length) %}
   <p class="prazdno">Obsah téhle stránky se teprve připravuje.</p>
 {% endif %}
