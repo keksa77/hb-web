@@ -153,7 +153,8 @@
     return false;
   }
   // Startovné jen tam, kde je potřeba (Keksa 10. 10. 2026): po zaplacení a u běžce se krok jmenuje „Přehled týmu“.
-  function bezStartovneho(p) { return !!p.zaplaceno || p.role === "bezec"; }
+  // Náhradník a zrušený tým startovné neplatí, proto se jim karta s platbou neukazuje (Keksa 13. 10. 2026).
+  function bezStartovneho(p) { return !!p.zaplaceno || p.role === "bezec" || p.stav === "nahradnik" || p.stav === "zruseno"; }
   function viditelneKroky(p) {
     return KROKY.filter(function (x) { return !x.vede || p.role !== "bezec"; }).map(function (x) {
       if (x.k === "prehled" && bezStartovneho(p)) return Object.assign({}, x, { n: "Přehled týmu", hint: "Tvůj tým a stav registrace." });

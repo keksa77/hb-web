@@ -1,0 +1,84 @@
+---
+permalink: "/registrace/index.html"
+layout: zaklad.njk
+titulek: "Registrace týmu"
+metaPopis: "Registrace týmu na štafetový běh Hory Bory."
+eleventyExcludeFromCollections: true
+---
+{# Veřejná registrace týmu (Keksa 13. 10. 2026). Formulář volá web_registrace; do otevření ukazuje jen termín a odpočet.
+   Termín, ročník a číselníky se čtou až v prohlížeči, ať se po změně v Nastavení nemusí přestavovat web. #}
+<link rel="stylesheet" href="{{ web.zaklad }}/assets/registrace.css">
+<h1>Registrace týmu</h1>
+
+<div id="rg-nacitam" class="rg-info">Načítám termín registrace…</div>
+
+<div id="rg-pred" class="rg-info rg-skryte">
+  <p><strong>Registrace se otevře <span id="rg-od"></span>.</strong></p>
+  <p class="rg-odpocet" id="rg-odpocet"></p>
+</div>
+
+<div id="rg-po" class="rg-info rg-skryte">
+  <p><strong>Registrace ročníku <span id="rg-rok-po"></span> je uzavřená.</strong> Napiš nám na <a href="mailto:info@horybory.cz">info@horybory.cz</a>.</p>
+</div>
+
+<form id="rg-form" class="rg-form rg-skryte" novalidate>
+  <fieldset>
+    <legend>Tým a kapitán</legend>
+    <div class="rg-radek">
+      <label class="rg-pole rg-cela">Název týmu *<input name="nazev" required maxlength="80"></label>
+      <label class="rg-pole">Jméno kapitána *<input name="jmeno" required autocomplete="given-name"></label>
+      <label class="rg-pole">Příjmení *<input name="prijmeni" required autocomplete="family-name"></label>
+      <label class="rg-pole">E-mail *<input name="email" type="email" required autocomplete="email"></label>
+      <label class="rg-pole">Telefon<input name="telefon" type="tel" autocomplete="tel" placeholder="777 123 456"></label>
+      <label class="rg-volba rg-cela"><input type="checkbox" name="bezim" checked><span>Poběžím také – zapiš mě rovnou na soupisku (pak je telefon povinný)</span></label>
+      <label class="rg-pole">Kraj *<select name="kraj" id="rg-kraj" required><option value="">Načítám…</option></select></label>
+      <label class="rg-pole">Kategorie týmu *<select name="kategorie" id="rg-kategorie" required><option value="">Načítám…</option></select></label>
+    </div>
+    <p class="rg-pozn" id="rg-popis-kategorie"></p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Zástupce kapitána</legend>
+    <p class="rg-pozn">Druhá kontaktní osoba týmu. Musí mít jiný e-mail než kapitán.</p>
+    <div class="rg-radek">
+      <label class="rg-pole">Jméno *<input name="zastupce_jmeno" required></label>
+      <label class="rg-pole">Příjmení *<input name="zastupce_prijmeni" required></label>
+      <label class="rg-pole">E-mail *<input name="zastupce_email" type="email" required></label>
+      <label class="rg-pole">Telefon *<input name="zastupce_telefon" type="tel" required placeholder="777 123 456"></label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Faktura za startovné</legend>
+    <label class="rg-volba"><input type="radio" name="faktura" value="ne" checked><span>Ne, fakturu nepotřebujeme</span></label>
+    <label class="rg-volba"><input type="radio" name="faktura" value="ano"><span>Ano, startovné platí firma nebo organizace a potřebuje fakturu</span></label>
+    <div id="rg-faktura" class="rg-odsaz rg-skryte">
+      <div class="rg-radek">
+        <label class="rg-pole">Název odběratele *<input name="odberatel_nazev"></label>
+        <label class="rg-pole">IČ *<input name="odberatel_ic"></label>
+        <label class="rg-pole">DIČ<input name="odberatel_dic"></label>
+        <label class="rg-pole">Adresa *<input name="odberatel_adresa"></label>
+      </div>
+      <p class="rg-otazka">Datum uskutečnění zdanitelného plnění *</p>
+      <label class="rg-volba"><input type="radio" name="duzp" value="2027" checked><span>v roce 2027</span></label>
+      <p class="rg-pozn">Preferujeme plnění v roce 2027.</p>
+      <label class="rg-volba"><input type="radio" name="duzp" value="2026"><span>v roce 2026</span></label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Poznámka pro pořadatele</legend>
+    <label class="rg-pole">Nepovinné<textarea name="poznamka" rows="3" maxlength="1000"></textarea></label>
+  </fieldset>
+
+  <p class="rg-pozn rg-souhlas">Odesláním přihlášky souhlasíš s <a href="{{ web.zaklad }}/pravidla/">pravidly závodu</a>. Jak zacházíme s osobními údaji, najdeš v <a href="{{ web.zaklad }}/gdpr/">zásadách zpracování osobních údajů</a>.</p>
+  <button class="rg-tlacitko" type="submit" id="rg-odeslat">Odeslat přihlášku</button>
+</form>
+
+<div id="rg-chyba" class="rg-chyba rg-skryte" role="alert"></div>
+<div id="rg-vysledek" class="rg-vysledek rg-skryte" role="status"></div>
+
+<script>
+  window.HB_REG = { url: "{{ web.supabaseUrl }}", klic: "{{ web.supabaseKlic }}", zaklad: "{{ web.zaklad }}" };
+</script>
+<script src="{{ web.zaklad }}/assets/registrace.js" defer></script>

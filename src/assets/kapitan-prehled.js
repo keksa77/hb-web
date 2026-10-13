@@ -28,7 +28,7 @@
       "<dt>Název</dt><dd>" + e(p.nazev) + "</dd>" +
       "<dt>Číslo týmu</dt><dd>" + (p.cislo ? e(p.cislo) : "přidělíme později") + "</dd>" +
       "<dt>Ročník</dt><dd>" + e(p.rocnik) + "</dd>" +
-      "<dt>Registrace</dt><dd>" + (p.stav === "nahradnik" ? "náhradník" : p.stav === "zruseno" ? "zrušená" : "přijatá") + "</dd>" +
+      "<dt>Registrace</dt><dd>" + (p.stav === "nahradnik" ? "náhradník – startovné zatím neplať" : p.stav === "zruseno" ? "zrušená" : "přijatá") + "</dd>" +
       "<dt>Start</dt><dd>" + (p.start_cas ? HBK.cas(p.start_cas) : "čas startu pošleme nejpozději týden před závodem") + "</dd>" +
       (p.role !== "bezec" && p.zaplaceno ? "<dt>Startovné</dt><dd>zaplaceno " + e(HBK.datum(p.zaplaceno_dne)) + "</dd>" : "") +
       "<dt>Soupiska a etapy</dt><dd>" + (p.soupiska_otevrena ? "měnit jde " + (p.soupiska_do ? "do " + e(HBK.cas(p.soupiska_do)) : "do termínu, který ještě oznámíme")
