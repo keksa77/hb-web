@@ -8,7 +8,10 @@
   if (!koren) return;
   var CFG = window.HB || {};
   var Q = new URLSearchParams(location.search);
-  var UKAZKA = Q.get("ukazka") === "hb26";
+  // Ukázka jen pro organizátora přihlášeného v administraci (14. 10. 2026) – veřejnost odkaz nevidí a ?ukazka=hb26 nefunguje.
+  var ADMIN = false;
+  try { ADMIN = !!(JSON.parse(localStorage.getItem("hb_admin_relace") || "null") || {}).refresh_token; } catch (e) {}
+  var UKAZKA = ADMIN && Q.get("ukazka") === "hb26";
   var POHLEDY = [
     { k: "poradi", n: "Pořadí" },
     { k: "tym", n: "Můj tým" },
@@ -250,7 +253,7 @@
     if (!data.zobrazit) {
       koren.innerHTML = "<p>Průběžné výsledky ročníku se tu objeví během závodu" +
         (data.datum_zavodu ? " (" + new Date(data.datum_zavodu + "T12:00:00").toLocaleDateString("cs-CZ") + ")" : "") + ".</p>" +
-        '<p><a href="?ukazka=hb26">Vyzkoušej ukázku na ročníku 2026</a></p>';
+        (ADMIN ? '<p><a href="?ukazka=hb26">Vyzkoušej ukázku na ročníku 2026</a> <span class="v-aktualizace">(vidí jen přihlášený organizátor)</span></p>' : "");
       return;
     }
     spocitej();
